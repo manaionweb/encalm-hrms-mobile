@@ -36,7 +36,7 @@ export default function SignInScreen({ navigation }: any) {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={tw`flex-1 bg-indigo-950`}
+            style={tw`flex-1 bg-[#1e1b4b]`}
         >
             <ScrollView contentContainerStyle={tw`flex-grow justify-center p-6`} keyboardShouldPersistTaps="handled">
                 <View style={tw`bg-white rounded-3xl shadow-xl p-6 md:p-8 w-full max-w-sm self-center`}>
@@ -58,7 +58,7 @@ export default function SignInScreen({ navigation }: any) {
                         <View style={tw`mb-4`}>
                             <Text style={tw`text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide`}>Username or E-mail</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-3 bg-gray-50 border border-gray-300 focus:border-indigo-500 rounded-xl text-gray-700 font-medium`}
+                                style={tw`w-full px-4 py-3 bg-[#f5f3ff] border border-gray-300 focus:border-[#8b5cf6] rounded-xl text-gray-700 font-medium`}
                                 placeholder="Enter your username"
                                 placeholderTextColor="#cbd5e1"
                                 autoCapitalize="none"
@@ -72,7 +72,7 @@ export default function SignInScreen({ navigation }: any) {
                             <Text style={tw`text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide`}>Password</Text>
                             <View style={tw`relative justify-center`}>
                                 <TextInput
-                                    style={tw`w-full px-4 py-3 bg-gray-50 border border-gray-300 focus:border-indigo-500 rounded-xl text-gray-700 font-medium pr-12`}
+                                    style={tw`w-full px-4 py-3 bg-[#f5f3ff] border border-gray-300 focus:border-[#8b5cf6] rounded-xl text-gray-700 font-medium pr-12`}
                                     placeholder="Enter your password"
                                     placeholderTextColor="#cbd5e1"
                                     secureTextEntry={!showPassword}
@@ -94,7 +94,7 @@ export default function SignInScreen({ navigation }: any) {
                     <TouchableOpacity
                         onPress={handleLogin}
                         disabled={loading}
-                        style={tw`w-full py-3.5 bg-indigo-600 rounded-full items-center mt-4 shadow-lg`}
+                        style={tw`w-full py-3.5 bg-[#8b5cf6] rounded-full items-center mt-4 shadow-lg`}
                         activeOpacity={0.8}
                     >
                         <Text style={tw`text-white font-bold text-lg`}>
@@ -105,7 +105,7 @@ export default function SignInScreen({ navigation }: any) {
                     {/* Actions */}
                     <View style={tw`items-center mt-6`}>
                         <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                            <Text style={tw`text-indigo-600 font-bold text-sm`}>Forgot Password?</Text>
+                            <Text style={tw`text-[#8b5cf6] font-bold text-sm`}>Forgot Password?</Text>
                         </TouchableOpacity>
                     </View>
 

@@ -39,7 +39,7 @@ export default function AdminDashboard({
             {pendingRegularizations.length > 0 && (
                 <View style={tw`bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-500/30 rounded-3xl p-4 mb-6`}>
                     <View style={tw`flex-row items-start mb-3`}>
-                        <View style={tw`p-2 bg-white dark:bg-slate-700 rounded-2xl shadow-sm mr-3`}>
+                        <View style={tw`p-2 bg-white dark:bg-[#1c1a45] rounded-2xl shadow-sm mr-3`}>
                             <AlertCircle color="#ea580c" size={20} />
                         </View>
                         <View style={tw`flex-1`}>
@@ -69,31 +69,31 @@ export default function AdminDashboard({
             <LiveAttendance data={attendanceData} />
 
             {/* Approval Center */}
-            <View style={tw`bg-white dark:bg-slate-800 p-5 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm mb-6`}>
+            <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
                 <View style={tw`flex-row justify-between items-center mb-4`}>
                     <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Approval Center</Text>
-                    <View style={tw`bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1 rounded-full`}>
-                        <Text style={tw`text-indigo-600 dark:text-indigo-400 text-xs font-bold`}>
+                    <View style={tw`bg-[#f5f3ff] dark:bg-[#1e1b4b]/50 px-2.5 py-1 rounded-full`}>
+                        <Text style={tw`text-[#8b5cf6] dark:text-[#c4b5fd] text-xs font-bold`}>
                             {activeTab === 'leaves' ? pendingApprovals.length : pendingRegularizations.length}
                         </Text>
                     </View>
                 </View>
 
                 {/* Tab Switcher */}
-                <View style={tw`flex-row border-b border-gray-100 dark:border-slate-700 mb-4`}>
+                <View style={tw`flex-row border-b border-gray-100 dark:border-white/5 mb-4`}>
                     <TouchableOpacity
                         onPress={() => setActiveTab('leaves')}
-                        style={tw`flex-1 pb-2 items-center ${activeTab === 'leaves' ? 'border-b-2 border-indigo-600' : ''}`}
+                        style={tw`flex-1 pb-2 items-center ${activeTab === 'leaves' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
                     >
-                        <Text style={tw`text-xs font-bold uppercase tracking-wider ${activeTab === 'leaves' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'}`}>
+                        <Text style={tw`text-xs font-bold uppercase tracking-wider ${activeTab === 'leaves' ? 'text-[#8b5cf6] dark:text-[#c4b5fd]' : 'text-gray-400'}`}>
                             Leaves ({pendingApprovals.length})
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => setActiveTab('regularizations')}
-                        style={tw`flex-1 pb-2 items-center ${activeTab === 'regularizations' ? 'border-b-2 border-indigo-600' : ''}`}
+                        style={tw`flex-1 pb-2 items-center ${activeTab === 'regularizations' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
                     >
-                        <Text style={tw`text-xs font-bold uppercase tracking-wider ${activeTab === 'regularizations' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'}`}>
+                        <Text style={tw`text-xs font-bold uppercase tracking-wider ${activeTab === 'regularizations' ? 'text-[#8b5cf6] dark:text-[#c4b5fd]' : 'text-gray-400'}`}>
                             Corrections ({pendingRegularizations.length})
                         </Text>
                     </TouchableOpacity>
@@ -111,8 +111,8 @@ export default function AdminDashboard({
                                     style={tw`flex-row items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700/50`}
                                 >
                                     <View style={tw`flex-row items-center flex-1 mr-2`}>
-                                        <View style={tw`w-9 h-9 rounded-xl bg-indigo-50 dark:bg-slate-700 flex items-center justify-center mr-3`}>
-                                            <Text style={tw`text-indigo-600 dark:text-indigo-400 font-bold text-xs`}>
+                                        <View style={tw`w-9 h-9 rounded-xl bg-[#f5f3ff] dark:bg-[#1c1a45] flex items-center justify-center mr-3`}>
+                                            <Text style={tw`text-[#8b5cf6] dark:text-[#c4b5fd] font-bold text-xs`}>
                                                 {approval.userName.substring(0, 2).toUpperCase()}
                                             </Text>
                                         </View>
@@ -125,9 +125,9 @@ export default function AdminDashboard({
                                     </View>
                                     <TouchableOpacity
                                         onPress={() => navigation.navigate('Leave', { activeTab: 'APPROVALS' })}
-                                        style={tw`bg-indigo-50 dark:bg-indigo-950/50 px-3 py-1.5 rounded-xl`}
+                                        style={tw`bg-[#f5f3ff] dark:bg-[#1e1b4b]/50 px-3 py-1.5 rounded-xl`}
                                     >
-                                        <Text style={tw`text-[10px] font-bold text-indigo-600 dark:text-indigo-400`}>Review</Text>
+                                        <Text style={tw`text-[10px] font-bold text-[#8b5cf6] dark:text-[#c4b5fd]`}>Review</Text>
                                     </TouchableOpacity>
                                 </View>
                             ))
@@ -144,7 +144,7 @@ export default function AdminDashboard({
                                         style={tw`flex-row items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700/50`}
                                     >
                                         <View style={tw`flex-row items-center flex-1 mr-2`}>
-                                            <View style={tw`w-9 h-9 rounded-xl bg-orange-50 dark:bg-slate-700 flex items-center justify-center mr-3`}>
+                                            <View style={tw`w-9 h-9 rounded-xl bg-orange-50 dark:bg-[#1c1a45] flex items-center justify-center mr-3`}>
                                                 <Text style={tw`text-orange-600 dark:text-orange-400 font-bold text-xs`}>
                                                     {name.substring(0, 2).toUpperCase()}
                                                 </Text>
@@ -165,9 +165,9 @@ export default function AdminDashboard({
                                         </View>
                                         <TouchableOpacity
                                             onPress={() => navigation.navigate('EmployeeStack', { screen: 'Regularizations' })}
-                                            style={tw`bg-indigo-50 dark:bg-indigo-950/50 px-3 py-1.5 rounded-xl`}
+                                            style={tw`bg-[#f5f3ff] dark:bg-[#1e1b4b]/50 px-3 py-1.5 rounded-xl`}
                                         >
-                                            <Text style={tw`text-[10px] font-bold text-indigo-600 dark:text-indigo-400`}>Review</Text>
+                                            <Text style={tw`text-[10px] font-bold text-[#8b5cf6] dark:text-[#c4b5fd]`}>Review</Text>
                                         </TouchableOpacity>
                                     </View>
                                 );
@@ -182,11 +182,11 @@ export default function AdminDashboard({
                 <View style={tw`flex-row justify-between items-center mb-4`}>
                     <Text style={tw`text-lg font-black text-gray-900 dark:text-white`}>Employee Overview</Text>
                     <TouchableOpacity onPress={() => navigation.navigate('EmployeeStack', { screen: 'EmployeeList' })}>
-                        <Text style={tw`text-xs font-bold text-indigo-600 dark:text-indigo-400`}>View All</Text>
+                        <Text style={tw`text-xs font-bold text-[#8b5cf6] dark:text-[#c4b5fd]`}>View All</Text>
                     </TouchableOpacity>
                 </View>
 
-                <View style={tw`bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm p-4`}>
+                <View style={tw`bg-white dark:bg-[#12112b] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm p-4`}>
                     {employees
                         .filter((emp) => emp.status !== 'Inactive' && emp.status?.toLowerCase() !== 'inactive')
                         .map((emp) => (
@@ -196,7 +196,7 @@ export default function AdminDashboard({
                                 style={tw`flex-row items-center justify-between py-3 border-b border-gray-50 dark:border-slate-700/50 last:border-0`}
                             >
                                 <View style={tw`flex-row items-center flex-1 mr-2`}>
-                                    <View style={tw`w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mr-3`}>
+                                    <View style={tw`w-10 h-10 rounded-2xl bg-slate-100 dark:bg-[#1c1a45] flex items-center justify-center mr-3`}>
                                         <Text style={tw`text-slate-600 dark:text-slate-300 font-bold text-xs`}>
                                             {emp.name.split(' ').map((n: string) => n[0]).join('')}
                                         </Text>

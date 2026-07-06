@@ -36,11 +36,11 @@ export default function MastersScreen({ navigation }: any) {
     const renderMenuItem = (title: string, icon: any, type: MastersTab) => (
         <TouchableOpacity
             onPress={() => fetchMastersData(type)}
-            style={tw`flex-row justify-between items-center bg-white dark:bg-slate-800 p-5 rounded-3xl mb-4 border border-gray-100 dark:border-slate-700 shadow-sm`}
+            style={tw`flex-row justify-between items-center bg-white dark:bg-[#12112b] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}
         >
             <View style={tw`flex-row items-center`}>
-                <View style={tw`p-2.5 bg-indigo-50 dark:bg-slate-700 rounded-2xl mr-3`}>
-                    {React.createElement(icon, { size: 20, color: '#6366f1' })}
+                <View style={tw`p-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] rounded-2xl mr-3`}>
+                    {React.createElement(icon, { size: 20, color: "#8b5cf6" })}
                 </View>
                 <Text style={tw`text-sm font-bold text-gray-800 dark:text-white`}>{title}</Text>
             </View>
@@ -49,12 +49,12 @@ export default function MastersScreen({ navigation }: any) {
     );
 
     const renderDetailItem = ({ item }: { item: any }) => (
-        <View style={tw`bg-white dark:bg-slate-800 p-4 rounded-3xl mb-3 border border-gray-100 dark:border-slate-700 shadow-sm`}>
+        <View style={tw`bg-white dark:bg-[#12112b] p-4 rounded-3xl mb-3 border border-gray-100 dark:border-white/5 shadow-sm`}>
             <Text style={tw`font-bold text-sm text-gray-900 dark:text-white`}>{item.name || item.title || 'Master record'}</Text>
             {item.description ? <Text style={tw`text-xs text-gray-400 mt-1`}>{item.description}</Text> : null}
-            {item.date ? <Text style={tw`text-xs text-indigo-500 font-bold mt-1`}>{item.date}</Text> : null}
+            {item.date ? <Text style={tw`text-xs text-[#8b5cf6] font-bold mt-1`}>{item.date}</Text> : null}
             {item.inTime && item.outTime ? (
-                <Text style={tw`text-xs text-indigo-500 font-bold mt-1`}>
+                <Text style={tw`text-xs text-[#8b5cf6] font-bold mt-1`}>
                     Shift: {item.inTime} - {item.outTime}
                 </Text>
             ) : null}
@@ -62,12 +62,12 @@ export default function MastersScreen({ navigation }: any) {
     );
 
     return (
-        <View style={tw`flex-1 bg-gray-50 dark:bg-slate-900`}>
+        <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
             
             {currentView === 'MENU' ? (
                 <CustomHeader navigation={navigation} title="Masters" />
             ) : (
-                <View style={tw`flex-row items-center p-4 bg-white dark:bg-slate-800 border-b border-gray-150 dark:border-slate-700`}>
+                <View style={tw`flex-row items-center p-4 bg-white dark:bg-[#12112b] border-b border-gray-100 dark:border-white/5`}>
                     <TouchableOpacity onPress={() => setCurrentView('MENU')} style={tw`p-2 mr-2`}>
                         <ArrowLeft size={20} color="#1e293b" />
                     </TouchableOpacity>
@@ -92,7 +92,7 @@ export default function MastersScreen({ navigation }: any) {
                 <View style={tw`flex-1 p-4`}>
                     {loading ? (
                         <View style={tw`flex-1 justify-center`}>
-                            <ActivityIndicator size="large" color="#6366f1" />
+                            <ActivityIndicator size="large" color="#8b5cf6" />
                         </View>
                     ) : (
                         <FlatList
