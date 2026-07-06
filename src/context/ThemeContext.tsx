@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Appearance } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import tw from 'twrnc';
 
 type Theme = 'light' | 'dark';
 
@@ -12,7 +14,10 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setThemeState] = useState<Theme>('light');
+    const [theme, setThemeState] = useState<Theme>(() => {
+        const colorScheme = Appearance.getColorScheme();
+        return colorScheme === 'dark' ? 'dark' : 'light';
+    });
 
     useEffect(() => {
         // Load theme from async storage on boot
@@ -21,6 +26,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                 const savedTheme = await AsyncStorage.getItem('theme');
                 if (savedTheme === 'light' || savedTheme === 'dark') {
                     setThemeState(savedTheme);
+                    (tw as any).setColorScheme(savedTheme);
+                } else {
+                    const systemScheme = Appearance.getColorScheme();
+                    const initialTheme = systemScheme === 'dark' ? 'dark' : 'light';
+                    setThemeState(initialTheme);
+                    (tw as any).setColorScheme(initialTheme);
                 }
             } catch (e) {
                 console.error('Failed to load theme', e);
@@ -32,6 +43,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const toggleTheme = async () => {
         const nextTheme = theme === 'light' ? 'dark' : 'light';
         setThemeState(nextTheme);
+        (tw as any).setColorScheme(nextTheme);
         try {
             await AsyncStorage.setItem('theme', nextTheme);
         } catch (e) {
@@ -41,6 +53,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     const setTheme = async (newTheme: Theme) => {
         setThemeState(newTheme);
+        (tw as any).setColorScheme(newTheme);
         try {
             await AsyncStorage.setItem('theme', newTheme);
         } catch (e) {

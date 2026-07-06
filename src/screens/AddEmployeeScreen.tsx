@@ -158,7 +158,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
         <View style={tw`mb-4`}>
             <Text style={tw`text-xs font-bold text-gray-500 mb-1.5 uppercase`}>{label}</Text>
             <TextInput
-                style={tw`w-full px-4 py-2.5 bg-gray-50 border ${errors[field] ? 'border-red-500' : 'border-gray-300'} rounded-xl text-gray-800`}
+                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] border ${errors[field] ? 'border-red-500' : 'border-gray-300'} rounded-xl text-gray-800`}
                 placeholder={placeholder}
                 placeholderTextColor="#cbd5e1"
                 keyboardType={keyboardType}
@@ -190,7 +190,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
             <View style={tw`flex-row justify-between mb-6 px-4`}>
                 {[1, 2, 3].map((step) => (
                     <View key={step} style={tw`items-center`}>
-                        <View style={tw`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= step ? 'bg-indigo-600' : 'bg-gray-200'}`}>
+                        <View style={tw`w-8 h-8 rounded-full flex items-center justify-center ${currentStep >= step ? 'bg-[#8b5cf6]' : 'bg-gray-200'}`}>
                             <Text style={tw`text-white font-bold text-xs`}>{step}</Text>
                         </View>
                         <Text style={tw`text-[10px] font-bold text-gray-500 mt-1`}>
@@ -250,7 +250,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
                 <TouchableOpacity
                     onPress={handleNext}
                     disabled={loading}
-                    style={tw`px-8 py-3 bg-indigo-600 rounded-full flex-row items-center gap-1.5`}
+                    style={tw`px-8 py-3 bg-[#8b5cf6] rounded-full flex-row items-center gap-1.5`}
                 >
                     <Text style={tw`text-white font-bold`}>
                         {loading ? 'Submitting...' : currentStep === 3 ? 'Submit' : 'Next'}

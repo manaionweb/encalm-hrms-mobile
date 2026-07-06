@@ -66,11 +66,11 @@ export default function DashboardHomeScreen({ navigation }: any) {
     if (loading) {
         return (
             <View
-                style={tw`flex-1 items-center justify-center bg-gray-50 dark:bg-slate-900`}
+                style={tw`flex-1 items-center justify-center bg-[#f5f3ff] dark:bg-[#0B0A1F]`}
             >
                 <ActivityIndicator
                     size="large"
-                    color="#6366F1"
+                    color="#8b5cf6"
                 />
             </View>
         );
@@ -82,7 +82,7 @@ export default function DashboardHomeScreen({ navigation }: any) {
     if (error) {
         return (
             <View
-                style={tw`flex-1 bg-gray-50 dark:bg-slate-900`}
+                style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}
             >
                 <CustomHeader
                     navigation={navigation}
@@ -106,7 +106,7 @@ export default function DashboardHomeScreen({ navigation }: any) {
 
                     <TouchableOpacity
                         onPress={refreshDashboard}
-                        style={tw`bg-indigo-600 px-6 py-3 rounded-xl`}
+                        style={tw`bg-[#8b5cf6] px-6 py-3 rounded-xl`}
                     >
                         <Text
                             style={tw`text-white font-bold`}
@@ -126,7 +126,7 @@ export default function DashboardHomeScreen({ navigation }: any) {
 
     return (
         <View
-            style={tw`flex-1 bg-gray-50 dark:bg-slate-900`}
+            style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}
         >
             {/* ============================================================
                  Header

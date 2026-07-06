@@ -9,7 +9,7 @@ const getBaseURL = () => {
         return `http://${host}:3001/api`;
     }
     // Fallback to local IP for physical mobile devices on Wi-Fi
-    return 'http://192.168.1.4:3001/api';
+    return 'http://192.168.1.16:3001/api';
 };
 
 const baseURL = getBaseURL();

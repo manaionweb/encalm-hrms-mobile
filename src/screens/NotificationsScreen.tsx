@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, FlatList } from 'react-native';
-import { Bell, Check, Trash2, Search, ArrowLeft } from 'lucide-react-native';
+import { Bell, Check, Trash2, Search, ArrowLeft, FileText, Calendar } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../context/ThemeContext';
 import api from '../utils/api';
 import tw from 'twrnc';
 
 export default function NotificationsScreen({ navigation }: any) {
     const insets = useSafeAreaInsets();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
     const [notifications, setNotifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
@@ -84,43 +87,81 @@ export default function NotificationsScreen({ navigation }: any) {
                     if (item.unread) markAsRead(item.id);
                     Alert.alert(item.title, item.message);
                 }}
-                style={tw`p-4 bg-white dark:bg-slate-800 rounded-3xl mb-4 border ${item.unread ? 'border-indigo-200 dark:border-indigo-900' : 'border-gray-100 dark:border-slate-700'} shadow-sm`}
+                style={tw`p-4 rounded-3xl mb-4 border ${
+                    item.unread 
+                        ? 'bg-[#f5f3ff] dark:bg-[#8b5cf6]/10 border-[#ede9fe] dark:border-[#8b5cf6]/20' 
+                        : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5'
+                } shadow-sm`}
             >
-                <View style={tw`flex-row justify-between items-start`}>
-                    <TouchableOpacity onPress={() => toggleSelect(item.id)} style={tw`flex-row items-start flex-1 mr-2`}>
-                        <View style={tw`w-5 h-5 rounded border ${isSelected ? 'bg-indigo-600 border-indigo-600' : 'border-gray-300'} items-center justify-center mr-3 mt-0.5`}>
-                            {isSelected && <Check size={12} color="white" />}
-                        </View>
-                        <View style={tw`flex-1`}>
-                            <View style={tw`flex-row items-center gap-1.5`}>
-                                <Text style={tw`font-bold text-sm text-gray-900 dark:text-white`}>{item.title}</Text>
+                <View style={tw`flex-row items-center`}>
+                    {/* Checkbox */}
+                    <TouchableOpacity 
+                        onPress={() => toggleSelect(item.id)} 
+                        style={tw`w-5 h-5 rounded border ${
+                            isSelected 
+                                ? 'bg-[#8b5cf6] border-[#8b5cf6]' 
+                                : 'border-gray-300 dark:border-white/20'
+                        } items-center justify-center mr-3`}
+                    >
+                        {isSelected && <Check size={12} color="white" />}
+                    </TouchableOpacity>
+
+                    {/* Category Icon */}
+                    <View style={tw`w-10 h-10 rounded-xl flex items-center justify-center mr-3 shrink-0 ${
+                        item.type === 'leave' ? 'bg-amber-100 dark:bg-amber-500/20' :
+                        item.type === 'attendance' ? 'bg-rose-100 dark:bg-rose-500/20' :
+                        'bg-[#f5f3ff] dark:bg-[#8b5cf6]/10'
+                    }`}>
+                        {item.type === 'leave' ? (
+                            <FileText size={18} color={isDark ? '#fbbf24' : '#d97706'} />
+                        ) : item.type === 'attendance' ? (
+                            <Calendar size={18} color={isDark ? '#fb7185' : '#e11d48'} />
+                        ) : (
+                            <Bell size={18} color={isDark ? '#c4b5fd' : '#8b5cf6'} />
+                        )}
+                    </View>
+
+                    {/* Content text */}
+                    <View style={tw`flex-1`}>
+                        <View style={tw`flex-row justify-between items-center mb-0.5`}>
+                            <View style={tw`flex-row items-center gap-1.5 flex-1 mr-2`}>
+                                <Text style={tw`font-bold text-sm text-gray-900 dark:text-white flex-shrink`} numberOfLines={1}>
+                                    {item.title}
+                                </Text>
                                 {item.unread && (
-                                    <View style={tw`w-1.5 h-1.5 rounded-full bg-indigo-600`} />
+                                    <View style={tw`w-1.5 h-1.5 rounded-full bg-[#8b5cf6]`} />
                                 )}
                             </View>
-                            <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mt-1`}>{item.message}</Text>
+                            {item.time && (
+                                <Text style={tw`text-[10px] text-gray-400 dark:text-gray-500 font-medium`}>
+                                    {item.time}
+                                </Text>
+                            )}
                         </View>
-                    </TouchableOpacity>
+                        <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mt-0.5`} numberOfLines={1}>
+                            {item.message || item.title}
+                        </Text>
+                    </View>
                 </View>
             </TouchableOpacity>
         );
     };
 
     return (
-        <View style={tw`flex-1 bg-gray-50 dark:bg-slate-900`}>
+        <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
             
             {/* Header */}
             <View style={[
-                tw`flex-row items-center justify-between px-4 pb-4 bg-white dark:bg-slate-800 border-b border-gray-150 dark:border-slate-700`,
+                tw`flex-row items-center justify-between px-4 pb-4 bg-white dark:bg-[#0B0A1F] border-b border-gray-100 dark:border-white/5`,
                 { paddingTop: insets.top + 16 }
             ]}>
                 <View style={tw`flex-row items-center`}>
                     {navigation.canGoBack() && (
                         <TouchableOpacity onPress={() => navigation.goBack()} style={tw`p-2 mr-2`}>
-                            <ArrowLeft size={20} color="#1e293b" />
+                            <ArrowLeft size={20} color={isDark ? '#c4b5fd' : '#8b5cf6'} />
                         </TouchableOpacity>
                     )}
-                    <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Notifications</Text>
+                    <Text style={tw`text-lg font-black text-gray-900 dark:text-white`}>Notifications</Text>
                 </View>
                 <View style={tw`flex-row gap-2`}>
                     {selectedIds.length > 0 && (
@@ -129,31 +170,31 @@ export default function NotificationsScreen({ navigation }: any) {
                         </TouchableOpacity>
                     )}
                     <TouchableOpacity onPress={markAllRead} style={tw`p-2`}>
-                        <Check size={20} color="#6366f1" />
+                        <Check size={20} color={isDark ? '#c4b5fd' : '#8b5cf6'} />
                     </TouchableOpacity>
                 </View>
             </View>
 
             {/* Tabs */}
-            <View style={tw`flex-row bg-white dark:bg-slate-800 p-2 border-b border-gray-100 dark:border-slate-700`}>
+            <View style={tw`flex-row bg-[#f5f3ff] dark:bg-[#0B0A1F] px-4 py-2 border-b border-gray-100 dark:border-white/5`}>
                 <TouchableOpacity
                     onPress={() => setActiveTab('all')}
-                    style={tw`flex-1 py-2 items-center ${activeTab === 'all' ? 'border-b-2 border-indigo-600' : ''}`}
+                    style={tw`flex-1 py-2 items-center ${activeTab === 'all' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
                 >
-                    <Text style={tw`text-xs font-bold ${activeTab === 'all' ? 'text-indigo-600' : 'text-gray-400'}`}>All</Text>
+                    <Text style={tw`text-xs font-bold ${activeTab === 'all' ? 'text-[#8b5cf6] dark:text-[#c4b5fd]' : 'text-gray-400 dark:text-gray-500'}`}>All</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => setActiveTab('unread')}
-                    style={tw`flex-1 py-2 items-center ${activeTab === 'unread' ? 'border-b-2 border-indigo-600' : ''}`}
+                    style={tw`flex-1 py-2 items-center ${activeTab === 'unread' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
                 >
-                    <Text style={tw`text-xs font-bold ${activeTab === 'unread' ? 'text-indigo-600' : 'text-gray-400'}`}>Unread</Text>
+                    <Text style={tw`text-xs font-bold ${activeTab === 'unread' ? 'text-[#8b5cf6] dark:text-[#c4b5fd]' : 'text-gray-400 dark:text-gray-500'}`}>Unread</Text>
                 </TouchableOpacity>
             </View>
 
             {/* Search */}
             <View style={tw`px-4 pt-4`}>
-                <View style={tw`flex-row items-center bg-white dark:bg-slate-800 border border-gray-150 dark:border-slate-700 rounded-2xl px-3 py-1 mb-4 shadow-sm`}>
-                    <Search size={18} color="#94a3b8" style={tw`mr-2`} />
+                <View style={tw`flex-row items-center bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl px-3 py-1 mb-4 shadow-sm`}>
+                    <Search size={18} color={isDark ? '#c4b5fd' : '#8b5cf6'} style={tw`mr-2`} />
                     <TextInput
                         style={tw`flex-1 text-sm text-gray-800 dark:text-white h-10`}
                         placeholder="Search alerts..."
@@ -166,11 +207,11 @@ export default function NotificationsScreen({ navigation }: any) {
 
             {loading ? (
                 <View style={tw`flex-1 justify-center`}>
-                    <ActivityIndicator size="large" color="#6366f1" />
+                    <ActivityIndicator size="large" color="#8b5cf6" />
                 </View>
             ) : filteredNotifications.length === 0 ? (
                 <View style={tw`flex-1 items-center justify-center p-6`}>
-                    <Bell size={48} color="#cbd5e1" style={tw`mb-4`} />
+                    <Bell size={48} color={isDark ? '#2e2b5c' : '#cbd5e1'} style={tw`mb-4`} />
                     <Text style={tw`text-base font-bold text-gray-700 dark:text-white`}>No Notifications</Text>
                     <Text style={tw`text-xs text-gray-400 mt-1`}>You are all caught up!</Text>
                 </View>

@@ -78,7 +78,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
             <View style={tw`mb-4`}>
                 <Text style={tw`text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide`}>Registered Email / Mobile *</Text>
                 <TextInput
-                    style={tw`w-full px-4 py-2.5 bg-gray-50 border border-gray-300 focus:border-indigo-500 rounded-xl text-gray-700 font-medium`}
+                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] border border-gray-300 focus:border-[#8b5cf6] rounded-xl text-gray-700 font-medium`}
                     placeholder="admin@gmail.com"
                     placeholderTextColor="#cbd5e1"
                     keyboardType="email-address"
@@ -92,7 +92,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
                 <Text style={tw`text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide`}>New Password *</Text>
                 <View style={tw`relative justify-center`}>
                     <TextInput
-                        style={tw`w-full px-4 py-2.5 bg-gray-50 border border-gray-300 focus:border-indigo-500 rounded-xl text-gray-700 font-medium pr-12`}
+                        style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] border border-gray-300 focus:border-[#8b5cf6] rounded-xl text-gray-700 font-medium pr-12`}
                         placeholder="Enter New Password"
                         placeholderTextColor="#cbd5e1"
                         secureTextEntry={!showPassword}
@@ -113,7 +113,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
                 <Text style={tw`text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide`}>Confirm Password *</Text>
                 <View style={tw`relative justify-center`}>
                     <TextInput
-                        style={tw`w-full px-4 py-2.5 bg-gray-50 border border-gray-300 focus:border-indigo-500 rounded-xl text-gray-700 font-medium pr-12`}
+                        style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] border border-gray-300 focus:border-[#8b5cf6] rounded-xl text-gray-700 font-medium pr-12`}
                         placeholder="Enter Confirm Password"
                         placeholderTextColor="#cbd5e1"
                         secureTextEntry={!showConfirmPassword}
@@ -133,7 +133,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
             <View style={tw`mb-4`}>
                 <Captcha onVerify={setGeneratedCaptcha}>
                     <TextInput
-                        style={tw`w-28 h-12 bg-gray-50 border border-gray-300 focus:border-indigo-500 rounded-xl text-center font-bold text-gray-900 tracking-widest`}
+                        style={tw`w-28 h-12 bg-[#f5f3ff] border border-gray-300 focus:border-[#8b5cf6] rounded-xl text-center font-bold text-gray-900 tracking-widest`}
                         placeholder="----"
                         placeholderTextColor="#cbd5e1"
                         autoCapitalize="characters"
@@ -146,7 +146,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
             <TouchableOpacity
                 onPress={handleSendOTP}
                 disabled={loading}
-                style={tw`w-full py-3.5 bg-indigo-600 rounded-xl items-center mt-4 shadow-lg`}
+                style={tw`w-full py-3.5 bg-[#8b5cf6] rounded-xl items-center mt-4 shadow-lg`}
                 activeOpacity={0.8}
             >
                 <Text style={tw`text-white font-bold`}>
@@ -155,7 +155,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={tw`mt-4 items-center`}>
-                <Text style={tw`text-indigo-600 font-bold text-sm`}>Back to Login</Text>
+                <Text style={tw`text-[#8b5cf6] font-bold text-sm`}>Back to Login</Text>
             </TouchableOpacity>
         </View>
     );
@@ -174,7 +174,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
             <TouchableOpacity
                 onPress={handleVerifyOTP}
                 disabled={loading || otp.length < 6}
-                style={tw`w-full py-3.5 bg-indigo-600 rounded-xl items-center shadow-lg ${otp.length < 6 ? 'opacity-50' : ''}`}
+                style={tw`w-full py-3.5 bg-[#8b5cf6] rounded-xl items-center shadow-lg ${otp.length < 6 ? 'opacity-50' : ''}`}
                 activeOpacity={0.8}
             >
                 <Text style={tw`text-white font-bold`}>
@@ -195,7 +195,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={tw`flex-1 bg-indigo-950`}
+            style={tw`flex-1 bg-[#1e1b4b]`}
         >
             <ScrollView contentContainerStyle={tw`flex-grow justify-center p-6`} keyboardShouldPersistTaps="handled">
                 <View style={tw`bg-white rounded-3xl shadow-xl p-6 w-full max-w-sm self-center`}>

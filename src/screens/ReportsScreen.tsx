@@ -70,19 +70,19 @@ export default function ReportsScreen({ navigation }: any) {
     };
 
     return (
-        <View style={tw`flex-1 bg-gray-50 dark:bg-slate-900`}>
+        <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
             
             <CustomHeader navigation={navigation} title="Reports" />
 
             <ScrollView style={tw`flex-1 p-4`} contentContainerStyle={tw`pb-12`}>
                 
                 {/* Period Selector Tabs */}
-                <View style={tw`flex-row justify-between mb-6 bg-white dark:bg-slate-800 p-2 rounded-2xl border border-gray-150`}>
+                <View style={tw`flex-row justify-between mb-6 bg-white dark:bg-[#12112b] p-2 rounded-2xl border border-gray-100`}>
                     {options.map((opt) => (
                         <TouchableOpacity
                             key={opt.value}
                             onPress={() => setPeriod(opt.value)}
-                            style={tw`flex-1 py-2 items-center rounded-xl ${period === opt.value ? 'bg-indigo-600' : ''}`}
+                            style={tw`flex-1 py-2 items-center rounded-xl ${period === opt.value ? 'bg-[#8b5cf6]' : ''}`}
                         >
                             <Text style={tw`text-xs font-bold ${period === opt.value ? 'text-white' : 'text-gray-400'}`}>
                                 {opt.label}
@@ -92,15 +92,15 @@ export default function ReportsScreen({ navigation }: any) {
                 </View>
 
                 {loading ? (
-                    <ActivityIndicator size="large" color="#6366f1" style={tw`py-10`} />
+                    <ActivityIndicator size="large" color="#8b5cf6" style={tw`py-10`} />
                 ) : (
                     <View>
                         
                         {/* Reports Cards */}
                         <View style={tw`flex-row flex-wrap justify-between mb-6`}>
-                            <View style={tw`w-[47%] bg-white dark:bg-slate-800 p-4 rounded-3xl mb-4 border border-gray-100 dark:border-slate-700 shadow-sm`}>
-                                <View style={tw`p-2 bg-indigo-50 dark:bg-slate-700 rounded-xl self-start mb-3`}>
-                                    <Users size={18} color="#4f46e5" />
+                            <View style={tw`w-[47%] bg-white dark:bg-[#12112b] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}>
+                                <View style={tw`p-2 bg-[#f5f3ff] dark:bg-[#1c1a45] rounded-xl self-start mb-3`}>
+                                    <Users size={18} color="#8b5cf6" />
                                 </View>
                                 <Text style={tw`text-[10px] font-bold text-gray-450 uppercase`}>Headcount</Text>
                                 <Text style={tw`text-xl font-black text-gray-900 dark:text-white mt-1`}>
@@ -108,8 +108,8 @@ export default function ReportsScreen({ navigation }: any) {
                                 </Text>
                             </View>
 
-                            <View style={tw`w-[47%] bg-white dark:bg-slate-800 p-4 rounded-3xl mb-4 border border-gray-100 dark:border-slate-700 shadow-sm`}>
-                                <View style={tw`p-2 bg-green-50 dark:bg-slate-700 rounded-xl self-start mb-3`}>
+                            <View style={tw`w-[47%] bg-white dark:bg-[#12112b] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}>
+                                <View style={tw`p-2 bg-green-50 dark:bg-[#1c1a45] rounded-xl self-start mb-3`}>
                                     <DollarSign size={18} color="#22c55e" />
                                 </View>
                                 <Text style={tw`text-[10px] font-bold text-gray-450 uppercase`}>Total Payroll</Text>
@@ -124,10 +124,10 @@ export default function ReportsScreen({ navigation }: any) {
                         
                         <TouchableOpacity
                             onPress={() => handleDownloadReport('/reports/attendance/export', 'Attendance-Report.csv')}
-                            style={tw`bg-white dark:bg-slate-800 p-4 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm flex-row items-center justify-between mb-4`}
+                            style={tw`bg-white dark:bg-[#12112b] p-4 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm flex-row items-center justify-between mb-4`}
                         >
                             <View style={tw`flex-row items-center`}>
-                                <View style={tw`p-2.5 bg-blue-50 dark:bg-slate-700 rounded-2xl mr-3`}>
+                                <View style={tw`p-2.5 bg-blue-50 dark:bg-[#1c1a45] rounded-2xl mr-3`}>
                                     <FileText size={20} color="#3b82f6" />
                                 </View>
                                 <View>
@@ -140,10 +140,10 @@ export default function ReportsScreen({ navigation }: any) {
 
                         <TouchableOpacity
                             onPress={() => handleDownloadReport('/reports/payroll/export', 'Payroll-Report.csv')}
-                            style={tw`bg-white dark:bg-slate-800 p-4 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm flex-row items-center justify-between`}
+                            style={tw`bg-white dark:bg-[#12112b] p-4 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm flex-row items-center justify-between`}
                         >
                             <View style={tw`flex-row items-center`}>
-                                <View style={tw`p-2.5 bg-purple-50 dark:bg-slate-700 rounded-2xl mr-3`}>
+                                <View style={tw`p-2.5 bg-purple-50 dark:bg-[#1c1a45] rounded-2xl mr-3`}>
                                     <DollarSign size={20} color="#a855f7" />
                                 </View>
                                 <View>

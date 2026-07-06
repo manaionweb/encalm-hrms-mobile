@@ -84,8 +84,8 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
     if (loading) {
         return (
-            <View style={tw`flex-1 items-center justify-center bg-gray-50 dark:bg-slate-900`}>
-                <ActivityIndicator size="large" color="#6366f1" />
+            <View style={tw`flex-1 items-center justify-center bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
+                <ActivityIndicator size="large" color="#8b5cf6" />
             </View>
         );
     }
@@ -109,11 +109,11 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     );
 
     return (
-        <View style={tw`flex-1 bg-gray-50 dark:bg-slate-900`}>
+        <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
             
             {/* Header */}
             <View style={[
-                tw`flex-row items-center justify-between px-4 pb-4 bg-white dark:bg-slate-800 border-b border-gray-150 dark:border-slate-700`,
+                tw`flex-row items-center justify-between px-4 pb-4 bg-white dark:bg-[#12112b] border-b border-gray-100 dark:border-white/5`,
                 { paddingTop: insets.top + 16 }
             ]}>
                 <View style={tw`flex-row items-center`}>
@@ -123,16 +123,16 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                     <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Employee Profile</Text>
                 </View>
                 <TouchableOpacity onPress={handleExportPayslip} style={tw`p-2`}>
-                    <Download size={20} color="#6366f1" />
+                    <Download size={20} color="#8b5cf6" />
                 </TouchableOpacity>
             </View>
 
             <ScrollView style={tw`flex-grow`}>
                 
                 {/* Profile Banner */}
-                <View style={tw`items-center py-6 bg-white dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700 mb-4`}>
-                    <View style={tw`w-20 h-20 rounded-3xl bg-indigo-100 dark:bg-slate-700 flex items-center justify-center mb-3`}>
-                        <Text style={tw`text-indigo-600 dark:text-indigo-400 font-extrabold text-2xl`}>{initials}</Text>
+                <View style={tw`items-center py-6 bg-white dark:bg-[#12112b] border-b border-gray-100 dark:border-white/5 mb-4`}>
+                    <View style={tw`w-20 h-20 rounded-3xl bg-[#ede9fe] dark:bg-[#1c1a45] flex items-center justify-center mb-3`}>
+                        <Text style={tw`text-[#8b5cf6] dark:text-[#c4b5fd] font-extrabold text-2xl`}>{initials}</Text>
                     </View>
                     <Text style={tw`text-xl font-bold text-gray-900 dark:text-white`}>{employee.name}</Text>
                     <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mt-1`}>{profile.title || 'No Role'}</Text>
@@ -140,7 +140,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 </View>
 
                 {/* Tab selectors */}
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row bg-white dark:bg-slate-800 py-3 px-4 border-b border-gray-100 dark:border-slate-700 mb-4`}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row bg-white dark:bg-[#12112b] py-3 px-4 border-b border-gray-100 dark:border-white/5 mb-4`}>
                     {[
                         { key: 'personal', label: 'Personal', icon: User },
                         { key: 'statutory', label: 'Statutory', icon: CreditCard },
@@ -151,7 +151,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                         <TouchableOpacity
                             key={tab.key}
                             onPress={() => setActiveTab(tab.key as ProfileTab)}
-                            style={tw`flex-row items-center gap-1.5 px-4 py-2 rounded-xl mr-2 ${activeTab === tab.key ? 'bg-indigo-600' : 'bg-gray-100 dark:bg-slate-700'}`}
+                            style={tw`flex-row items-center gap-1.5 px-4 py-2 rounded-xl mr-2 ${activeTab === tab.key ? 'bg-[#8b5cf6]' : 'bg-gray-100 dark:bg-[#1c1a45]'}`}
                         >
                             <tab.icon size={14} color={activeTab === tab.key ? '#fff' : '#64748b'} />
                             <Text style={tw`text-xs font-bold ${activeTab === tab.key ? 'text-white' : 'text-gray-500 dark:text-gray-300'}`}>
@@ -162,7 +162,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 </ScrollView>
 
                 {/* Tab content panel */}
-                <View style={tw`bg-white dark:bg-slate-800 p-5 rounded-3xl border border-gray-100 dark:border-slate-700 mx-4 shadow-sm mb-8`}>
+                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 mx-4 shadow-sm mb-8`}>
                     
                     {activeTab === 'personal' && (
                         <View>

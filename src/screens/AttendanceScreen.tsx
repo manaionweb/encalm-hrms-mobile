@@ -141,7 +141,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
     };
 
     return (
-        <View style={tw`flex-1 bg-gray-50 dark:bg-slate-900`}>
+        <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
 
             <CustomHeader navigation={navigation} title="Attendance Logs" />
 
@@ -149,8 +149,8 @@ export default function AttendanceScreen({ route, navigation }: any) {
 
                 {/* Real-time Punch Card */}
                 {isSelf && (
-                    <View style={tw`bg-white dark:bg-slate-800 p-5 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm mb-6 items-center`}>
-                        <Clock size={32} color="#6366f1" />
+                    <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6 items-center`}>
+                        <Clock size={32} color="#8b5cf6" />
                         <Text style={tw`text-2xl font-bold text-gray-800 dark:text-white mt-2`}>
                             {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                         </Text>
@@ -178,7 +178,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                         { label: 'Late', val: stats.late, color: 'text-amber-600', bg: 'bg-amber-50' },
                         { label: 'Holiday', val: stats.holiday, color: 'text-blue-600', bg: 'bg-blue-50' },
                     ].map((s, idx) => (
-                        <View key={idx} style={tw`w-[23%] bg-white dark:bg-slate-800 p-3 rounded-2xl border border-gray-100 dark:border-slate-700 items-center`}>
+                        <View key={idx} style={tw`w-[23%] bg-white dark:bg-[#12112b] p-3 rounded-2xl border border-gray-100 dark:border-white/5 items-center`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 uppercase`}>{s.label}</Text>
                             <Text style={tw`text-lg font-black text-gray-900 dark:text-white mt-1`}>{s.val}</Text>
                         </View>
@@ -186,7 +186,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 </View>
 
                 {/* Month Controller */}
-                <View style={tw`flex-row justify-between items-center bg-white dark:bg-slate-800 p-3 rounded-2xl mb-4 border border-gray-150 dark:border-slate-700`}>
+                <View style={tw`flex-row justify-between items-center bg-white dark:bg-[#12112b] p-3 rounded-2xl mb-4 border border-gray-100 dark:border-white/5`}>
                     <TouchableOpacity onPress={() => changeMonth('prev')} style={tw`p-1`}>
                         <ChevronLeft size={20} color="#64748b" />
                     </TouchableOpacity>
@@ -199,11 +199,11 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 </View>
 
                 {/* Daily Logs History */}
-                <View style={tw`bg-white dark:bg-slate-800 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm p-4`}>
+                <View style={tw`bg-white dark:bg-[#12112b] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm p-4`}>
                     <Text style={tw`font-bold text-gray-900 dark:text-white text-sm mb-4`}>Daily Attendance Records</Text>
 
                     {loading ? (
-                        <ActivityIndicator size="small" color="#6366f1" style={tw`py-10`} />
+                        <ActivityIndicator size="small" color="#8b5cf6" style={tw`py-10`} />
                     ) : (
                         attendanceHistory.map((log, index) => {
                             const dateObj = new Date(log.date);
@@ -211,7 +211,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                             const weekdayStr = dateObj.toLocaleDateString([], { weekday: 'short' });
 
                             return (
-                                <View key={index} style={tw`flex-row justify-between items-center py-3 border-b border-gray-50 dark:border-slate-700 last:border-0`}>
+                                <View key={index} style={tw`flex-row justify-between items-center py-3 border-b border-gray-50 dark:border-white/5 last:border-0`}>
                                     <View>
                                         <Text style={tw`text-xs font-bold text-gray-900 dark:text-white`}>{dayStr} ({weekdayStr})</Text>
                                         <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
@@ -277,9 +277,9 @@ export default function AttendanceScreen({ route, navigation }: any) {
 
                                                     setReason('');
                                                 }}
-                                                style={tw`bg-indigo-50 dark:bg-slate-700 px-3 py-1.5 rounded-xl`}
+                                                style={tw`bg-[#f5f3ff] dark:bg-[#1c1a45] px-3 py-1.5 rounded-xl`}
                                             >
-                                                <Text style={tw`text-[10px] font-bold text-indigo-600 dark:text-indigo-400`}>Correct</Text>
+                                                <Text style={tw`text-[10px] font-bold text-[#8b5cf6] dark:text-[#c4b5fd]`}>Correct</Text>
                                             </TouchableOpacity>
                                         )}
                                     </View>
@@ -299,13 +299,13 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 onRequestClose={() => setRegularizeDate(null)}
             >
                 <View style={tw`flex-1 justify-end bg-black/60`}>
-                    <View style={tw`bg-white dark:bg-slate-800 p-6 rounded-t-3xl border-t border-gray-200 dark:border-slate-700`}>
+                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}>
                         <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>Attendance Correction ({regularizeDate})</Text>
 
                         <View style={tw`mb-4`}>
                             <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock In Time (e.g. 09:00 AM)</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-650 rounded-xl text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
                                 value={inInputText}
                                 onChangeText={setInInputText}
                             />
@@ -314,7 +314,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                         <View style={tw`mb-4`}>
                             <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock Out Time (e.g. 06:00 PM)</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-650 rounded-xl text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
                                 value={outInputText}
                                 onChangeText={setOutInputText}
                             />
@@ -323,7 +323,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                         <View style={tw`mb-6`}>
                             <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Reason for correction *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-650 rounded-xl text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
                                 placeholder="Forgot to punch / Client site work..."
                                 placeholderTextColor="#cbd5e1"
                                 value={reason}
@@ -339,7 +339,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                     setInInputText('09:00 AM');
                                     setOutInputText('06:00 PM');
                                 }}
-                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-slate-700 rounded-xl items-center`}
+                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
                             >
                                 <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
                             </TouchableOpacity>
@@ -347,7 +347,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                             <TouchableOpacity
                                 onPress={submitRegularization}
                                 disabled={submittingRequest}
-                                style={tw`flex-1 py-3.5 bg-indigo-600 rounded-xl items-center`}
+                                style={tw`flex-1 py-3.5 bg-[#8b5cf6] rounded-xl items-center`}
                             >
                                 <Text style={tw`text-white font-bold`}>
                                     {submittingRequest ? 'Submitting...' : 'Submit'}
