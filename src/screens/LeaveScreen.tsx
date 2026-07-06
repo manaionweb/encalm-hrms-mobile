@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal } from 'react-native';
 import { Calendar, Plus, Check, X } from 'lucide-react-native';
 //import api from '../utils/api';
@@ -6,9 +6,11 @@ import useLeave from "../hooks/useLeave";
 import CustomHeader from '../components/CustomHeader';
 import { useAuth } from '../context/AuthContext';
 import tw from 'twrnc';
+import { useRoute } from "@react-navigation/native";
 
 export default function LeaveScreen({ navigation }: any) {
     const { user } = useAuth();
+    const route = useRoute<any>();
     const isHrAdmin = user?.role === 'HR_ADMIN';
     const {
 
@@ -36,7 +38,10 @@ export default function LeaveScreen({ navigation }: any) {
 
     } = useLeave();
 
-    const [activeTab, setActiveTab] = useState<'MY_LEAVE' | 'APPROVALS'>('MY_LEAVE');
+    const [activeTab, setActiveTab] =
+        useState<'MY_LEAVE' | 'APPROVALS'>(
+            route.params?.activeTab ?? 'MY_LEAVE'
+        );
     // const [loading, setLoading] = useState(true);
     // const [leaveBalances, setLeaveBalances] = useState<any[]>([]);
     // const [leaveHistory, setLeaveHistory] = useState<any[]>([]);
@@ -84,6 +89,16 @@ export default function LeaveScreen({ navigation }: any) {
     //     fetchData();
     // }, [isHrAdmin]);
 
+    useEffect(() => {
+
+        if (route.params?.activeTab) {
+
+            setActiveTab(route.params.activeTab);
+
+        }
+
+    }, [route.params]);
+
     const handleApplyLeave = async () => {
 
         if (!fromDate || !toDate || !reason.trim()) {
@@ -125,11 +140,9 @@ export default function LeaveScreen({ navigation }: any) {
             setToDate("");
 
             setReason("");
-            setLeaveType("CL");
 
-        }
 
-        catch (err: any) {
+        } catch (err: any) {
 
             Alert.alert(
                 "Error",
@@ -139,7 +152,6 @@ export default function LeaveScreen({ navigation }: any) {
         }
 
     };
-
     const handleApprove = async (
         leaveId: number
     ) => {
@@ -172,11 +184,10 @@ export default function LeaveScreen({ navigation }: any) {
 
             Alert.alert(
                 "Error",
-                "Please enter a rejection reason."
+                "Please enter rejection reason."
             );
 
             return;
-
         }
 
         try {
@@ -188,17 +199,13 @@ export default function LeaveScreen({ navigation }: any) {
 
             Alert.alert(
                 "Success",
-                "Leave rejected successfully."
+                "Leave rejected."
             );
 
             setRejectComment("");
-
-            setRejectingId(null);
             setRejectingId(null);
 
-        }
-
-        catch (err: any) {
+        } catch (err: any) {
 
             Alert.alert(
                 "Error",

@@ -4,6 +4,9 @@ import { Platform } from 'react-native';
 
 // Dynamically determine the API baseURL depending on the platform
 const getBaseURL = () => {
+    if (process.env.EXPO_PUBLIC_API_URL) {
+        return process.env.EXPO_PUBLIC_API_URL;
+    }
     if (Platform.OS === 'web') {
         const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
         return `http://${host}:3001/api`;
