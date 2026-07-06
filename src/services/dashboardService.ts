@@ -239,12 +239,7 @@ export const getPendingRegularizations =
                 ? response.data
                 : [];
         } catch (error) {
-            console.warn(
-                "Regularization API unavailable:",
-                error
-            );
-
-            return [];
+            throw handleApiError(error);
         }
     };
 
@@ -287,6 +282,6 @@ export const getAdminDashboardData = async () => {
             pendingRegularizations,
         };
     } catch (error) {
-        handleApiError(error);
+        throw handleApiError(error);
     }
 };

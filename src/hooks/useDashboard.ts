@@ -104,7 +104,7 @@ export const useDashboard = (): DashboardHookReturn => {
             const dashboard =
                 await getAdminDashboardData();
 
-            if (!dashboard) return;
+            // if (!dashboard) return;
 
             setStats(dashboard.stats);
 
@@ -126,11 +126,11 @@ export const useDashboard = (): DashboardHookReturn => {
 
         } catch (err: any) {
 
-            console.error(err);
+            console.error("Dashboard Error:", err);
 
             setError(
-                err.message ||
-                "Failed to load Dashboard."
+                err?.message ??
+                "Failed to load dashboard."
             );
 
         } finally {
