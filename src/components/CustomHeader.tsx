@@ -10,9 +10,10 @@ interface CustomHeaderProps {
     navigation: any;
     title: string;
     showBackButton?: boolean;
+    subtitle?: string;
 }
 
-export default function CustomHeader({ navigation, title, showBackButton }: CustomHeaderProps) {
+export default function CustomHeader({ navigation, title, showBackButton, subtitle }: CustomHeaderProps) {
     const { theme, toggleTheme } = useTheme();
     const isDark = theme === 'dark';
     const [unreadCount, setUnreadCount] = useState(0);
@@ -36,9 +37,10 @@ export default function CustomHeader({ navigation, title, showBackButton }: Cust
         return () => clearInterval(interval);
     }, []);
 
+    const hasDrawer = navigation && typeof navigation.openDrawer === 'function';
     const canGoBack = showBackButton !== undefined 
         ? showBackButton 
-        : (navigation && typeof navigation.canGoBack === 'function' ? navigation.canGoBack() : false);
+        : (hasDrawer ? false : (navigation && typeof navigation.canGoBack === 'function' ? navigation.canGoBack() : false));
 
     return (
         <View style={[

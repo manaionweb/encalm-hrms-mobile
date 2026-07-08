@@ -78,6 +78,14 @@ export default function NotificationsScreen({ navigation }: any) {
         return matchesTab && matchesSearch;
     });
 
+    const toggleSelectAll = () => {
+        if (selectedIds.length === filteredNotifications.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(filteredNotifications.map(n => n.id));
+        }
+    };
+
     const renderNotificationItem = ({ item }: { item: any }) => {
         const isSelected = selectedIds.includes(item.id);
         
@@ -85,15 +93,14 @@ export default function NotificationsScreen({ navigation }: any) {
             <TouchableOpacity 
                 onPress={() => {
                     if (item.unread) markAsRead(item.id);
-                    Alert.alert(item.title, item.message);
                 }}
                 style={tw`p-4 rounded-3xl mb-4 border ${
                     item.unread 
-                        ? 'bg-[#f5f3ff] dark:bg-[#8b5cf6]/10 border-[#ede9fe] dark:border-[#8b5cf6]/20' 
-                        : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/5'
+                        ? 'bg-white dark:bg-[#12112b] border-gray-150 dark:border-white/5' 
+                        : 'bg-white/50 dark:bg-[#12112b]/40 border-gray-100 dark:border-white/5'
                 } shadow-sm`}
             >
-                <View style={tw`flex-row items-center`}>
+                <View style={tw`flex-row items-start`}>
                     {/* Checkbox */}
                     <TouchableOpacity 
                         onPress={() => toggleSelect(item.id)} 
@@ -101,13 +108,13 @@ export default function NotificationsScreen({ navigation }: any) {
                             isSelected 
                                 ? 'bg-[#8b5cf6] border-[#8b5cf6]' 
                                 : 'border-gray-300 dark:border-white/20'
-                        } items-center justify-center mr-3`}
+                        } items-center justify-center mr-3 mt-1`}
                     >
                         {isSelected && <Check size={12} color="white" />}
                     </TouchableOpacity>
 
                     {/* Category Icon */}
-                    <View style={tw`w-10 h-10 rounded-xl flex items-center justify-center mr-3 shrink-0 ${
+                    <View style={tw`w-10 h-10 rounded-xl flex items-center justify-center mr-3 shrink-0 mt-0.5 ${
                         item.type === 'leave' ? 'bg-amber-100 dark:bg-amber-500/20' :
                         item.type === 'attendance' ? 'bg-rose-100 dark:bg-rose-500/20' :
                         'bg-[#f5f3ff] dark:bg-[#8b5cf6]/10'
@@ -123,7 +130,7 @@ export default function NotificationsScreen({ navigation }: any) {
 
                     {/* Content text */}
                     <View style={tw`flex-1`}>
-                        <View style={tw`flex-row justify-between items-center mb-0.5`}>
+                        <View style={tw`flex-row justify-between items-center mb-1`}>
                             <View style={tw`flex-row items-center gap-1.5 flex-1 mr-2`}>
                                 <Text style={tw`font-bold text-sm text-gray-900 dark:text-white flex-shrink`} numberOfLines={1}>
                                     {item.title}
@@ -138,7 +145,7 @@ export default function NotificationsScreen({ navigation }: any) {
                                 </Text>
                             )}
                         </View>
-                        <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mt-0.5`} numberOfLines={1}>
+                        <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed`}>
                             {item.message || item.title}
                         </Text>
                     </View>
@@ -161,7 +168,10 @@ export default function NotificationsScreen({ navigation }: any) {
                             <ArrowLeft size={20} color={isDark ? '#c4b5fd' : '#8b5cf6'} />
                         </TouchableOpacity>
                     )}
-                    <Text style={tw`text-lg font-black text-gray-900 dark:text-white`}>Notifications</Text>
+                    <View>
+                        <Text style={tw`text-base font-black text-gray-900 dark:text-white`}>Notifications</Text>
+                        <Text style={tw`text-[10px] text-gray-400 dark:text-gray-500 font-medium`}>Manage your system alerts and history</Text>
+                    </View>
                 </View>
                 <View style={tw`flex-row gap-2`}>
                     {selectedIds.length > 0 && (
@@ -175,19 +185,30 @@ export default function NotificationsScreen({ navigation }: any) {
                 </View>
             </View>
 
-            {/* Tabs */}
-            <View style={tw`flex-row bg-[#f5f3ff] dark:bg-[#0B0A1F] px-4 py-2 border-b border-gray-100 dark:border-white/5`}>
+            {/* Filter Tabs & Select All */}
+            <View style={tw`flex-row bg-[#f5f3ff] dark:bg-[#0B0A1F] px-4 py-3 border-b border-gray-100 dark:border-white/5 justify-between items-center`}>
+                <View style={tw`flex-row bg-gray-200/50 dark:bg-white/5 p-1 rounded-xl w-36`}>
+                    <TouchableOpacity
+                        onPress={() => setActiveTab('all')}
+                        style={tw`flex-1 py-1.5 items-center rounded-lg ${activeTab === 'all' ? 'bg-white dark:bg-[#8b5cf6] shadow-sm' : ''}`}
+                    >
+                        <Text style={tw`text-[10px] font-bold ${activeTab === 'all' ? 'text-[#8b5cf6] dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>All</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setActiveTab('unread')}
+                        style={tw`flex-1 py-1.5 items-center rounded-lg ${activeTab === 'unread' ? 'bg-white dark:bg-[#8b5cf6] shadow-sm' : ''}`}
+                    >
+                        <Text style={tw`text-[10px] font-bold ${activeTab === 'unread' ? 'text-[#8b5cf6] dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>Unread</Text>
+                    </TouchableOpacity>
+                </View>
+                
                 <TouchableOpacity
-                    onPress={() => setActiveTab('all')}
-                    style={tw`flex-1 py-2 items-center ${activeTab === 'all' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
+                    onPress={toggleSelectAll}
+                    style={tw`px-3 py-1.5 bg-white dark:bg-[#12112b] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm`}
                 >
-                    <Text style={tw`text-xs font-bold ${activeTab === 'all' ? 'text-[#8b5cf6] dark:text-[#c4b5fd]' : 'text-gray-400 dark:text-gray-500'}`}>All</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => setActiveTab('unread')}
-                    style={tw`flex-1 py-2 items-center ${activeTab === 'unread' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
-                >
-                    <Text style={tw`text-xs font-bold ${activeTab === 'unread' ? 'text-[#8b5cf6] dark:text-[#c4b5fd]' : 'text-gray-400 dark:text-gray-500'}`}>Unread</Text>
+                    <Text style={tw`text-[10px] font-bold text-gray-700 dark:text-gray-300`}>
+                        {selectedIds.length > 0 && selectedIds.length === filteredNotifications.length ? "Deselect All" : "Select All"}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
@@ -197,7 +218,7 @@ export default function NotificationsScreen({ navigation }: any) {
                     <Search size={18} color={isDark ? '#c4b5fd' : '#8b5cf6'} style={tw`mr-2`} />
                     <TextInput
                         style={tw`flex-1 text-sm text-gray-800 dark:text-white h-10`}
-                        placeholder="Search alerts..."
+                        placeholder="Search through alerts..."
                         placeholderTextColor="#94a3b8"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -212,8 +233,8 @@ export default function NotificationsScreen({ navigation }: any) {
             ) : filteredNotifications.length === 0 ? (
                 <View style={tw`flex-1 items-center justify-center p-6`}>
                     <Bell size={48} color={isDark ? '#2e2b5c' : '#cbd5e1'} style={tw`mb-4`} />
-                    <Text style={tw`text-base font-bold text-gray-700 dark:text-white`}>No Notifications</Text>
-                    <Text style={tw`text-xs text-gray-400 mt-1`}>You are all caught up!</Text>
+                    <Text style={tw`text-base font-bold text-gray-700 dark:text-white`}>All Clear!</Text>
+                    <Text style={tw`text-xs text-gray-400 mt-1`}>You don't have any notifications right now.</Text>
                 </View>
             ) : (
                 <FlatList

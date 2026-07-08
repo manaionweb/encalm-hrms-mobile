@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Calendar, Plus, Check, X } from 'lucide-react-native';
+
+const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    return dateString.includes('T') ? dateString.split('T')[0] : dateString;
+};
 //import api from '../utils/api';
 import useLeave from "../hooks/useLeave";
 import CustomHeader from '../components/CustomHeader';
@@ -11,7 +16,7 @@ import { useRoute } from "@react-navigation/native";
 export default function LeaveScreen({ navigation }: any) {
     const { user } = useAuth();
     const route = useRoute<any>();
-    const isHrAdmin = user?.role === 'HR_ADMIN';
+    const canApprove = user?.role === 'HR_ADMIN' || user?.role === 'MANAGER';
     const {
 
         loading,
@@ -90,13 +95,7 @@ export default function LeaveScreen({ navigation }: any) {
     // }, [isHrAdmin]);
 
     useEffect(() => {
-
-        if (route.params?.activeTab) {
-
-            setActiveTab(route.params.activeTab);
-
-        }
-
+        setActiveTab(route.params?.activeTab ?? 'MY_LEAVE');
     }, [route.params]);
 
     const handleApplyLeave = async () => {
@@ -219,25 +218,7 @@ export default function LeaveScreen({ navigation }: any) {
     return (
         <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
 
-            <CustomHeader navigation={navigation} title="Leave Manager" />
-
-            {/* Role Switcher tabs */}
-            {isHrAdmin && (
-                <View style={tw`flex-row bg-white dark:bg-[#12112b] p-2 border-b border-gray-100 dark:border-white/5`}>
-                    <TouchableOpacity
-                        onPress={() => setActiveTab('MY_LEAVE')}
-                        style={tw`flex-1 py-2 items-center ${activeTab === 'MY_LEAVE' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
-                    >
-                        <Text style={tw`text-xs font-bold ${activeTab === 'MY_LEAVE' ? 'text-[#8b5cf6]' : 'text-gray-400'}`}>My Leave</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => setActiveTab('APPROVALS')}
-                        style={tw`flex-1 py-2 items-center ${activeTab === 'APPROVALS' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
-                    >
-                        <Text style={tw`text-xs font-bold ${activeTab === 'APPROVALS' ? 'text-[#8b5cf6]' : 'text-gray-400'}`}>Approvals</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+            <CustomHeader navigation={navigation} title={activeTab === 'APPROVALS' ? "Leave Approvals" : "Leave Manager"} />
 
             {loading ? (
                 <View style={tw`flex-1 justify-center`}>
@@ -281,16 +262,16 @@ export default function LeaveScreen({ navigation }: any) {
                                 ) : (
                                     leaveHistory.map((leave) => (
                                         <View key={leave.id} style={tw`py-3 border-b border-gray-50 dark:border-white/5 last:border-0`}>
-                                            <View style={tw`flex-row justify-between`}>
-                                                <View>
+                                            <View style={tw`flex-row justify-between items-center`}>
+                                                <View style={tw`flex-1 mr-2`}>
                                                     <Text style={tw`text-xs font-bold text-gray-900 dark:text-white`}>
                                                         {leave.leaveType?.code || 'Leave'} Application
                                                     </Text>
                                                     <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
-                                                        {leave.startDate} to {leave.endDate}
+                                                        {formatDate(leave.startDate)} to {formatDate(leave.endDate)}
                                                     </Text>
                                                 </View>
-                                                <View style={tw`px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-[#1c1a45] justify-center`}>
+                                                <View style={tw`px-2.5 py-1 rounded-full bg-slate-100 dark:bg-[#1c1a45] justify-center`}>
                                                     <Text style={tw`text-[9px] font-bold text-gray-600 dark:text-gray-300`}>
                                                         {leave.status}
                                                     </Text>
@@ -320,7 +301,7 @@ export default function LeaveScreen({ navigation }: any) {
                                             >
                                                 <Text style={tw`font-bold text-sm text-gray-900 dark:text-white`}>{name}</Text>
                                                 <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
-                                                    Type: {leave.leaveType?.code} • Date: {leave.startDate} to {leave.endDate}
+                                                    Type: {leave.leaveType?.code} • Date: {formatDate(leave.startDate)} to {formatDate(leave.endDate)}
                                                 </Text>
                                                 <Text style={tw`text-xs text-gray-500 italic my-3`}>
                                                     "{leave.reason}"
@@ -329,10 +310,10 @@ export default function LeaveScreen({ navigation }: any) {
                                                 <View style={tw`flex-row gap-3`}>
                                                     <TouchableOpacity
                                                         onPress={() => handleApprove(leave.id)}
-                                                        style={tw`flex-1 py-2 bg-green-50 rounded-xl items-center flex-row justify-center gap-1`}
+                                                        style={tw`flex-1 py-2 bg-green-50 dark:bg-green-950/20 border border-transparent dark:border-green-800/30 rounded-xl items-center flex-row justify-center gap-1`}
                                                     >
                                                         <Check size={16} color="#10b981" />
-                                                        <Text style={tw`text-xs font-bold text-green-600`}>Approve</Text>
+                                                        <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>Approve</Text>
                                                     </TouchableOpacity>
 
                                                     <TouchableOpacity
@@ -340,10 +321,10 @@ export default function LeaveScreen({ navigation }: any) {
                                                             setRejectingId(leave.id);
                                                             setRejectComment('');
                                                         }}
-                                                        style={tw`flex-1 py-2 bg-rose-50 rounded-xl items-center flex-row justify-center gap-1`}
+                                                        style={tw`flex-1 py-2 bg-rose-50 dark:bg-rose-950/20 border border-transparent dark:border-rose-800/30 rounded-xl items-center flex-row justify-center gap-1`}
                                                     >
                                                         <X size={16} color="#f43f5e" />
-                                                        <Text style={tw`text-xs font-bold text-rose-500`}>Reject</Text>
+                                                        <Text style={tw`text-xs font-bold text-rose-500 dark:text-rose-400`}>Reject</Text>
                                                     </TouchableOpacity>
                                                 </View>
                                             </View>
@@ -355,7 +336,6 @@ export default function LeaveScreen({ navigation }: any) {
 
                 </ScrollView>
             )}
-
             {/* Apply Leave Modal */}
             <Modal
                 visible={showApplyModal}
@@ -363,82 +343,89 @@ export default function LeaveScreen({ navigation }: any) {
                 transparent={true}
                 onRequestClose={() => setShowApplyModal(false)}
             >
-                <View style={tw`flex-1 justify-end bg-black/60`}>
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}>
-                        <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>Apply for Leave</Text>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={tw`flex-1 justify-end bg-black/60`}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            style={tw`w-full`}
+                        >
+                            <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 max-h-[85%]`}>
+                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                                    <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>Apply for Leave</Text>
 
-                        <View style={tw`mb-4`}>
-                            <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Leave Type (CL, SL, EL)</Text>
-                            <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-805`}
-                                value={leaveType}
-                                onChangeText={setLeaveType}
-                                autoCapitalize="characters"
-                            />
-                        </View>
+                                    <View style={tw`mb-4`}>
+                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Leave Type (CL, SL, EL)</Text>
+                                        <TextInput
+                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
+                                            value={leaveType}
+                                            onChangeText={setLeaveType}
+                                            autoCapitalize="characters"
+                                            placeholderTextColor="#9ca3af"
+                                        />
+                                    </View>
 
-                        <View style={tw`mb-4`}>
-                            <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Start Date (YYYY-MM-DD)</Text>
-                            <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-805`}
-                                placeholder="e.g. 2026-07-15"
-                                value={fromDate}
-                                onChangeText={setFromDate}
-                            />
-                        </View>
+                                    <View style={tw`mb-4`}>
+                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Start Date (YYYY-MM-DD)</Text>
+                                        <TextInput
+                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
+                                            placeholder="e.g. 2026-07-15"
+                                            placeholderTextColor="#9ca3af"
+                                            value={fromDate}
+                                            onChangeText={setFromDate}
+                                        />
+                                    </View>
 
-                        <View style={tw`mb-4`}>
-                            <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>End Date (YYYY-MM-DD)</Text>
-                            <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-805`}
-                                placeholder="e.g. 2026-07-16"
-                                value={toDate}
-                                onChangeText={setToDate}
-                            />
-                        </View>
+                                    <View style={tw`mb-4`}>
+                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>End Date (YYYY-MM-DD)</Text>
+                                        <TextInput
+                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
+                                            placeholder="e.g. 2026-07-16"
+                                            placeholderTextColor="#9ca3af"
+                                            value={toDate}
+                                            onChangeText={setToDate}
+                                        />
+                                    </View>
 
-                        <View style={tw`mb-6`}>
-                            <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Reason for leave *</Text>
-                            <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-805`}
-                                placeholder="Personal emergency..."
-                                value={reason}
-                                onChangeText={setReason}
-                            />
-                        </View>
+                                    <View style={tw`mb-6`}>
+                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Reason for leave *</Text>
+                                        <TextInput
+                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
+                                            placeholder="Personal emergency..."
+                                            placeholderTextColor="#9ca3af"
+                                            value={reason}
+                                            onChangeText={setReason}
+                                        />
+                                    </View>
 
-                        <View style={tw`flex-row gap-4`}>
-                            <TouchableOpacity
-                                onPress={() => {
+                                    <View style={tw`flex-row gap-4 mb-4`}>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setShowApplyModal(false);
+                                                setLeaveType("CL");
+                                                setFromDate("");
+                                                setToDate("");
+                                                setReason("");
+                                            }}
+                                            style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
+                                        >
+                                            <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
+                                        </TouchableOpacity>
 
-                                    setShowApplyModal(false);
-
-                                    setLeaveType("CL");
-
-                                    setFromDate("");
-
-                                    setToDate("");
-
-                                    setReason("");
-
-                                }}
-                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
-                            >
-                                <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={handleApplyLeave}
-                                disabled={submitting}
-                                style={tw`flex-1 py-3.5 bg-[#8b5cf6] rounded-xl items-center`}
-                            >
-                                <Text style={tw`text-white font-bold`}>
-                                    {submitting ? 'Applying...' : 'Apply'}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                                        <TouchableOpacity
+                                            onPress={handleApplyLeave}
+                                            disabled={submitting}
+                                            style={tw`flex-1 py-3.5 bg-[#8b5cf6] rounded-xl items-center`}
+                                        >
+                                            <Text style={tw`text-white font-bold`}>
+                                                {submitting ? 'Applying...' : 'Apply'}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </ScrollView>
+                            </View>
+                        </KeyboardAvoidingView>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
 
             {/* Rejection comment modal for Admin */}
@@ -448,40 +435,49 @@ export default function LeaveScreen({ navigation }: any) {
                 transparent={true}
                 onRequestClose={() => setRejectingId(null)}
             >
-                <View style={tw`flex-1 justify-end bg-black/60`}>
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}>
-                        <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-2`}>Reject Leave Application</Text>
-                        <Text style={tw`text-xs text-gray-500 mb-4`}>Please provide a reason for rejecting this leave request.</Text>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={tw`flex-1 justify-end bg-black/60`}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            style={tw`w-full`}
+                        >
+                            <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 max-h-[80%]`}>
+                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                                    <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-2`}>Reject Leave Application</Text>
+                                    <Text style={tw`text-xs text-gray-500 mb-4`}>Please provide a reason for rejecting this leave request.</Text>
 
-                        <TextInput
-                            style={tw`w-full px-4 py-3 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white min-h-20 mb-6`}
-                            placeholder="Reason for rejection..."
-                            placeholderTextColor="#cbd5e1"
-                            multiline={true}
-                            value={rejectComment}
-                            onChangeText={setRejectComment}
-                        />
+                                    <TextInput
+                                        style={tw`w-full px-4 py-3 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white min-h-20 mb-6`}
+                                        placeholder="Reason for rejection..."
+                                        placeholderTextColor="#cbd5e1"
+                                        multiline={true}
+                                        value={rejectComment}
+                                        onChangeText={setRejectComment}
+                                    />
 
-                        <View style={tw`flex-row gap-4`}>
-                            <TouchableOpacity
-                                onPress={() => setRejectingId(null)}
-                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
-                            >
-                                <Text style={tw`text-gray-655 dark:text-gray-300 font-bold`}>Cancel</Text>
-                            </TouchableOpacity>
+                                    <View style={tw`flex-row gap-4 mb-4`}>
+                                        <TouchableOpacity
+                                            onPress={() => setRejectingId(null)}
+                                            style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
+                                        >
+                                            <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
+                                        </TouchableOpacity>
 
-                            <TouchableOpacity
-                                onPress={handleRejectSubmit}
-                                disabled={submitting}
-                                style={tw`flex-1 py-3.5 bg-rose-500 rounded-xl items-center`}
-                            >
-                                <Text style={tw`text-white font-bold`}>
-                                    {submitting ? 'Rejecting...' : 'Reject'}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                                        <TouchableOpacity
+                                            onPress={handleRejectSubmit}
+                                            disabled={submitting}
+                                            style={tw`flex-1 py-3.5 bg-rose-500 rounded-xl items-center`}
+                                        >
+                                            <Text style={tw`text-white font-bold`}>
+                                                {submitting ? 'Rejecting...' : 'Reject'}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </ScrollView>
+                            </View>
+                        </KeyboardAvoidingView>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
 
         </View>
