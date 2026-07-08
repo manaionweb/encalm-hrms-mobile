@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Clock, Calendar, AlertCircle, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
@@ -298,64 +298,73 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 transparent={true}
                 onRequestClose={() => setRegularizeDate(null)}
             >
-                <View style={tw`flex-1 justify-end bg-black/60`}>
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}>
-                        <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>Attendance Correction ({regularizeDate})</Text>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <View style={tw`flex-1 justify-end bg-black/60`}>
+                        <KeyboardAvoidingView
+                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                            style={tw`w-full`}
+                        >
+                            <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 max-h-[85%]`}>
+                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                                    <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>Attendance Correction ({regularizeDate})</Text>
 
-                        <View style={tw`mb-4`}>
-                            <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock In Time (e.g. 09:00 AM)</Text>
-                            <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                value={inInputText}
-                                onChangeText={setInInputText}
-                            />
-                        </View>
+                                    <View style={tw`mb-4`}>
+                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock In Time (e.g. 09:00 AM)</Text>
+                                        <TextInput
+                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
+                                            value={inInputText}
+                                            onChangeText={setInInputText}
+                                        />
+                                    </View>
 
-                        <View style={tw`mb-4`}>
-                            <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock Out Time (e.g. 06:00 PM)</Text>
-                            <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                value={outInputText}
-                                onChangeText={setOutInputText}
-                            />
-                        </View>
+                                    <View style={tw`mb-4`}>
+                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock Out Time (e.g. 06:00 PM)</Text>
+                                        <TextInput
+                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
+                                            value={outInputText}
+                                            onChangeText={setOutInputText}
+                                        />
+                                    </View>
 
-                        <View style={tw`mb-6`}>
-                            <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Reason for correction *</Text>
-                            <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                placeholder="Forgot to punch / Client site work..."
-                                placeholderTextColor="#cbd5e1"
-                                value={reason}
-                                onChangeText={setReason}
-                            />
-                        </View>
+                                    <View style={tw`mb-6`}>
+                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Reason for correction *</Text>
+                                        <TextInput
+                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
+                                            placeholder="Forgot to punch / Client site work..."
+                                            placeholderTextColor="#cbd5e1"
+                                            value={reason}
+                                            onChangeText={setReason}
+                                        />
+                                    </View>
 
-                        <View style={tw`flex-row gap-4 mb-4`}>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    setRegularizeDate(null);
-                                    setReason('');
-                                    setInInputText('09:00 AM');
-                                    setOutInputText('06:00 PM');
-                                }}
-                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
-                            >
-                                <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
-                            </TouchableOpacity>
+                                    <View style={tw`flex-row gap-4 mb-4`}>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setRegularizeDate(null);
+                                                setReason('');
+                                                setInInputText('09:00 AM');
+                                                setOutInputText('06:00 PM');
+                                            }}
+                                            style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
+                                        >
+                                            <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
+                                        </TouchableOpacity>
 
-                            <TouchableOpacity
-                                onPress={submitRegularization}
-                                disabled={submittingRequest}
-                                style={tw`flex-1 py-3.5 bg-[#8b5cf6] rounded-xl items-center`}
-                            >
-                                <Text style={tw`text-white font-bold`}>
-                                    {submittingRequest ? 'Submitting...' : 'Submit'}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
+                                        <TouchableOpacity
+                                            onPress={submitRegularization}
+                                            disabled={submittingRequest}
+                                            style={tw`flex-1 py-3.5 bg-[#8b5cf6] rounded-xl items-center`}
+                                        >
+                                            <Text style={tw`text-white font-bold`}>
+                                                {submittingRequest ? 'Submitting...' : 'Submit'}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </ScrollView>
+                            </View>
+                        </KeyboardAvoidingView>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
 
         </View>
