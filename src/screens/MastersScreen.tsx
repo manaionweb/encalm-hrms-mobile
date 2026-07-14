@@ -767,7 +767,7 @@ export default function MastersScreen({ navigation }: any) {
         if (activeMainTab === 'ACCESS') {
             const permissionsCount = item.permissions?.length || 0;
             return (
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl mb-3 border border-gray-100 dark:border-white/5 shadow-sm`}>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl mb-3 border border-gray-100 dark:border-white/5 shadow-sm`}>
                     <View style={tw`flex-row justify-between items-center mb-3`}>
                         <View style={tw`flex-1`}>
                             <Text style={tw`font-bold text-sm text-gray-900 dark:text-white`}>{item.name}</Text>
@@ -776,7 +776,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-row gap-2`}>
                             <TouchableOpacity
                                 onPress={() => handleEditRole(item)}
-                                style={tw`p-2 bg-gray-50 dark:bg-white/5 rounded-xl`}
+                                style={tw`p-2 bg-gray-50 dark:bg-[#111827] rounded-xl`}
                             >
                                 <Edit2 size={12} color="#8b5cf6" />
                             </TouchableOpacity>
@@ -813,7 +813,7 @@ export default function MastersScreen({ navigation }: any) {
 
         if (activeSubTab === 'Shifts & Rosters') {
             return (
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl mb-3 border border-gray-100 dark:border-white/5 shadow-sm`}>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl mb-3 border border-gray-100 dark:border-white/5 shadow-sm`}>
                     <Text style={tw`font-bold text-sm text-gray-900 dark:text-white mb-3`}>{name}</Text>
                     <View style={tw`gap-1.5`}>
                         <View style={tw`flex-row justify-between`}>
@@ -840,11 +840,11 @@ export default function MastersScreen({ navigation }: any) {
         if (activeSubTab === 'Holidays') {
             const d = item.date ? new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
             return (
-                <View style={tw`flex-row bg-white dark:bg-[#12112b] py-3.5 px-4 rounded-2xl mb-2 border border-gray-100 dark:border-white/5 items-center`}>
+                <View style={tw`flex-row bg-white dark:bg-[#1e293b] py-3.5 px-4 rounded-2xl mb-2 border border-gray-100 dark:border-white/5 items-center`}>
                     <Text style={tw`flex-1 text-xs font-bold text-gray-900 dark:text-white`}>{item.name}</Text>
                     <Text style={tw`flex-1 text-xs text-center text-[#8b5cf6] font-bold`}>{d}</Text>
                     <View style={tw`flex-1 items-end`}>
-                        <View style={tw`px-2 py-0.5 bg-gray-100 dark:bg-white/5 rounded`}>
+                        <View style={tw`px-2 py-0.5 bg-gray-100 dark:bg-[#111827] rounded`}>
                             <Text style={tw`text-[9px] text-gray-500 font-bold uppercase`}>{item.type || 'PUBLIC'}</Text>
                         </View>
                     </View>
@@ -854,7 +854,7 @@ export default function MastersScreen({ navigation }: any) {
 
         if (activeSubTab === 'Professional Tax') {
             return (
-                <View style={tw`flex-row bg-white dark:bg-[#12112b] py-3.5 px-4 rounded-2xl mb-2 border border-gray-100 dark:border-white/5 items-center`}>
+                <View style={tw`flex-row bg-white dark:bg-[#1e293b] py-3.5 px-4 rounded-2xl mb-2 border border-gray-100 dark:border-white/5 items-center`}>
                     <Text style={tw`flex-1 text-xs font-bold text-gray-900 dark:text-white`}>{item.stateName || 'PT Slab'}</Text>
                     <Text style={tw`flex-1.5 text-xs text-center text-[#8b5cf6] font-bold`}>₹{item.minSalary} - ₹{item.maxSalary}</Text>
                     <Text style={tw`flex-1 text-xs text-right text-gray-800 dark:text-white font-bold`}>₹{item.taxAmount}</Text>
@@ -879,9 +879,9 @@ export default function MastersScreen({ navigation }: any) {
             const catLabel = item.category === 'PERSONAL_DETAILS' ? 'Personal Details' : 'Document Vault';
             const typeLabel = item.type === 'RADIO' ? 'Radio Button' : item.type === 'FILE' ? 'File Upload' : item.type === 'PDF' ? 'PDF Document' : item.type;
             return (
-                <View style={tw`flex-row bg-white dark:bg-[#12112b] py-3.5 px-4 rounded-2xl mb-2 border border-gray-100 dark:border-white/5 items-center`}>
+                <View style={tw`flex-row bg-white dark:bg-[#4c1d95] py-3.5 px-4 rounded-2xl mb-2 border border-gray-100 dark:border-white/5 items-center`}>
                     <Text style={tw`flex-1 text-xs font-bold text-gray-900 dark:text-white`}>{item.name}</Text>
-                    <Text style={tw`flex-1 text-xs text-center text-gray-500 font-bold`}>{catLabel}</Text>
+                    <Text style={tw`flex-1 text-xs text-center text-gray-500 dark:text-gray-300 font-bold`}>{catLabel}</Text>
                     <Text style={tw`flex-1 text-xs text-center text-[#8b5cf6] font-bold`}>{typeLabel}</Text>
                     <View style={tw`w-12 items-end`}>
                         <TouchableOpacity
@@ -896,7 +896,7 @@ export default function MastersScreen({ navigation }: any) {
         }
 
         return (
-            <View style={tw`bg-white dark:bg-[#12112b] p-4 rounded-3xl mb-3 border border-gray-100 dark:border-white/5 shadow-sm`}>
+            <View style={tw`bg-white dark:bg-[#1e293b] p-4 rounded-3xl mb-3 border border-gray-100 dark:border-white/5 shadow-sm`}>
                 <Text style={tw`font-bold text-sm text-gray-900 dark:text-white`}>{name}</Text>
                 {item.description ? <Text style={tw`text-xs text-gray-400 mt-1`}>{item.description}</Text> : null}
                 {detail1 ? <Text style={tw`text-xs text-[#8b5cf6] font-bold mt-1.5`}>{detail1}</Text> : null}
@@ -906,7 +906,7 @@ export default function MastersScreen({ navigation }: any) {
     };
 
     const renderProfessionalTaxHeader = () => (
-        <View style={tw`flex-row bg-gray-100 dark:bg-white/2 py-2.5 px-4 rounded-xl mb-2 border border-gray-250 dark:border-white/5`}>
+        <View style={tw`flex-row bg-gray-100 dark:bg-white/2 py-2.5 px-4 rounded-xl mb-2 border border-gray-200 dark:border-white/5`}>
             <Text style={tw`flex-1 text-[9px] font-black text-gray-400 uppercase`}>State</Text>
             <Text style={tw`flex-1.5 text-[9px] font-black text-gray-400 uppercase text-center`}>Salary Range</Text>
             <Text style={tw`flex-1 text-[9px] font-black text-gray-400 uppercase text-right`}>Tax Amount</Text>
@@ -914,7 +914,7 @@ export default function MastersScreen({ navigation }: any) {
     );
 
     const renderHolidaysHeader = () => (
-        <View style={tw`flex-row bg-gray-100 dark:bg-white/2 py-2.5 px-4 rounded-xl mb-2 border border-gray-250 dark:border-white/5`}>
+        <View style={tw`flex-row bg-gray-100 dark:bg-white/2 py-2.5 px-4 rounded-xl mb-2 border border-gray-200 dark:border-white/5`}>
             <Text style={tw`flex-1 text-[9px] font-black text-gray-400 uppercase`}>Holiday Name</Text>
             <Text style={tw`flex-1 text-[9px] font-black text-gray-400 uppercase text-center`}>Date</Text>
             <Text style={tw`flex-1 text-[9px] font-black text-gray-400 uppercase text-right`}>Type</Text>
@@ -922,7 +922,7 @@ export default function MastersScreen({ navigation }: any) {
     );
 
     const renderCustomFieldsHeader = () => (
-        <View style={tw`flex-row bg-gray-100 dark:bg-white/2 py-2.5 px-4 rounded-xl mb-2 border border-gray-250 dark:border-white/5`}>
+        <View style={tw`flex-row bg-gray-100 dark:bg-white/2 py-2.5 px-4 rounded-xl mb-2 border border-gray-200 dark:border-white/5`}>
             <Text style={tw`flex-1 text-[11px] font-black text-gray-400 uppercase`}>Field Name</Text>
             <Text style={tw`flex-1 text-[11px] font-black text-gray-400 uppercase text-center`}>Category</Text>
             <Text style={tw`flex-1 text-[11px] font-black text-gray-400 uppercase text-center`}>Type</Text>
@@ -947,13 +947,13 @@ export default function MastersScreen({ navigation }: any) {
                 </View>
 
                 {/* Corporate Identity */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
                     <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4`}>Corporate Identity</Text>
                     
                     <View style={tw`mb-3`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Legal Name</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={legalName}
                             onChangeText={setLegalName}
                         />
@@ -963,7 +963,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>CIN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={cin}
                                 onChangeText={setCin}
                             />
@@ -971,7 +971,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>GSTIN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={gstin}
                                 onChangeText={setGstin}
                             />
@@ -982,7 +982,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>PAN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={pan}
                                 onChangeText={setPan}
                             />
@@ -990,7 +990,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>TAN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={tan}
                                 onChangeText={setTan}
                             />
@@ -999,13 +999,13 @@ export default function MastersScreen({ navigation }: any) {
                 </View>
 
                 {/* Location & Branding */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
                     <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4`}>Location & Branding</Text>
 
                     <View style={tw`mb-3`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Registered Address</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={address}
                             onChangeText={setAddress}
                         />
@@ -1014,7 +1014,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-4`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Website</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={website}
                             onChangeText={setWebsite}
                         />
@@ -1023,7 +1023,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`flex-row gap-3`}>
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Primary Color</Text>
-                            <View style={tw`flex-row items-center bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
+                            <View style={tw`flex-row items-center bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
                                 <View style={[tw`w-4 h-4 rounded mr-2`, { backgroundColor: primaryColor }]} />
                                 <TextInput
                                     style={tw`flex-1 text-xs text-gray-800 dark:text-white font-bold h-7 p-0`}
@@ -1034,7 +1034,7 @@ export default function MastersScreen({ navigation }: any) {
                         </View>
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Secondary Color</Text>
-                            <View style={tw`flex-row items-center bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
+                            <View style={tw`flex-row items-center bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
                                 <View style={[tw`w-4 h-4 rounded mr-2`, { backgroundColor: secondaryColor }]} />
                                 <TextInput
                                     style={tw`flex-1 text-xs text-gray-800 dark:text-white font-bold h-7 p-0`}
@@ -1058,13 +1058,13 @@ export default function MastersScreen({ navigation }: any) {
         return (
             <ScrollView style={tw`flex-grow p-4`} contentContainerStyle={tw`pb-12`} keyboardShouldPersistTaps="handled">
                 <Text style={tw`text-sm font-black text-gray-900 dark:text-white mb-1`}>Signature Settings</Text>
-                <Text style={tw`text-[10px] text-gray-400 dark:text-gray-550 mb-4`}>Manage authorized signature that will be used in official documents.</Text>
+                <Text style={tw`text-[10px] text-gray-400 dark:text-gray-400 mb-4`}>Manage authorized signature that will be used in official documents.</Text>
 
                 {/* Signatory Name Card */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Authorized Signatory Name *</Text>
                     <TextInput
-                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                         placeholder="e.g. System Admin"
                         placeholderTextColor="#94a3b8"
                         value={signatoryName}
@@ -1073,8 +1073,8 @@ export default function MastersScreen({ navigation }: any) {
                 </View>
 
                 {/* Upload & Preview Cards */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
-                    <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest mb-4`}>Upload Signature</Text>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
+                    <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-4`}>Upload Signature</Text>
                     
                     {signaturePreviewUri ? (
                         <View style={tw`relative border border-dashed border-gray-200 dark:border-white/10 rounded-2xl p-4 items-center justify-center bg-gray-50 dark:bg-white/2`}>
@@ -1102,7 +1102,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <Text style={tw`text-base text-[#8b5cf6] font-bold`}>↑</Text>
                             </View>
                             <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Choose Signature Image</Text>
-                            <Text style={tw`text-[9px] text-gray-400 dark:text-gray-550 mt-1`}>PNG, JPG or JPEG (Max. 2MB)</Text>
+                            <Text style={tw`text-[9px] text-gray-400 dark:text-gray-400 mt-1`}>PNG, JPG or JPEG (Max. 2MB)</Text>
                             
                             <View style={tw`mt-4 px-4 py-1.5 bg-[#8b5cf6] rounded-xl`}>
                                 <Text style={tw`text-[10px] font-bold text-white uppercase`}>Select File</Text>
@@ -1142,7 +1142,7 @@ export default function MastersScreen({ navigation }: any) {
                 </View>
 
                 {/* EPF Settings */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
                     <View style={tw`flex-row justify-between items-center mb-4`}>
                         <Text style={tw`text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest`}>• EPF Settings</Text>
                         <Switch
@@ -1159,7 +1159,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>EPF Number</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfNumber}
                                         onChangeText={setEpfNumber}
                                     />
@@ -1168,7 +1168,7 @@ export default function MastersScreen({ navigation }: any) {
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Wage Ceiling (₹15,000)</Text>
                                     <TouchableOpacity
                                         onPress={() => setEpfWageCeiling(!epfWageCeiling)}
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl justify-center h-[38px]`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl justify-center h-[38px]`}
                                     >
                                         <Text style={tw`text-xs text-gray-800 dark:text-white font-bold`}>
                                             {epfWageCeiling ? 'Cap at ₹15,000' : 'No Cap'}
@@ -1181,7 +1181,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Employee Rate (%)</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfEmployeeRate}
                                         onChangeText={setEpfEmployeeRate}
                                         keyboardType="numeric"
@@ -1190,7 +1190,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Employer EPF (%)</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfEmployerRate}
                                         onChangeText={setEpfEmployerRate}
                                         keyboardType="numeric"
@@ -1202,7 +1202,7 @@ export default function MastersScreen({ navigation }: any) {
                 </View>
 
                 {/* ESIC Settings */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
                     <View style={tw`flex-row justify-between items-center mb-4`}>
                         <Text style={tw`text-[10px] font-black text-rose-500 uppercase tracking-widest`}>• ESIC Settings</Text>
                         <Switch
@@ -1218,7 +1218,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>ESIC Number</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                    style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                     value={esicNumber}
                                     onChangeText={setEsicNumber}
                                 />
@@ -1226,7 +1226,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Wage Limit</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                    style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                     value={esicWageLimit}
                                     onChangeText={setEsicWageLimit}
                                     keyboardType="numeric"
@@ -1256,14 +1256,14 @@ export default function MastersScreen({ navigation }: any) {
                 </View>
 
                 {/* Day Status Thresholds Card */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
-                    <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-550 uppercase tracking-widest mb-4`}>Day Status Thresholds (Hours)</Text>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
+                    <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-4`}>Day Status Thresholds (Hours)</Text>
                     
                     <View style={tw`flex-row gap-3`}>
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Min Half Day</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={minHalfDayHours}
                                 onChangeText={setMinHalfDayHours}
                                 keyboardType="numeric"
@@ -1272,7 +1272,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Min Full Day</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={minFullDayHours}
                                 onChangeText={setMinFullDayHours}
                                 keyboardType="numeric"
@@ -1282,21 +1282,21 @@ export default function MastersScreen({ navigation }: any) {
                 </View>
 
                 {/* Late Mark Deduction Card */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
-                    <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest mb-4`}>Late Mark Deduction</Text>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
+                    <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-4`}>Late Mark Deduction</Text>
                     
                     <View style={tw`flex-row items-center gap-2 mb-4`}>
-                        <Text style={tw`text-xs text-gray-555 font-bold`}>Every</Text>
+                        <Text style={tw`text-xs text-gray-500 font-bold`}>Every</Text>
                         <TextInput
-                            style={tw`w-14 px-3 py-2 bg-gray-55 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-center text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
+                            style={tw`w-14 px-3 py-2 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-center text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
                             value={lateMarkThreshold}
                             onChangeText={setLateMarkThreshold}
                             keyboardType="numeric"
                         />
-                        <Text style={tw`text-xs text-gray-555 font-bold`}>late marks deduct</Text>
+                        <Text style={tw`text-xs text-gray-500 font-bold`}>late marks deduct</Text>
                     </View>
 
-                    <View style={tw`flex-row bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl p-0.5`}>
+                    <View style={tw`flex-row bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl p-0.5`}>
                         {[
                             { key: 'HALF_DAY', label: '0.5 Day' },
                             { key: 'ONE_DAY', label: '1.0 Day' }
@@ -1316,8 +1316,8 @@ export default function MastersScreen({ navigation }: any) {
                 </View>
 
                 {/* Overtime Card */}
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
-                    <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest mb-4`}>Overtime Configuration</Text>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
+                    <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-4`}>Overtime Configuration</Text>
                     
                     {renderCheckbox('Enable Overtime Calculation', otEnabled, setOtEnabled)}
                 </View>
@@ -1341,22 +1341,22 @@ export default function MastersScreen({ navigation }: any) {
                     </TouchableOpacity>
                 </View>
 
-                <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
+                <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
                     {renderCheckbox('Enable Sandwich Rule', sandwichEnabled, setSandwichEnabled)}
                 </View>
 
                 {sandwichEnabled && (
                     <View style={tw`gap-5`}>
                         {/* Apply On Card */}
-                        <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
-                            <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest mb-4`}>Apply On</Text>
+                        <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
+                            <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-4`}>Apply On</Text>
                             {renderCheckbox('Weekends Between Leaves', applyOnWeekends, setApplyOnWeekends)}
                             {renderCheckbox('Holidays Between Leaves', applyOnHolidays, setApplyOnHolidays)}
                         </View>
 
                         {/* Applicable Leave Types Card */}
-                        <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
-                            <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-555 uppercase tracking-widest mb-4`}>Applicable Leave Types</Text>
+                        <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
+                            <Text style={tw`text-[10px] font-black text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-4`}>Applicable Leave Types</Text>
                             {renderCheckbox('Casual Leave', applyCasualLeave, setApplyCasualLeave)}
                             {renderCheckbox('Sick Leave', applySickLeave, setApplySickLeave)}
                             {renderCheckbox('Earned Leave', applyEarnedLeave, setApplyEarnedLeave)}
@@ -1375,7 +1375,7 @@ export default function MastersScreen({ navigation }: any) {
             <View style={tw`w-5 h-5 rounded border ${value ? 'bg-[#8b5cf6] border-[#8b5cf6]' : 'border-gray-300 dark:border-white/20'} items-center justify-center mr-3`}>
                 {value && <Text style={tw`text-[10px] text-white font-bold`}>✓</Text>}
             </View>
-            <Text style={tw`text-xs font-bold text-gray-700 dark:text-gray-350`}>{label}</Text>
+            <Text style={tw`text-xs font-bold text-gray-700 dark:text-gray-200`}>{label}</Text>
         </TouchableOpacity>
     );
 
@@ -1387,7 +1387,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-4`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>ROLE NAME</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-805 dark:text-white font-bold h-10`}
+                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-10`}
                             placeholder="e.g. HR Manager"
                             placeholderTextColor="#94a3b8"
                             value={addName}
@@ -1406,7 +1406,7 @@ export default function MastersScreen({ navigation }: any) {
                                     <TouchableOpacity
                                         key={m.key}
                                         onPress={() => toggleModuleSelection(m.key)}
-                                        style={tw`flex-row items-center px-3 py-2.5 bg-[#f5f3ff] dark:bg-white/2 border ${isChecked ? 'border-[#8b5cf6] bg-[#8b5cf6]/5' : 'border-gray-250 dark:border-white/5'} rounded-xl w-[48%]`}
+                                        style={tw`flex-row items-center px-3 py-2.5 bg-[#f5f3ff] dark:bg-white/2 border ${isChecked ? 'border-[#8b5cf6] bg-[#8b5cf6]/5' : 'border-gray-200 dark:border-white/5'} rounded-xl w-[48%]`}
                                     >
                                         <View style={tw`w-4 h-4 rounded border ${isChecked ? 'bg-[#8b5cf6] border-[#8b5cf6]' : 'border-gray-300 dark:border-white/10'} items-center justify-center mr-2`}>
                                             {isChecked && <Text style={tw`text-[9px] text-white font-bold`}>✓</Text>}
@@ -1456,7 +1456,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-3`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Location Name *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder="e.g. Mumbai HQ"
                                 placeholderTextColor="#94a3b8"
                                 value={addName}
@@ -1466,7 +1466,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-3`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Address *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder="e.g. 5th Floor, Building A"
                                 placeholderTextColor="#94a3b8"
                                 value={addAddress}
@@ -1527,7 +1527,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-3`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Name *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder={activeSubTab === 'Departments' ? "e.g. Engineering" : "e.g. Lead Engineer"}
                                 placeholderTextColor="#94a3b8"
                                 value={addName}
@@ -1537,7 +1537,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-4`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Description</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder="Provide brief detail..."
                                 placeholderTextColor="#94a3b8"
                                 value={addDescription}
@@ -1555,7 +1555,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-3`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Component Name *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder="e.g. Basic Pay"
                                 placeholderTextColor="#94a3b8"
                                 value={addName}
@@ -1566,7 +1566,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-row gap-3 mb-3`}>
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Type *</Text>
-                                <View style={tw`flex-row bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl p-0.5`}>
+                                <View style={tw`flex-row bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl p-0.5`}>
                                     {['Earning', 'Deduction'].map((t) => {
                                         const isSel = (addType || 'Earning') === t;
                                         return (
@@ -1584,7 +1584,7 @@ export default function MastersScreen({ navigation }: any) {
 
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Taxability *</Text>
-                                <View style={tw`flex-row bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl p-0.5`}>
+                                <View style={tw`flex-row bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl p-0.5`}>
                                     {['Taxable', 'Non-Taxable'].map((t) => {
                                         const isSel = compTaxability === t;
                                         return (
@@ -1604,7 +1604,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-row gap-3 mb-4`}>
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Calculation *</Text>
-                                <View style={tw`flex-row bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl p-0.5`}>
+                                <View style={tw`flex-row bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl p-0.5`}>
                                     {['Flat Amount', 'Percentage'].map((t) => {
                                         const isSel = compCalculation === t;
                                         return (
@@ -1623,7 +1623,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Value *</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
+                                    style={tw`w-full px-4 py-2 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
                                     value={compValue}
                                     onChangeText={setCompValue}
                                     keyboardType="numeric"
@@ -1645,7 +1645,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-3`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>State Name *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder="e.g. Maharashtra"
                                 placeholderTextColor="#94a3b8"
                                 value={addName}
@@ -1657,7 +1657,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Min Salary Threshold *</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                     value={addInTime}
                                     placeholder="e.g. 10000"
                                     placeholderTextColor="#94a3b8"
@@ -1668,7 +1668,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Max Salary Threshold *</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                     value={addOutTime}
                                     placeholder="e.g. 15000"
                                     placeholderTextColor="#94a3b8"
@@ -1681,7 +1681,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-4`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Tax Amount *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 value={addGracePeriod}
                                 placeholder="e.g. 200"
                                 placeholderTextColor="#94a3b8"
@@ -1700,7 +1700,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-3`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Shift Name *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder="e.g. morning"
                                 placeholderTextColor="#94a3b8"
                                 value={addName}
@@ -1711,7 +1711,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>In Time (HH:mm) *</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                     value={addInTime}
                                     onChangeText={setAddInTime}
                                 />
@@ -1719,7 +1719,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Out Time (HH:mm) *</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                     value={addOutTime}
                                     onChangeText={setAddOutTime}
                                 />
@@ -1729,7 +1729,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Break Duration (mins)</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
+                                    style={tw`w-full px-4 py-2 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
                                     value={addBreakDuration}
                                     onChangeText={setAddBreakDuration}
                                     keyboardType="number-pad"
@@ -1738,7 +1738,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Grace Period (mins)</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
+                                    style={tw`w-full px-4 py-2 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
                                     value={addGracePeriod}
                                     onChangeText={setAddGracePeriod}
                                     keyboardType="number-pad"
@@ -1757,7 +1757,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-3`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Holiday Name *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder="e.g. Independence Day"
                                 placeholderTextColor="#94a3b8"
                                 value={addName}
@@ -1767,7 +1767,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-3`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Date (YYYY-MM-DD) *</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 value={addDate}
                                 onChangeText={setAddDate}
                             />
@@ -1811,7 +1811,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-4`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>FIELD NAME *</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-805 dark:text-white font-bold h-10`}
+                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-10`}
                             placeholder="Enter field name (e.g. Alternate Phone, Emergency Contact)"
                             placeholderTextColor="#94a3b8"
                             value={addName}
@@ -1847,7 +1847,7 @@ export default function MastersScreen({ navigation }: any) {
                                     <TouchableOpacity
                                         key={t.key}
                                         onPress={() => setAddType(t.key)}
-                                        style={tw`px-3 py-2 rounded-xl border items-center ${isSel ? 'border-[#8b5cf6] bg-[#8b5cf6]/5' : 'border-gray-250 dark:border-white/5'} w-[48%]`}
+                                        style={tw`px-3 py-2 rounded-xl border items-center ${isSel ? 'border-[#8b5cf6] bg-[#8b5cf6]/5' : 'border-gray-200 dark:border-white/5'} w-[48%]`}
                                     >
                                         <Text style={tw`text-xs font-bold ${isSel ? 'text-[#8b5cf6]' : 'text-gray-500'}`}>{t.label}</Text>
                                     </TouchableOpacity>
@@ -1859,7 +1859,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`mb-4`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>OPTIONS (comma separated)</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-805 dark:text-white font-bold h-10`}
+                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-10`}
                                 placeholder="e.g. Yes, No, Maybe"
                                 placeholderTextColor="#94a3b8"
                                 value={addOptions}
@@ -1898,7 +1898,7 @@ export default function MastersScreen({ navigation }: any) {
                                 }}
                                 style={tw`py-3.5 px-4 mr-2 border-b-2 ${isSel ? 'border-[#8b5cf6]' : 'border-transparent'}`}
                             >
-                                <Text style={tw`text-xs font-black ${isSel ? 'text-[#8b5cf6] dark:text-white' : 'text-gray-400 dark:text-gray-550'}`}>
+                                <Text style={tw`text-xs font-black ${isSel ? 'text-[#8b5cf6] dark:text-white' : 'text-gray-400 dark:text-gray-400'}`}>
                                     {tab.label}
                                 </Text>
                             </TouchableOpacity>
@@ -1917,9 +1917,9 @@ export default function MastersScreen({ navigation }: any) {
                                 <TouchableOpacity
                                     key={idx}
                                     onPress={() => setActiveSubTab(sub)}
-                                    style={tw`px-4 py-1.5 rounded-xl mr-2.5 border ${isActiveSub ? 'border-[#8b5cf6] bg-[#8b5cf6]/5' : 'border-transparent bg-gray-150 dark:bg-white/5'}`}
+                                    style={tw`px-4 py-1.5 rounded-xl mr-2.5 border ${isActiveSub ? 'border-[#8b5cf6] bg-[#8b5cf6]/5' : 'border-transparent bg-transparent'}`}
                                 >
-                                    <Text style={tw`text-[11px] font-bold ${isActiveSub ? 'text-[#8b5cf6]' : 'text-gray-550'}`}>{sub}</Text>
+                                    <Text style={tw`text-[11px] font-bold ${isActiveSub ? 'text-[#8b5cf6] dark:text-[#c4b5fd]' : 'text-gray-500 dark:text-gray-400'}`}>{sub}</Text>
                                 </TouchableOpacity>
                             );
                         })}
@@ -1968,6 +1968,36 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1 justify-center`}>
                             <ActivityIndicator size="large" color="#8b5cf6" />
                         </View>
+                    ) : activeMainTab === 'CUSTOM' ? (
+                        <View style={tw`bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-white/5 p-4 shadow-sm`}>
+                            {renderCustomFieldsHeader()}
+                            {dataList.length === 0 ? (
+                                <Text style={tw`text-center text-xs font-bold text-gray-400 py-12`}>No custom fields configured.</Text>
+                            ) : (
+                                <ScrollView showsVerticalScrollIndicator={false} style={tw`max-h-120`}>
+                                    {dataList.map((item, index) => {
+                                        const catLabel = item.category === 'PERSONAL_DETAILS' ? 'Personal Details' : 'Document Vault';
+                                        const typeLabel = item.type === 'RADIO' ? 'Radio Button' : item.type === 'FILE' ? 'File Upload' : item.type === 'PDF' ? 'PDF Document' : item.type;
+                                        const isLast = index === dataList.length - 1;
+                                        return (
+                                            <View key={index} style={tw`flex-row py-3.5 px-4 border-b ${isLast ? 'border-transparent' : 'border-gray-100 dark:border-white/5'} items-center`}>
+                                                <Text style={tw`flex-1 text-xs font-bold text-gray-900 dark:text-white`}>{item.name}</Text>
+                                                <Text style={tw`flex-1 text-xs text-center text-gray-500 dark:text-gray-300 font-bold`}>{catLabel}</Text>
+                                                <Text style={tw`flex-1 text-xs text-center text-purple-600 dark:text-purple-300 font-bold`}>{typeLabel}</Text>
+                                                <View style={tw`w-12 items-end`}>
+                                                    <TouchableOpacity
+                                                        onPress={() => handleDeleteCustomField(item.id, item.name)}
+                                                        style={tw`p-1.5 bg-red-50 dark:bg-red-500/5 rounded-lg`}
+                                                    >
+                                                        <Trash2 size={12} color="#ef4444" />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
+                                </ScrollView>
+                            )}
+                        </View>
                     ) : (
                         <FlatList
                             data={dataList}
@@ -1976,7 +2006,7 @@ export default function MastersScreen({ navigation }: any) {
                             ListHeaderComponent={
                                 activeSubTab === 'Professional Tax' 
                                     ? renderProfessionalTaxHeader() 
-                                    : (activeSubTab === 'Holidays' ? renderHolidaysHeader() : (activeMainTab === 'CUSTOM' ? renderCustomFieldsHeader() : null))
+                                    : (activeSubTab === 'Holidays' ? renderHolidaysHeader() : null)
                             }
                             showsVerticalScrollIndicator={false}
                             ListEmptyComponent={
@@ -1990,18 +2020,18 @@ export default function MastersScreen({ navigation }: any) {
             {/* Add Master Item Modal */}
             <Modal
                 visible={showAddModal}
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
                 onRequestClose={() => setShowAddModal(false)}
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={tw`flex-1 justify-end bg-black/60`}>
+                    <View style={tw`flex-1 justify-center items-center bg-black/60 p-4`}>
                         <KeyboardAvoidingView
-                            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                            style={tw`w-full`}
+                            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                            style={tw`w-full max-w-sm`}
                         >
-                            <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 max-h-[85%]`}>
-                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                            <View style={tw`bg-white dark:bg-[#1e293b] p-6 rounded-3xl border border-gray-200 dark:border-white/5 shadow-2xl w-full max-h-[85%]`}>
+                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={tw`pb-2`}>
                                     <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>
                                         {activeMainTab === 'ACCESS' 
                                             ? (editingRole ? 'Edit Role' : 'Create Role') 
@@ -2017,7 +2047,7 @@ export default function MastersScreen({ navigation }: any) {
                                                 setShowAddModal(false);
                                                 resetAddForm();
                                             }}
-                                            style={tw`flex-1 py-3.5 bg-gray-150 dark:bg-[#1c1a45] rounded-xl items-center`}
+                                            style={tw`flex-1 py-3.5 bg-gray-150 dark:bg-[#111827] rounded-xl items-center`}
                                         >
                                             <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
                                         </TouchableOpacity>
