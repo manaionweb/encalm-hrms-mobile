@@ -82,6 +82,9 @@ export default function MastersScreen({ navigation }: any) {
     const [addOutTime, setAddOutTime] = useState('18:00');
     const [addGracePeriod, setAddGracePeriod] = useState('15');
     const [addDate, setAddDate] = useState('');
+    const [addState, setAddState] = useState('');
+    const [addCountry, setAddCountry] = useState('India');
+    const [addPincode, setAddPincode] = useState('');
     const [addCategory, setAddCategory] = useState('PERSONAL_DETAILS');
     const [addOptions, setAddOptions] = useState('');
     const [submittingAdd, setSubmittingAdd] = useState(false);
@@ -163,7 +166,7 @@ export default function MastersScreen({ navigation }: any) {
             setGstin(c.gstin || '');
             setPan(c.pan || '');
             setTan(c.tan || '');
-            setAddress(c.address || '');
+            setAddress(c.regAddress || '');
             setWebsite(c.website || '');
             setPrimaryColor(c.primaryColor || '#6366f1');
             setSecondaryColor(c.secondaryColor || '#ec4899');
@@ -184,7 +187,7 @@ export default function MastersScreen({ navigation }: any) {
                 gstin,
                 pan,
                 tan,
-                address,
+                regAddress: address,
                 website,
                 primaryColor,
                 secondaryColor
@@ -493,6 +496,9 @@ export default function MastersScreen({ navigation }: any) {
         setAddOutTime('18:00');
         setAddGracePeriod('15');
         setAddDate(new Date().toISOString().substring(0, 10));
+        setAddState('');
+        setAddCountry('India');
+        setAddPincode('');
         setAddCategory('PERSONAL_DETAILS');
         setAddOptions('');
         setCompTaxability('Taxable');
@@ -584,6 +590,13 @@ export default function MastersScreen({ navigation }: any) {
             return;
         }
 
+        if (activeMainTab === 'ORG' && activeSubTab === 'Locations') {
+            if (!addAddress.trim() || !addCity.trim() || !addState.trim() || !addCountry.trim() || !addPincode.trim()) {
+                Alert.alert('Required', 'Please fill in all location fields (Address, City, State, Country, and Pincode).');
+                return;
+            }
+        }
+
         setSubmittingAdd(true);
         try {
             let endpoint = '';
@@ -612,13 +625,21 @@ export default function MastersScreen({ navigation }: any) {
             if (activeMainTab === 'ORG') {
                 if (activeSubTab === 'Locations') {
                     endpoint = '/masters/locations';
-                    payload = { name: addName.trim(), address: addAddress.trim(), city: addCity.trim(), companyId };
+                    payload = { 
+                        name: addName.trim(), 
+                        address: addAddress.trim(), 
+                        city: addCity.trim(), 
+                        state: addState.trim(),
+                        country: addCountry.trim(),
+                        pincode: addPincode.trim(),
+                        companyId 
+                    };
                 } else if (activeSubTab === 'Departments') {
                     endpoint = '/masters/departments';
-                    payload = { name: addName.trim(), description: addDescription.trim(), companyId };
+                    payload = { name: addName.trim(), companyId };
                 } else if (activeSubTab === 'Designations') {
                     endpoint = '/masters/designations';
-                    payload = { name: addName.trim(), description: addDescription.trim() };
+                    payload = { name: addName.trim(), companyId };
                 }
             } else if (activeMainTab === 'PAYROLL') {
                 if (activeSubTab === 'Salary Components') {
@@ -626,12 +647,12 @@ export default function MastersScreen({ navigation }: any) {
                     payload = { 
                         name: addName.trim(), 
                         type: (addType || 'Earning').toUpperCase(), 
-                        taxability: compTaxability.toUpperCase(),
-                        calculation: compCalculation.replace(' ', '_').toUpperCase(),
+                        taxability: compTaxability === 'Taxable' ? 'TAXABLE' : 'FULLY_EXEMPT',
+                        calculationType: compCalculation === 'Flat Amount' ? 'FLAT' : '%_BASIC',
                         value: Number(compValue) || 0,
-                        isBasicPay,
-                        partOfPf,
-                        fbpEligible,
+                        isWageCodeComponent: isBasicPay,
+                        isPartOfWages: partOfPf,
+                        isFBP: fbpEligible,
                         description: addDescription.trim() 
                     };
                 } else if (activeSubTab === 'Professional Tax') {
@@ -845,11 +866,13 @@ export default function MastersScreen({ navigation }: any) {
         let detail2 = '';
 
         if (activeSubTab === 'Salary Components') {
-            detail1 = `Type: ${item.type || 'Earning'} • Tax: ${item.taxability || 'Taxable'}`;
-            detail2 = `Calculated As: ${item.calculation || 'Flat Amount'} (${item.value || 0})`;
+            const taxLabel = item.taxability === 'FULLY_EXEMPT' ? 'Non-Taxable' : 'Taxable';
+            const calcLabel = item.calculationType === 'FLAT' ? 'Flat Amount' : 'Percentage';
+            detail1 = `Type: ${item.type || 'Earning'} • Tax: ${taxLabel}`;
+            detail2 = `Calculated As: ${calcLabel} (${item.value || 0})`;
         } else if (activeSubTab === 'Locations') {
             detail1 = item.address ? `Address: ${item.address}` : '';
-            detail2 = item.city ? `City: ${item.city}` : '';
+            detail2 = `${item.city || ''}${item.state ? ', ' + item.state : ''}${item.pincode ? ' - ' + item.pincode : ''}`;
         }
 
         if (activeMainTab === 'CUSTOM') {
@@ -1441,7 +1464,7 @@ export default function MastersScreen({ navigation }: any) {
                             />
                         </View>
                         <View style={tw`mb-3`}>
-                            <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Address</Text>
+                            <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Address *</Text>
                             <TextInput
                                 style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
                                 placeholder="e.g. 5th Floor, Building A"
@@ -1450,15 +1473,50 @@ export default function MastersScreen({ navigation }: any) {
                                 onChangeText={setAddAddress}
                             />
                         </View>
-                        <View style={tw`mb-4`}>
-                            <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>City</Text>
-                            <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
-                                placeholder="e.g. Mumbai"
-                                placeholderTextColor="#94a3b8"
-                                value={addCity}
-                                onChangeText={setAddCity}
-                            />
+                        <View style={tw`flex-row gap-3 mb-3`}>
+                            <View style={tw`flex-1`}>
+                                <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>City *</Text>
+                                <TextInput
+                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                    placeholder="e.g. Mumbai"
+                                    placeholderTextColor="#94a3b8"
+                                    value={addCity}
+                                    onChangeText={setAddCity}
+                                />
+                            </View>
+                            <View style={tw`flex-1`}>
+                                <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>State *</Text>
+                                <TextInput
+                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                    placeholder="e.g. Maharashtra"
+                                    placeholderTextColor="#94a3b8"
+                                    value={addState}
+                                    onChangeText={setAddState}
+                                />
+                            </View>
+                        </View>
+                        <View style={tw`flex-row gap-3 mb-4`}>
+                            <View style={tw`flex-1`}>
+                                <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Country *</Text>
+                                <TextInput
+                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                    placeholder="e.g. India"
+                                    placeholderTextColor="#94a3b8"
+                                    value={addCountry}
+                                    onChangeText={setAddCountry}
+                                />
+                            </View>
+                            <View style={tw`flex-1`}>
+                                <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Pincode *</Text>
+                                <TextInput
+                                    style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white`}
+                                    placeholder="e.g. 400001"
+                                    placeholderTextColor="#94a3b8"
+                                    value={addPincode}
+                                    onChangeText={setAddPincode}
+                                    keyboardType="numeric"
+                                />
+                            </View>
                         </View>
                     </View>
                 );

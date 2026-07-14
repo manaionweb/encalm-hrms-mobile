@@ -309,8 +309,8 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     const initials = employee.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2);
 
     const renderDetailRow = (label: string, value: string | null | undefined) => (
-        <View style={tw`flex-row justify-between py-3 border-b border-gray-50 dark:border-slate-700/20`}>
-            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase`}>{label}</Text>
+        <View style={tw`flex-row justify-between py-3 border-b border-gray-50 dark:border-slate-700/50`}>
+            <Text style={tw`text-xs font-bold text-gray-400 uppercase`}>{label}</Text>
             <Text style={tw`text-xs font-semibold text-gray-800 dark:text-white`}>{value || 'N/A'}</Text>
         </View>
     );
@@ -498,10 +498,6 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                             );
                                         }
 
-                                        let val = ca.value;
-                                        if (ca.field?.type === 'PASSWORD' && val) {
-                                            val = '••••••••';
-                                        }
                                         return renderDetailRow(ca.field?.name || 'Custom Field', val);
                                     })}
                                 </View>
@@ -583,67 +579,14 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
                     {activeTab === 'statutory' && (
                         <View>
-                            <View style={tw`flex-row items-center gap-2 mb-4`}>
-                                <CreditCard size={18} color="#8b5cf6" />
-                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white`}>Statutory Details</Text>
-                            </View>
-                            {renderEditableDetailRow('UAN (PROVIDENT FUND)', profile.statutory?.uanNumber, formUan, setFormUan, 'UAN Number')}
-                            {renderEditableDetailRow('ESIC NUMBER', profile.statutory?.esicNumber, formEsic, setFormEsic, 'ESIC Number')}
-                            {renderEditableDetailRow('PAN NUMBER', profile.statutory?.panNumber, formPan, setFormPan, 'PAN Card Number')}
-                            {renderEditableDetailRow('AADHAAR NUMBER', profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, 'Aadhaar Card Number')}
-
-                            <View style={tw`flex-row items-center gap-2 mt-6 mb-4`}>
-                                <Briefcase size={18} color="#8b5cf6" />
-                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white`}>Bank Account</Text>
-                            </View>
-                            
-                            {isEditing ? (
-                                <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5 gap-3.5`}>
-                                    <View>
-                                        <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-1.5`}>Bank Name</Text>
-                                        <TextInput
-                                            style={tw`w-full px-3 py-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-9`}
-                                            value={formBankName}
-                                            onChangeText={setFormBankName}
-                                            placeholder="e.g. UCO Bank"
-                                            placeholderTextColor="#94a3b8"
-                                        />
-                                    </View>
-                                    <View>
-                                        <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-1.5`}>Account Number</Text>
-                                        <TextInput
-                                            style={tw`w-full px-3 py-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-9`}
-                                            value={formAccountNumber}
-                                            onChangeText={setFormAccountNumber}
-                                            placeholder="Bank Account Number"
-                                            placeholderTextColor="#94a3b8"
-                                            keyboardType="number-pad"
-                                        />
-                                    </View>
-                                    <View>
-                                        <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-1.5`}>IFSC Code</Text>
-                                        <TextInput
-                                            style={tw`w-full px-3 py-2 bg-white dark:bg-[#1e293b] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-9`}
-                                            value={formIfscCode}
-                                            onChangeText={setFormIfscCode}
-                                            placeholder="IFSC Code"
-                                            placeholderTextColor="#94a3b8"
-                                            autoCapitalize="characters"
-                                        />
-                                    </View>
-                                </View>
-                            ) : (
-                                <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
-                                    <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-0.5`}>Bank Name</Text>
-                                    <Text style={tw`text-sm font-bold text-gray-800 dark:text-white mb-3`}>{profile.bank?.bankName || 'N/A'}</Text>
-                                    
-                                    <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-0.5`}>Account Number</Text>
-                                    <Text style={tw`text-sm font-bold text-gray-800 dark:text-white mb-3`}>{profile.bank?.accountNumber || 'N/A'}</Text>
-                                    
-                                    <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-0.5`}>IFSC Code</Text>
-                                    <Text style={tw`text-sm font-bold text-gray-800 dark:text-white`}>{profile.bank?.ifscCode || 'N/A'}</Text>
-                                </View>
-                            )}
+                            <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory Details</Text>
+                            {renderDetailRow('PAN Card', profile.statutory?.panNumber)}
+                            {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber)}
+                            {renderDetailRow('UAN (PF)', profile.statutory?.uanNumber)}
+                            {renderDetailRow('ESIC Number', profile.statutory?.esicNumber)}
+                            {renderDetailRow('Bank Name', profile.bank?.bankName)}
+                            {renderDetailRow('IFSC Code', profile.bank?.ifscCode)}
+                            {renderDetailRow('Account Number', profile.bank?.accountNumber)}
                         </View>
                     )}
 
