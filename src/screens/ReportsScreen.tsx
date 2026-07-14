@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { FileText, TrendingUp, Users, DollarSign, Calendar, Clock, ChevronDown, Check } from 'lucide-react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
@@ -86,7 +86,7 @@ export default function ReportsScreen({ navigation }: any) {
         if (!attendanceData || attendanceData.length === 0) {
             return (
                 <View style={tw`h-40 justify-center items-center`}>
-                    <Text style={tw`text-xs text-gray-405`}>No attendance data available</Text>
+                    <Text style={tw`text-xs text-gray-400`}>No attendance data available</Text>
                 </View>
             );
         }
@@ -97,7 +97,7 @@ export default function ReportsScreen({ navigation }: any) {
         );
 
         return (
-            <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
+            <View style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
                 <Text style={tw`text-sm font-black text-gray-900 dark:text-white mb-4`}>Monthly Attendance</Text>
                 
                 <View style={tw`flex-row h-40 items-end justify-between px-2`}>
@@ -138,7 +138,7 @@ export default function ReportsScreen({ navigation }: any) {
         if (!payrollData || payrollData.length === 0) {
             return (
                 <View style={tw`h-40 justify-center items-center`}>
-                    <Text style={tw`text-xs text-gray-405`}>No payroll data available</Text>
+                    <Text style={tw`text-xs text-gray-400`}>No payroll data available</Text>
                 </View>
             );
         }
@@ -154,7 +154,7 @@ export default function ReportsScreen({ navigation }: any) {
         let accumulatedPercent = 0;
 
         return (
-            <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
+            <View style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
                 <Text style={tw`text-sm font-black text-gray-900 dark:text-white mb-4`}>Department Payroll</Text>
                 
                 <View style={tw`flex-row items-center justify-between`}>
@@ -247,7 +247,7 @@ export default function ReportsScreen({ navigation }: any) {
                     
                     <TouchableOpacity
                         onPress={() => setShowDropdown(true)}
-                        style={tw`flex-row items-center gap-2 px-3.5 py-2 bg-white dark:bg-[#12112b] border border-gray-100 dark:border-white/5 rounded-2xl shadow-sm`}
+                        style={tw`flex-row items-center gap-2 px-3.5 py-2 bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-white/5 rounded-2xl shadow-sm`}
                     >
                         <Calendar size={14} color="#8b5cf6" />
                         <Text style={tw`text-[11px] font-bold text-gray-800 dark:text-white`}>
@@ -263,7 +263,7 @@ export default function ReportsScreen({ navigation }: any) {
                     <View>
                         
                         {/* Payroll Metric Card */}
-                        <View style={tw`w-full bg-white dark:bg-[#12112b] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}>
+                        <View style={tw`w-full bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}>
                             <View style={tw`flex-row justify-between items-center mb-3`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 uppercase tracking-wider`}>Total Payroll</Text>
                                 <View style={tw`p-2 bg-green-50 dark:bg-green-950/20 rounded-xl`}>
@@ -283,7 +283,7 @@ export default function ReportsScreen({ navigation }: any) {
 
                         {/* Attendance & Leaves Metric Cards */}
                         <View style={tw`flex-row justify-between mb-6`}>
-                            <View style={tw`w-[47%] bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
+                            <View style={tw`w-[48%] bg-white dark:bg-[#4c1d95] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
                                 <View style={tw`flex-row justify-between items-center mb-3`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 uppercase tracking-wider`}>Avg. Attendance</Text>
                                     <View style={tw`p-2 bg-blue-50 dark:bg-blue-950/20 rounded-xl`}>
@@ -298,7 +298,7 @@ export default function ReportsScreen({ navigation }: any) {
                                 </Text>
                             </View>
 
-                            <View style={tw`w-[47%] bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
+                            <View style={tw`w-[48%] bg-white dark:bg-[#4c1d95] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
                                 <View style={tw`flex-row justify-between items-center mb-3`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 uppercase tracking-wider`}>Pending Leaves</Text>
                                     <View style={tw`p-2 bg-amber-50 dark:bg-amber-950/20 rounded-xl`}>
@@ -320,56 +320,58 @@ export default function ReportsScreen({ navigation }: any) {
                         {/* Payroll Chart */}
                         {renderPayrollChart()}
 
-                        {/* Report Export Center */}
-                        <Text style={tw`text-sm font-black text-gray-900 dark:text-white mb-4`}>Generate Reports</Text>
-                        
-                        <TouchableOpacity
-                            onPress={() => handleDownloadReport('/reports/export/attendance', 'Attendance-Report.csv')}
-                            style={tw`bg-white dark:bg-[#12112b] p-4 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm flex-row items-center justify-between mb-4`}
-                        >
-                            <View style={tw`flex-row items-center`}>
-                                <View style={tw`p-2.5 bg-blue-50 dark:bg-blue-950/20 rounded-2xl mr-3`}>
-                                    <FileText size={20} color="#3b82f6" />
+                        {/* Report Export Center inside a purple banner container matching web */}
+                        <View style={tw`bg-[#8b5cf6] p-5 rounded-3xl mb-6 shadow-sm`}>
+                            <Text style={tw`text-sm font-black text-white mb-4`}>Generate Reports</Text>
+                            
+                            <TouchableOpacity
+                                onPress={() => handleDownloadReport('/reports/export/attendance', 'Attendance-Report.csv')}
+                                style={tw`bg-white/10 p-4 rounded-3xl border border-white/5 shadow-sm flex-row items-center justify-between mb-4`}
+                            >
+                                <View style={tw`flex-row items-center`}>
+                                    <View style={tw`p-2.5 bg-white/20 rounded-2xl mr-3`}>
+                                        <FileText size={20} color="#fff" />
+                                    </View>
+                                    <View>
+                                        <Text style={tw`text-sm font-bold text-white`}>Monthly Attendance</Text>
+                                        <Text style={tw`text-xs text-purple-100 mt-0.5`}>Download CSV</Text>
+                                    </View>
                                 </View>
-                                <View>
-                                    <Text style={tw`text-sm font-bold text-gray-800 dark:text-white`}>Monthly Attendance</Text>
-                                    <Text style={tw`text-xs text-gray-400 mt-0.5`}>Download CSV</Text>
-                                </View>
-                            </View>
-                            <TrendingUp size={16} color="#94a3b8" />
-                        </TouchableOpacity>
+                                <TrendingUp size={16} color="#fff" style={tw`opacity-70`} />
+                            </TouchableOpacity>
 
-                        <TouchableOpacity
-                            onPress={() => handleDownloadReport('/reports/export/salary', 'Salary-Register.csv')}
-                            style={tw`bg-white dark:bg-[#12112b] p-4 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm flex-row items-center justify-between mb-4`}
-                        >
-                            <View style={tw`flex-row items-center`}>
-                                <View style={tw`p-2.5 bg-green-50 dark:bg-green-950/20 rounded-2xl mr-3`}>
-                                    <DollarSign size={20} color="#22c55e" />
+                            <TouchableOpacity
+                                onPress={() => handleDownloadReport('/reports/export/salary', 'Salary-Register.csv')}
+                                style={tw`bg-white/10 p-4 rounded-3xl border border-white/5 shadow-sm flex-row items-center justify-between mb-4`}
+                            >
+                                <View style={tw`flex-row items-center`}>
+                                    <View style={tw`p-2.5 bg-white/20 rounded-2xl mr-3`}>
+                                        <DollarSign size={20} color="#fff" />
+                                    </View>
+                                    <View>
+                                        <Text style={tw`text-sm font-bold text-white`}>Monthly Salary Register</Text>
+                                        <Text style={tw`text-xs text-purple-100 mt-0.5`}>Download CSV</Text>
+                                    </View>
                                 </View>
-                                <View>
-                                    <Text style={tw`text-sm font-bold text-gray-800 dark:text-white`}>Monthly Salary Register</Text>
-                                    <Text style={tw`text-xs text-gray-400 mt-0.5`}>Download CSV</Text>
-                                </View>
-                            </View>
-                            <TrendingUp size={16} color="#94a3b8" />
-                        </TouchableOpacity>
+                                <TrendingUp size={16} color="#fff" style={tw`opacity-70`} />
+                            </TouchableOpacity>
 
-                        <TouchableOpacity
-                            onPress={() => handleDownloadReport('/reports/export/leave', 'Leave-Balance.xlsx')}
-                            style={tw`bg-white dark:bg-[#12112b] p-4 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm flex-row items-center justify-between`}
-                        >
-                            <View style={tw`flex-row items-center`}>
-                                <View style={tw`p-2.5 bg-amber-50 dark:bg-amber-950/20 rounded-2xl mr-3`}>
-                                    <Calendar size={20} color="#f59e0b" />
+                            <TouchableOpacity
+                                onPress={() => handleDownloadReport('/reports/export/leave', 'Leave-Balance.xlsx')}
+                                style={tw`bg-white/10 p-4 rounded-3xl border border-white/5 shadow-sm flex-row items-center justify-between`}
+                            >
+                                <View style={tw`flex-row items-center`}>
+                                    <View style={tw`p-2.5 bg-white/20 rounded-2xl mr-3`}>
+                                        <Calendar size={20} color="#fff" />
+                                    </View>
+                                    <View>
+                                        <Text style={tw`text-sm font-bold text-white`}>Monthly Leave Balance</Text>
+                                        <Text style={tw`text-xs text-purple-100 mt-0.5`}>Download Excel</Text>
+                                    </View>
                                 </View>
-                                <View>
-                                    <Text style={tw`text-sm font-bold text-gray-800 dark:text-white`}>Monthly Leave Balance</Text>
-                                    <Text style={tw`text-xs text-gray-400 mt-0.5`}>Download Excel</Text>
-                                </View>
-                            </View>
-                            <TrendingUp size={16} color="#94a3b8" />
-                        </TouchableOpacity>
+                                <TrendingUp size={16} color="#fff" style={tw`opacity-70`} />
+                            </TouchableOpacity>
+                        </View>
 
                     </View>
                 )}
@@ -383,35 +385,33 @@ export default function ReportsScreen({ navigation }: any) {
                 animationType="fade"
                 onRequestClose={() => setShowDropdown(false)}
             >
-                <TouchableOpacity
-                    activeOpacity={1}
-                    onPress={() => setShowDropdown(false)}
-                    style={tw`flex-1 bg-black/60 justify-end`}
-                >
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}>
-                        <Text style={tw`text-base font-black text-gray-900 dark:text-white mb-4`}>Select Time Period</Text>
-                        {options.map((opt) => (
-                            <TouchableOpacity
-                                key={opt.value}
-                                onPress={() => {
-                                    setPeriod(opt.value);
-                                    setShowDropdown(false);
-                                }}
-                                style={tw`flex-row items-center justify-between py-3.5 border-b border-gray-50 dark:border-white/5 last:border-0`}
-                            >
-                                <View style={tw`flex-row items-center gap-3`}>
-                                    <opt.icon size={18} color={period === opt.value ? '#8b5cf6' : '#94a3b8'} />
-                                    <Text style={tw`text-sm font-bold ${period === opt.value ? 'text-[#8b5cf6]' : 'text-gray-700 dark:text-gray-300'}`}>
-                                        {opt.label}
-                                    </Text>
-                                </View>
-                                {period === opt.value && (
-                                    <Check size={16} color="#8b5cf6" />
-                                )}
-                            </TouchableOpacity>
-                        ))}
+                <TouchableWithoutFeedback onPress={() => setShowDropdown(false)}>
+                    <View style={tw`flex-1 justify-center items-center bg-black/60 p-4`}>
+                        <View style={tw`bg-white dark:bg-[#4c1d95] p-6 rounded-3xl border border-gray-200 dark:border-white/5 shadow-2xl w-full max-w-sm`}>
+                            <Text style={tw`text-base font-black text-gray-900 dark:text-white mb-4`}>Select Time Period</Text>
+                            {options.map((opt) => (
+                                <TouchableOpacity
+                                    key={opt.value}
+                                    onPress={() => {
+                                        setPeriod(opt.value);
+                                        setShowDropdown(false);
+                                    }}
+                                    style={tw`flex-row items-center justify-between py-3.5 border-b border-gray-50 dark:border-white/5 last:border-0`}
+                                >
+                                    <View style={tw`flex-row items-center gap-3`}>
+                                        <opt.icon size={18} color={period === opt.value ? '#8b5cf6' : '#94a3b8'} />
+                                        <Text style={tw`text-sm font-bold ${period === opt.value ? 'text-[#8b5cf6] dark:text-white' : 'text-gray-700 dark:text-gray-300'}`}>
+                                            {opt.label}
+                                        </Text>
+                                    </View>
+                                    {period === opt.value && (
+                                        <Check size={16} color="#8b5cf6" />
+                                    )}
+                                </TouchableOpacity>
+                            ))}
+                        </View>
                     </View>
-                </TouchableOpacity>
+                </TouchableWithoutFeedback>
             </Modal>
 
         </View>
