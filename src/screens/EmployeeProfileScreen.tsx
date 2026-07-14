@@ -109,8 +109,8 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     const profile = employee.employeeProfile || {};
     const initials = employee.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2);
 
-    const renderDetailRow = (label: string, value: string | null | undefined) => (
-        <View style={tw`flex-row justify-between py-3 border-b border-gray-50 dark:border-slate-700/50`}>
+    const renderDetailRow = (label: string, value: string | null | undefined, key?: any) => (
+        <View key={key} style={tw`flex-row justify-between py-3 border-b border-gray-50 dark:border-slate-700/50`}>
             <Text style={tw`text-xs font-bold text-gray-400 uppercase`}>{label}</Text>
             <Text style={tw`text-xs font-semibold text-gray-800 dark:text-white`}>{value || 'N/A'}</Text>
         </View>
@@ -215,7 +215,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                             );
                                         }
 
-                                        return renderDetailRow(ca.field?.name || 'Custom Field', val);
+                                        return renderDetailRow(ca.field?.name || 'Custom Field', val, ca.id);
                                     })}
                                 </View>
                             )}
@@ -261,12 +261,12 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                     {activeTab === 'statutory' && (
                         <View>
                             <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory Details</Text>
-                            {renderDetailRow('PAN Card', profile.statutory?.panNumber)}
-                            {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber)}
-                            {renderDetailRow('UAN (PF)', profile.statutory?.uanNumber)}
-                            {renderDetailRow('ESIC Number', profile.statutory?.esicNumber)}
+                            {renderDetailRow('PAN Card', profile.statutory?.pan)}
+                            {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaar)}
+                            {renderDetailRow('UAN (PF)', profile.statutory?.uan)}
+                            {renderDetailRow('ESIC Number', profile.statutory?.esic)}
                             {renderDetailRow('Bank Name', profile.bank?.bankName)}
-                            {renderDetailRow('IFSC Code', profile.bank?.ifscCode)}
+                            {renderDetailRow('IFSC Code', profile.bank?.ifsc)}
                             {renderDetailRow('Account Number', profile.bank?.accountNumber)}
                         </View>
                     )}
