@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../utils/api';
+import api, { setAuthFailureCallback } from '../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type UserRole = "HR_ADMIN" | "EMPLOYEE" | "SYSTEM_ADMIN" | "MANAGER";
@@ -32,6 +32,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Initialize from Async Storage to persist login across sessions
     useEffect(() => {
+        // Register auth failure callback to reset context state when session expires
+        setAuthFailureCallback(() => {
+            setUser(null);
+        });
+
         const checkSession = async () => {
             try {
                 const storedUser = await AsyncStorage.getItem('encalm_user');

@@ -248,7 +248,7 @@ export default function TeamScreen({ navigation }: any) {
                 <View style={tw`px-4 pt-4`}>
                     <TouchableOpacity
                         onPress={() => setShowCreateModal(true)}
-                        style={tw`flex-row items-center justify-center gap-2 p-4 bg-[#f5f3ff] dark:bg-[#12112b] border border-dashed border-[#c4b5fd] dark:border-white/5 rounded-3xl`}
+                        style={tw`flex-row items-center justify-center gap-2 p-4 bg-white dark:bg-[#4c1d95] border border-dashed border-[#8b5cf6] dark:border-white/10 rounded-3xl shadow-sm`}
                     >
                         <Plus size={18} color="#8b5cf6" />
                         <Text style={tw`text-[#7c3aed] dark:text-[#c4b5fd] font-bold text-xs`}>Create New Team</Text>
@@ -268,56 +268,74 @@ export default function TeamScreen({ navigation }: any) {
                 </View>
             ) : (
                 <ScrollView style={tw`flex-grow p-4`} contentContainerStyle={tw`pb-12`}>
-                    {teams.map((team) => (
-                        <View 
-                            key={team.id}
-                            style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}
-                        >
-                            <View style={tw`flex-row justify-between items-start mb-2`}>
-                                <View style={tw`flex-1 mr-2`}>
-                                    <Text style={tw`font-bold text-base text-gray-900 dark:text-white`}>{team.name}</Text>
-                                    <Text style={tw`text-xs text-gray-500 mt-1`}>{team.description || 'No description provided.'}</Text>
+                    {teams.map((team) => {
+                        const managerInit = (team.manager?.name || 'U').charAt(0);
+                        return (
+                            <View 
+                                key={team.id}
+                                style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-150 dark:border-white/5 shadow-md`}
+                            >
+                                {/* Top Section: Suitcase Icon + Title/Description + 3-dots */}
+                                <View style={tw`flex-row justify-between items-start mb-4`}>
+                                    <View style={tw`flex-row items-center flex-1 mr-2`}>
+                                        <View style={tw`w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center mr-3 shadow-sm`}>
+                                            <Briefcase size={20} color="#3b82f6" />
+                                        </View>
+                                        <View style={tw`flex-1`}>
+                                            <Text style={tw`font-bold text-gray-900 dark:text-white text-base`}>{team.name}</Text>
+                                            <Text style={tw`text-xs text-gray-500 dark:text-gray-300 font-medium mt-0.5`}>
+                                                {team.description || 'No description provided.'}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                    {isAdmin && (
+                                        <TouchableOpacity 
+                                            onPress={() => {
+                                                setActiveTeam(team);
+                                                setShowOptionsSheet(true);
+                                            }}
+                                            style={tw`p-1.5 bg-gray-50 dark:bg-white/5 rounded-xl`}
+                                        >
+                                            <MoreVertical size={18} color="#94a3b8" />
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
-                                {isAdmin && (
-                                    <TouchableOpacity 
+
+                                {/* Middle Section: Manager Card Box */}
+                                <View style={tw`p-3 bg-gray-50 dark:bg-white/5 rounded-2xl flex-row items-center gap-3 border border-gray-100 dark:border-white/5`}>
+                                    <View style={tw`w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center`}>
+                                        <Text style={tw`text-white font-bold text-sm`}>{managerInit}</Text>
+                                    </View>
+                                    <View style={tw`flex-1`}>
+                                        <Text style={tw`text-[9px] font-black text-gray-400 dark:text-gray-300 tracking-wider uppercase`}>MANAGER</Text>
+                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                            {team.manager?.name || 'Unassigned'}
+                                        </Text>
+                                    </View>
+                                </View>
+                                
+                                {/* Bottom Section: Members Count + View Members button */}
+                                <View style={tw`flex-row justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-white/5`}>
+                                    <View style={tw`flex-row items-center gap-1.5`}>
+                                        <Users size={14} color="#64748b" />
+                                        <Text style={tw`text-xs text-gray-500 dark:text-gray-300 font-medium`}>
+                                            {team.members?.length || 0} Members
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity
                                         onPress={() => {
                                             setActiveTeam(team);
-                                            setShowOptionsSheet(true);
+                                            setShowRosterModal(true);
                                         }}
-                                        style={tw`p-1.5 bg-gray-50 dark:bg-white/5 rounded-xl`}
                                     >
-                                        <MoreVertical size={18} color="#94a3b8" />
+                                        <Text style={tw`text-xs text-purple-650 dark:text-[#c4b5fd] font-black`}>
+                                            View Members
+                                        </Text>
                                     </TouchableOpacity>
-                                )}
-                            </View>
-                            
-                            <View style={tw`flex-row justify-between items-center mt-4 pt-3 border-t border-gray-50 dark:border-white/5`}>
-                                <View style={tw`flex-row items-center gap-1.5`}>
-                                    <Users size={14} color="#64748b" />
-                                    <Text style={tw`text-xs text-gray-500 font-medium`}>
-                                        {team.members?.length || 0} Members
-                                    </Text>
                                 </View>
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setActiveTeam(team);
-                                        setShowRosterModal(true);
-                                    }}
-                                >
-                                    <Text style={tw`text-xs text-[#8b5cf6] dark:text-[#c4b5fd] font-bold`}>
-                                        View Members
-                                    </Text>
-                                </TouchableOpacity>
                             </View>
-
-                            <View style={tw`mt-2 pt-2 border-t border-gray-50 dark:border-white/5 flex-row justify-between items-center`}>
-                                <Text style={tw`text-xs text-gray-400`}>Manager</Text>
-                                <Text style={tw`text-xs text-gray-700 dark:text-gray-200 font-bold`}>
-                                    {team.manager?.name || 'Unassigned'}
-                                </Text>
-                            </View>
-                        </View>
-                    ))}
+                        );
+                    })}
                 </ScrollView>
             )}
 
@@ -339,7 +357,7 @@ export default function TeamScreen({ navigation }: any) {
                     >
                         <TouchableOpacity 
                             activeOpacity={1}
-                            style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}
+                            style={tw`bg-white dark:bg-[#1c1a45] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}
                         >
                             <View style={tw`flex-row justify-between items-center mb-4`}>
                                 <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Create New Team</Text>
@@ -408,7 +426,7 @@ export default function TeamScreen({ navigation }: any) {
                     >
                         <TouchableOpacity 
                             activeOpacity={1}
-                            style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}
+                            style={tw`bg-white dark:bg-[#1c1a45] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}
                         >
                             <View style={tw`flex-row justify-between items-center mb-4`}>
                                 <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Edit Team</Text>
@@ -526,7 +544,7 @@ export default function TeamScreen({ navigation }: any) {
                 onRequestClose={() => setShowDeleteConfirm(false)}
             >
                 <View style={tw`flex-1 bg-black/60 justify-center items-center p-6`}>
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-3xl border border-gray-200 dark:border-white/5 w-full max-w-sm text-center items-center shadow-2xl`}>
+                    <View style={tw`bg-white dark:bg-[#1c1a45] p-6 rounded-3xl border border-gray-250 dark:border-white/5 w-full max-w-sm text-center items-center shadow-2xl`}>
                         <View style={tw`w-16 h-16 mb-4 bg-rose-50 dark:bg-rose-500/10 rounded-full flex items-center justify-center`}>
                             <Trash2 size={32} color="#ef4444" />
                         </View>
@@ -560,7 +578,7 @@ export default function TeamScreen({ navigation }: any) {
                 onRequestClose={() => setShowRosterModal(false)}
             >
                 <View style={tw`flex-1 bg-black/60 justify-end`}>
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 max-h-[80%]`}>
+                    <View style={tw`bg-white dark:bg-[#1c1a45] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 max-h-[80%]`}>
                         <View style={tw`flex-row justify-between items-center mb-4`}>
                             <View>
                                 <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>
@@ -683,7 +701,7 @@ export default function TeamScreen({ navigation }: any) {
                     style={tw`flex-1`}
                 >
                     <View style={tw`flex-1 bg-black/60 justify-end`}>
-                        <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 h-[85%] flex-col`}>
+                        <View style={tw`bg-white dark:bg-[#1c1a45] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 h-[85%] flex-col`}>
                             <View style={tw`flex-row justify-between items-center mb-4`}>
                                 <View>
                                     <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Add Members</Text>

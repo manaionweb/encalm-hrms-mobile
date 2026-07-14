@@ -22,6 +22,11 @@ const api = axios.create({
 });
 
 let isRefreshing = false;
+let authFailureCallback: (() => void) | null = null;
+
+export const setAuthFailureCallback = (callback: () => void) => {
+    authFailureCallback = callback;
+};
 
 // Add a request interceptor to inject the auth token
 api.interceptors.request.use(
@@ -90,6 +95,10 @@ api.interceptors.response.use(
                 await AsyncStorage.removeItem('refreshToken');
                 await AsyncStorage.removeItem('tenantId');
                 await AsyncStorage.removeItem('encalm_user');
+
+                if (authFailureCallback) {
+                    authFailureCallback();
+                }
 
                 // Trigger navigation redirect through event or state reset if token fails
                 // In React Native, the Auth Provider state change will automatically route to Sign In
