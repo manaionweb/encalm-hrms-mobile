@@ -58,10 +58,11 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
         if (!user) return false;
         if (isAdmin) return true; // Admins access all
         
-        let userModules = user.accessibleModules || [];
-        if (userModules.length === 0) {
-            userModules = ['DASHBOARD', 'ATTENDANCE', 'LEAVE', 'MY_PROFILE'];
-        }
+        const employeeDefaultModules = ['DASHBOARD', 'ATTENDANCE', 'LEAVE', 'MY_PROFILE'];
+        const userModules = Array.from(new Set([
+            ...employeeDefaultModules,
+            ...(user.accessibleModules || [])
+        ]));
         return userModules.includes(moduleName);
     };
 

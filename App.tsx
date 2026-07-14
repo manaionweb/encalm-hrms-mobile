@@ -9,6 +9,29 @@ import tw from 'twrnc';
 import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import { Alert, Platform } from 'react-native';
+
+if (Platform.OS === 'web') {
+  Alert.alert = (title, message, buttons) => {
+    const formattedMessage = message ? `${title}\n\n${message}` : title;
+    if (buttons && buttons.length > 1) {
+      const result = window.confirm(formattedMessage);
+      if (result) {
+        const okButton = buttons[buttons.length - 1];
+        if (okButton && okButton.onPress) okButton.onPress();
+      } else {
+        const cancelButton = buttons[0];
+        if (cancelButton && cancelButton.onPress) cancelButton.onPress();
+      }
+    } else {
+      window.alert(formattedMessage);
+      if (buttons && buttons[0] && buttons[0].onPress) {
+        buttons[0].onPress();
+      }
+    }
+  };
+}
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
