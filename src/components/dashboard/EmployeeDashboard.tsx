@@ -132,7 +132,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
             <View style={tw`flex-row flex-wrap justify-between mb-6`}>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Attendance')}
-                    style={tw`w-[47%] bg-white dark:bg-[#12112b] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}
+                    style={tw`w-[47%] bg-white dark:bg-[#1a2235] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#374151]/50 shadow-sm`}
                 >
                     <View style={tw`flex-row justify-between items-center mb-3`}>
                         <View style={tw`p-2 bg-blue-50 dark:bg-[#1c1a45] rounded-xl`}>
@@ -148,7 +148,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
 
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Leave')}
-                    style={tw`w-[47%] bg-white dark:bg-[#12112b] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}
+                    style={tw`w-[47%] bg-white dark:bg-[#1a2235] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#374151]/50 shadow-sm`}
                 >
                     <View style={tw`flex-row justify-between items-center mb-3`}>
                         <View style={tw`p-2 bg-[#f5f3ff] dark:bg-[#1c1a45] rounded-xl`}>
@@ -160,7 +160,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                     <Text style={tw`text-sm font-bold text-gray-800 dark:text-white mt-0.5`}>{totalLeaves} Days</Text>
                 </TouchableOpacity>
 
-                <View style={tw`w-full bg-white dark:bg-[#12112b] p-4 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm`}>
+                <View style={tw`w-full bg-white dark:bg-[#1a2235] p-4 rounded-3xl border border-gray-100 dark:border-[#374151]/50 shadow-sm`}>
                     <View style={tw`flex-row justify-between items-center mb-3`}>
                         <View style={tw`p-2 bg-purple-50 dark:bg-[#1c1a45] rounded-xl`}>
                             <History size={18} color="#a855f7" />
@@ -202,7 +202,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
             </View>
 
             {/* RECENT ACTIVITY */}
-            <View style={tw`bg-white dark:bg-[#12112b] rounded-3xl p-5 border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
+            <View style={tw`bg-white dark:bg-[#1a2235] rounded-3xl p-5 border border-gray-100 dark:border-[#374151]/50 shadow-sm mb-6`}>
                 <View style={tw`flex-row justify-between items-center mb-4`}>
                     <Text style={tw`text-lg font-bold text-gray-800 dark:text-white`}>My Recent Activity</Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Attendance')}>

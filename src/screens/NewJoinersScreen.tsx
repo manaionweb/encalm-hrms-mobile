@@ -63,7 +63,7 @@ export default function NewJoinersScreen({ navigation }: any) {
         const isActive = (profile.status || 'Active') === 'Active';
 
         return (
-            <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm relative overflow-hidden`}>
+            <View style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-[#8b5cf6]/30 shadow-sm relative overflow-hidden`}>
                 <View style={tw`absolute top-0 left-0 w-1 h-full ${isActive ? 'bg-green-500' : 'bg-rose-500'}`} />
                 <View style={tw`flex-row justify-between items-start mb-4`}>
                     <View style={tw`flex-row gap-3 flex-1`}>
@@ -131,7 +131,7 @@ export default function NewJoinersScreen({ navigation }: any) {
                 </View>
 
                 {/* Search and Filters */}
-                <View style={tw`flex-row items-center bg-white dark:bg-[#12112b] border border-gray-100 dark:border-white/5 rounded-2xl px-3 py-1 mb-4 shadow-sm`}>
+                <View style={tw`flex-row items-center bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-[#8b5cf6]/30 rounded-2xl px-3 py-1 mb-4 shadow-sm`}>
                     <Search size={18} color="#94a3b8" style={tw`mr-2`} />
                     <TextInput
                         style={tw`flex-1 text-sm text-gray-800 dark:text-white h-10`}
@@ -146,7 +146,7 @@ export default function NewJoinersScreen({ navigation }: any) {
                 </View>
 
                 {showFilters && (
-                    <View style={tw`bg-white dark:bg-[#12112b] border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-4 shadow-sm flex-row justify-around`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-[#8b5cf6]/30 rounded-2xl p-4 mb-4 shadow-sm flex-row justify-around`}>
                         {['All', 'Active', 'Inactive'].map((status) => (
                             <TouchableOpacity
                                 key={status}
@@ -169,7 +169,7 @@ export default function NewJoinersScreen({ navigation }: any) {
                         </Text>
                     </View>
                 ) : filteredJoiners.length === 0 ? (
-                    <View style={tw`flex-1 justify-center items-center py-20 bg-white dark:bg-[#12112b] rounded-3xl border border-gray-100 dark:border-white/5 shadow-inner mt-4 h-64`}>
+                    <View style={tw`flex-1 justify-center items-center py-20 bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-[#8b5cf6]/30 shadow-inner mt-4 h-64`}>
                         <Calendar size={48} color="#cbd5e1" style={tw`mb-4 opacity-50`} />
                         <Text style={tw`text-lg font-bold text-gray-800 dark:text-white`}>No Employees Found</Text>
                         <Text style={tw`text-gray-500 dark:text-gray-400 mt-2 text-xs text-center px-4`}>

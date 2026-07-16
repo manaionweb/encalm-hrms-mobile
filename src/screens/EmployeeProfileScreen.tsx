@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, useColorScheme, TextInput, Linking, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, useColorScheme, TextInput, Linking, Modal, KeyboardAvoidingView, Platform } from 'react-native';
 import { ArrowLeft, User, CreditCard, Briefcase, Calendar, Users, FileText, Trash2, Upload, Eye, X } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Print from 'expo-print';
@@ -345,7 +345,12 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     const documentFields = customAssignments.filter(ca => ca.field?.category === 'DOCUMENT_VAULT');
 
     return (
-        <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
+        <KeyboardAvoidingView 
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
+            <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
             
             {/* Header */}
             <View style={[
@@ -758,6 +763,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 </View>
             </Modal>
 
-        </View>
+            </View>
+        </KeyboardAvoidingView>
     );
 }

@@ -118,7 +118,7 @@ export default function RegularizationsScreen({ navigation }: any) {
 
             {/* Header */}
             <View style={[
-                tw`flex-row items-center px-4 pb-4 bg-white dark:bg-[#12112b] border-b border-gray-100 dark:border-white/5`,
+                tw`flex-row items-center px-4 pb-4 bg-white dark:bg-[#4c1d95] border-b border-gray-100 dark:border-[#8b5cf6]/30`,
                 { paddingTop: insets.top + 16 }
             ]}>
                 {navigation.canGoBack() && (
@@ -131,7 +131,7 @@ export default function RegularizationsScreen({ navigation }: any) {
 
             {/* Search Bar */}
             <View style={tw`px-4 pt-4`}>
-                <View style={tw`flex-row items-center bg-white dark:bg-[#12112b] border border-gray-100 dark:border-white/5 rounded-2xl px-3 py-1 mb-4 shadow-sm`}>
+                <View style={tw`flex-row items-center bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-[#8b5cf6]/30 rounded-2xl px-3 py-1 mb-4 shadow-sm`}>
                     <Search size={18} color="#94a3b8" style={tw`mr-2`} />
                     <TextInput
                         style={tw`flex-1 text-sm text-gray-800 dark:text-white h-10`}
@@ -170,7 +170,7 @@ export default function RegularizationsScreen({ navigation }: any) {
                         return (
                             <View
                                 key={req.id}
-                                style={tw`bg-white dark:bg-[#12112b] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}
+                                style={tw`bg-white dark:bg-[#4c1d95] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#8b5cf6]/30 shadow-sm`}
                             >
                                 <View style={tw`flex-row justify-between mb-3`}>
                                     <View>
@@ -237,7 +237,7 @@ export default function RegularizationsScreen({ navigation }: any) {
                 onRequestClose={() => setRejectingId(null)}
             >
                 <View style={tw`flex-1 justify-end bg-black/60`}>
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] p-6 rounded-t-3xl border-t border-gray-200 dark:border-[#8b5cf6]/30`}>
                         <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-2`}>Reject Request</Text>
                         <Text style={tw`text-xs text-gray-500 mb-4`}>Please provide a reason for rejecting this regularization request.</Text>
 

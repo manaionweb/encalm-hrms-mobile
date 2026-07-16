@@ -96,8 +96,8 @@ export default function NotificationsScreen({ navigation }: any) {
                 }}
                 style={tw`p-4 rounded-3xl mb-4 border ${
                     item.unread 
-                        ? 'bg-white dark:bg-[#12112b] border-gray-150 dark:border-white/5' 
-                        : 'bg-white/50 dark:bg-[#12112b]/40 border-gray-100 dark:border-white/5'
+                        ? 'bg-white dark:bg-[#4c1d95] border-gray-150 dark:border-[#8b5cf6]/30' 
+                        : 'bg-white/50 dark:bg-[#4c1d95]/40 border-gray-100 dark:border-[#8b5cf6]/30'
                 } shadow-sm`}
             >
                 <View style={tw`flex-row items-start`}>
@@ -204,7 +204,7 @@ export default function NotificationsScreen({ navigation }: any) {
                 
                 <TouchableOpacity
                     onPress={toggleSelectAll}
-                    style={tw`px-3 py-1.5 bg-white dark:bg-[#12112b] border border-gray-100 dark:border-white/5 rounded-xl shadow-sm`}
+                    style={tw`px-3 py-1.5 bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-[#8b5cf6]/30 rounded-xl shadow-sm`}
                 >
                     <Text style={tw`text-[10px] font-bold text-gray-700 dark:text-gray-300`}>
                         {selectedIds.length > 0 && selectedIds.length === filteredNotifications.length ? "Deselect All" : "Select All"}

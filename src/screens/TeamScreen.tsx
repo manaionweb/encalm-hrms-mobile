@@ -489,7 +489,7 @@ export default function TeamScreen({ navigation }: any) {
                     activeOpacity={1}
                     onPress={() => setShowOptionsSheet(false)}
                 >
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] p-6 rounded-t-3xl border-t border-gray-200 dark:border-[#8b5cf6]/30`}>
                         <Text style={tw`text-sm font-bold text-gray-400 mb-4 text-center`}>Team Actions</Text>
                         
                         <TouchableOpacity
@@ -829,7 +829,7 @@ export default function TeamScreen({ navigation }: any) {
                 onRequestClose={() => setShowAccessControlModal(false)}
             >
                 <View style={tw`flex-1 bg-black/60 justify-end`}>
-                    <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 max-h-[85%]`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] p-6 rounded-t-3xl border-t border-gray-200 dark:border-[#8b5cf6]/30 max-h-[85%]`}>
                         <View style={tw`flex-row justify-between items-center mb-4`}>
                             <View>
                                 <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Access Control</Text>

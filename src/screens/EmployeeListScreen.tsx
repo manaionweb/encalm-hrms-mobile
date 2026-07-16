@@ -17,6 +17,7 @@ export default function EmployeeListScreen({ navigation }: any) {
     const [showFilters, setShowFilters] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [selectedEmployeeForActions, setSelectedEmployeeForActions] = useState<any>(null);
+    const [employeeToDelete, setEmployeeToDelete] = useState<any | null>(null);
 
     const fetchEmployees = async () => {
         try {
@@ -64,28 +65,8 @@ export default function EmployeeListScreen({ navigation }: any) {
         }
     };
 
-    const handleDeleteEmployee = async (id: number, name: string) => {
-        Alert.alert(
-            "Delete Employee",
-            `Are you sure you want to delete ${name}? This action cannot be undone.`,
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                        try {
-                            await api.delete(`/employee/${id}`);
-                            Alert.alert("Success", `${name} deleted successfully!`);
-                            fetchEmployees();
-                        } catch (error: any) {
-                            console.error('Delete error:', error);
-                            Alert.alert("Error", error.response?.data?.message || 'Failed to delete employee');
-                        }
-                    }
-                }
-            ]
-        );
+    const handleDeleteEmployee = (emp: any) => {
+        setEmployeeToDelete(emp);
     };
 
     const renderEmployeeCard = ({ item }: { item: any }) => {
@@ -386,7 +367,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                                                 }}
                                                 style={tw`w-full flex-row items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-transparent hover:border-[#8b5cf6]/30`}
                                             >
-                                                <View style={tw`p-3 bg-white dark:bg-[#12112b] rounded-xl shadow-sm`}>
+                                                <View style={tw`p-3 bg-white dark:bg-[#1a2235] rounded-xl shadow-sm`}>
                                                     <User size={20} color="#8b5cf6" />
                                                 </View>
                                                 <View>
@@ -405,7 +386,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                                                     }}
                                                     style={tw`w-full flex-row items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-white/5 border border-transparent hover:border-[#8b5cf6]/30`}
                                                 >
-                                                    <View style={tw`p-3 bg-white dark:bg-[#12112b] rounded-xl shadow-sm`}>
+                                                    <View style={tw`p-3 bg-white dark:bg-[#1a2235] rounded-xl shadow-sm`}>
                                                         <Pencil size={20} color="#f59e0b" />
                                                     </View>
                                                     <View>
@@ -421,11 +402,11 @@ export default function EmployeeListScreen({ navigation }: any) {
                                                     onPress={() => {
                                                         const emp = selectedEmployeeForActions;
                                                         setSelectedEmployeeForActions(null);
-                                                        handleDeleteEmployee(emp.id, emp.name);
-                                                    }}
+                                                         handleDeleteEmployee(emp);
+                                                     }}
                                                     style={tw`w-full flex-row items-center gap-4 p-4 rounded-2xl bg-rose-500/5 border border-transparent hover:border-rose-500/30`}
                                                 >
-                                                    <View style={tw`p-3 bg-white dark:bg-[#12112b] rounded-xl shadow-sm`}>
+                                                    <View style={tw`p-3 bg-white dark:bg-[#1a2235] rounded-xl shadow-sm`}>
                                                         <Trash2 size={20} color="#f43f5e" />
                                                     </View>
                                                     <View>
@@ -441,6 +422,69 @@ export default function EmployeeListScreen({ navigation }: any) {
                         </TouchableWithoutFeedback>
                     </View>
                 </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* Custom Styled Delete Confirmation Modal (Web-aligned) */}
+            <Modal
+                visible={!!employeeToDelete}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setEmployeeToDelete(null)}
+            >
+                <View style={tw`flex-1 justify-center items-center bg-black/70 px-6`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-150 dark:border-white/10 text-center relative overflow-hidden`}>
+                        {/* Top red stripe */}
+                        <View style={tw`absolute top-0 left-0 right-0 h-1.5 bg-red-500`} />
+
+                        {/* Trash icon circle with red glow */}
+                        <View style={tw`w-18 h-18 bg-red-100 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 mt-2`}>
+                            <Trash2 size={32} color="#ef4444" />
+                        </View>
+
+                        {/* Title */}
+                        <Text style={tw`text-xl font-bold text-gray-800 dark:text-white mb-2`}>
+                            Delete Employee?
+                        </Text>
+
+                        {/* Body */}
+                        <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mb-6 leading-relaxed`}>
+                            Are you sure you want to delete <Text style={tw`font-bold text-gray-700 dark:text-gray-200`}>{employeeToDelete?.name}</Text>? This action cannot be undone and will permanently remove all associated data.
+                        </Text>
+
+                        {/* Action buttons */}
+                        <View style={tw`flex-row gap-3`}>
+                            <TouchableOpacity
+                                onPress={() => setEmployeeToDelete(null)}
+                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-white/5 rounded-2xl items-center justify-center`}
+                            >
+                                <Text style={tw`text-xs font-bold text-gray-700 dark:text-gray-300`}>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    if (!employeeToDelete) return;
+                                    const id = employeeToDelete.id;
+                                    const name = employeeToDelete.name;
+                                    setEmployeeToDelete(null);
+                                    try {
+                                        await api.delete(`/employee/${id}`);
+                                        Alert.alert("Success", `${name} deleted successfully!`);
+                                        fetchEmployees();
+                                    } catch (error: any) {
+                                        console.error('Delete error:', error);
+                                        Alert.alert("Error", error.response?.data?.message || 'Failed to delete employee');
+                                    }
+                                }}
+                                style={tw`flex-1 py-3.5 bg-red-500 rounded-2xl items-center justify-center shadow-lg shadow-red-500/20`}
+                            >
+                                <Text style={tw`text-xs font-bold text-white`}>
+                                    Yes, Delete
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </Modal>
         </View>
     );

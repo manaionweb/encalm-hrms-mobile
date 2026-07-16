@@ -37,10 +37,21 @@ export default function CustomHeader({ navigation, title, showBackButton, subtit
         return () => clearInterval(interval);
     }, []);
 
+    const isDashboard = title.toLowerCase() === 'dashboard';
     const hasDrawer = navigation && typeof navigation.openDrawer === 'function';
     const canGoBack = showBackButton !== undefined 
         ? showBackButton 
-        : (hasDrawer ? false : (navigation && typeof navigation.canGoBack === 'function' ? navigation.canGoBack() : false));
+        : !isDashboard;
+
+    const handleBack = () => {
+        if (navigation) {
+            if (typeof navigation.canGoBack === 'function' && navigation.canGoBack()) {
+                navigation.goBack();
+            } else if (typeof navigation.navigate === 'function') {
+                navigation.navigate('Dashboard');
+            }
+        }
+    };
 
     return (
         <View style={[
@@ -56,7 +67,7 @@ export default function CustomHeader({ navigation, title, showBackButton, subtit
             {/* Left: Drawer Toggle or Back Button */}
             {canGoBack ? (
                 <TouchableOpacity
-                    onPress={() => navigation.goBack()}
+                    onPress={handleBack}
                     style={tw`p-2.5 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl shadow-sm`}
                 >
                     <ArrowLeft size={20} color={isDark ? '#c4b5fd' : '#8b5cf6'} />

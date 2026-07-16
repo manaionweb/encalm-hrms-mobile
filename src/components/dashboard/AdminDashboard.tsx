@@ -69,7 +69,7 @@ export default function AdminDashboard({
             <LiveAttendance data={attendanceData} />
 
             {/* Approval Center */}
-            <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
+            <View style={tw`bg-white dark:bg-[#1a2235] p-5 rounded-3xl border border-gray-100 dark:border-[#374151]/50 shadow-sm mb-6`}>
                 <View style={tw`flex-row justify-between items-center mb-4`}>
                     <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Approval Center</Text>
                     <View style={tw`bg-[#f5f3ff] dark:bg-[#1e1b4b]/50 px-2.5 py-1 rounded-full`}>
@@ -186,7 +186,7 @@ export default function AdminDashboard({
                     </TouchableOpacity>
                 </View>
 
-                <View style={tw`bg-white dark:bg-[#12112b] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm p-4`}>
+                <View style={tw`bg-white dark:bg-[#1a2235] rounded-3xl border border-gray-100 dark:border-[#374151]/50 shadow-sm p-4`}>
                     {employees
                         .filter((emp) => emp.status !== 'Inactive' && emp.status?.toLowerCase() !== 'inactive')
                         .map((emp) => (
