@@ -58,7 +58,7 @@ export default function LiveAttendance({ data }: LiveAttendanceProps) {
     } : {};
 
     return (
-        <View style={tw`bg-white dark:bg-[#12112b] p-5 rounded-[2rem] border border-gray-100 dark:border-white/5 shadow-sm mb-6`}>
+        <View style={tw`bg-white dark:bg-[#1a2235] p-5 rounded-[2rem] border border-gray-100 dark:border-[#374151]/50 shadow-sm mb-6`}>
             <View style={tw`flex-row justify-between items-center mb-6`}>
                 <View>
                     <Text style={tw`text-base font-black text-gray-900 dark:text-white`}>Live Attendance</Text>

@@ -72,6 +72,7 @@ export default function MastersScreen({ navigation }: any) {
 
     // Add Record Modal States
     const [showAddModal, setShowAddModal] = useState(false);
+    const [fieldToDelete, setFieldToDelete] = useState<any | null>(null);
     const [addName, setAddName] = useState('');
     const [addDescription, setAddDescription] = useState('');
     const [addAddress, setAddAddress] = useState('');
@@ -463,26 +464,7 @@ export default function MastersScreen({ navigation }: any) {
     };
 
     const handleDeleteCustomField = (id: string, name: string) => {
-        Alert.alert(
-            'Confirm Delete',
-            `Are you sure you want to delete the custom field "${name}"?`,
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await api.delete(`/custom-fields/masters/${id}`);
-                            Alert.alert('Deleted', 'Custom field deleted successfully.');
-                            fetchCustomFieldsList();
-                        } catch (e) {
-                            Alert.alert('Error', 'Failed to delete custom field.');
-                        }
-                    }
-                }
-            ]
-        );
+        setFieldToDelete({ id, name });
     };
 
     const resetAddForm = () => {
@@ -2067,6 +2049,68 @@ export default function MastersScreen({ navigation }: any) {
                         </KeyboardAvoidingView>
                     </View>
                 </TouchableWithoutFeedback>
+            </Modal>
+
+            {/* Custom Styled Delete Confirmation Modal for Custom Fields (Web-aligned) */}
+            <Modal
+                visible={!!fieldToDelete}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setFieldToDelete(null)}
+            >
+                <View style={tw`flex-1 justify-center items-center bg-black/70 px-6`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-150 dark:border-white/10 text-center relative overflow-hidden`}>
+                        {/* Top red stripe */}
+                        <View style={tw`absolute top-0 left-0 right-0 h-1.5 bg-red-500`} />
+
+                        {/* Trash icon circle with red glow */}
+                        <View style={tw`w-18 h-18 bg-red-100 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4 mt-2`}>
+                            <Trash2 size={32} color="#ef4444" />
+                        </View>
+
+                        {/* Title */}
+                        <Text style={tw`text-xl font-bold text-gray-800 dark:text-white mb-2`}>
+                            Delete Custom Field?
+                        </Text>
+
+                        {/* Body */}
+                        <Text style={tw`text-xs text-gray-500 dark:text-gray-400 mb-6 leading-relaxed`}>
+                            Are you sure you want to delete <Text style={tw`font-bold text-gray-700 dark:text-gray-200`}>{fieldToDelete?.name}</Text>? This action will permanently delete the custom field and all values filled by employees.
+                        </Text>
+
+                        {/* Action buttons */}
+                        <View style={tw`flex-row gap-3`}>
+                            <TouchableOpacity
+                                onPress={() => setFieldToDelete(null)}
+                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-white/5 rounded-2xl items-center justify-center`}
+                            >
+                                <Text style={tw`text-xs font-bold text-gray-700 dark:text-gray-300`}>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    if (!fieldToDelete) return;
+                                    const id = fieldToDelete.id;
+                                    const name = fieldToDelete.name;
+                                    setFieldToDelete(null);
+                                    try {
+                                        await api.delete(`/custom-fields/masters/${id}`);
+                                        Alert.alert('Deleted', 'Custom field deleted successfully.');
+                                        fetchCustomFieldsList();
+                                    } catch (e) {
+                                        Alert.alert('Error', 'Failed to delete custom field.');
+                                    }
+                                }}
+                                style={tw`flex-1 py-3.5 bg-red-500 rounded-2xl items-center justify-center shadow-lg shadow-red-500/20`}
+                            >
+                                <Text style={tw`text-xs font-bold text-white`}>
+                                    Yes, Delete
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
             </Modal>
 
         </View>

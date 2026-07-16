@@ -755,7 +755,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                             style={tw`w-full`}
                         >
-                            <View style={tw`bg-white dark:bg-[#12112b] p-6 rounded-t-3xl border-t border-gray-200 dark:border-white/5 max-h-[85%]`}>
+                            <View style={tw`bg-white dark:bg-[#4c1d95] p-6 rounded-t-3xl border-t border-gray-200 dark:border-[#8b5cf6]/30 max-h-[85%]`}>
                                 <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                                     <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>Attendance Correction ({regularizeDate})</Text>
 

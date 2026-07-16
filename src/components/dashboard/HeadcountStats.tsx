@@ -37,7 +37,7 @@ export default function HeadcountStats({ headcount, onLeaveToday, newJoiners, av
                         }
                     }}
                     activeOpacity={0.8}
-                    style={tw`w-[47%] bg-white dark:bg-[#12112b] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}
+                    style={tw`w-[47%] bg-white dark:bg-[#1a2235] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#374151]/50 shadow-sm`}
                 >
                     <View style={tw`flex-row justify-between items-start`}>
                         <View style={tw`flex-1 mr-2`}>
