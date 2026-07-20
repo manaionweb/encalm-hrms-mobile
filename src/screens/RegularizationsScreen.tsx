@@ -114,11 +114,11 @@ export default function RegularizationsScreen({ navigation }: any) {
     });
 
     return (
-        <View style={tw`flex-1 bg-gray-50 dark:bg-slate-900`}>
+        <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
 
             {/* Header */}
             <View style={[
-                tw`flex-row items-center px-4 pb-4 bg-white dark:bg-slate-800 border-b border-gray-150 dark:border-slate-700`,
+                tw`flex-row items-center px-4 pb-4 bg-white dark:bg-[#4c1d95] border-b border-gray-100 dark:border-[#8b5cf6]/30`,
                 { paddingTop: insets.top + 16 }
             ]}>
                 {navigation.canGoBack() && (
@@ -131,7 +131,7 @@ export default function RegularizationsScreen({ navigation }: any) {
 
             {/* Search Bar */}
             <View style={tw`px-4 pt-4`}>
-                <View style={tw`flex-row items-center bg-white dark:bg-slate-800 border border-gray-150 dark:border-slate-700 rounded-2xl px-3 py-1 mb-4 shadow-sm`}>
+                <View style={tw`flex-row items-center bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-[#8b5cf6]/30 rounded-2xl px-3 py-1 mb-4 shadow-sm`}>
                     <Search size={18} color="#94a3b8" style={tw`mr-2`} />
                     <TextInput
                         style={tw`flex-1 text-sm text-gray-800 dark:text-white h-10`}
@@ -145,7 +145,7 @@ export default function RegularizationsScreen({ navigation }: any) {
 
             {loading ? (
                 <View style={tw`flex-1 justify-center`}>
-                    <ActivityIndicator size="large" color="#6366f1" />
+                    <ActivityIndicator size="large" color="#8b5cf6" />
                 </View>
             ) : filteredRequests.length === 0 ? (
                 <View style={tw`flex-1 items-center justify-center p-6`}>
@@ -170,7 +170,7 @@ export default function RegularizationsScreen({ navigation }: any) {
                         return (
                             <View
                                 key={req.id}
-                                style={tw`bg-white dark:bg-slate-800 p-4 rounded-3xl mb-4 border border-gray-100 dark:border-slate-700 shadow-sm`}
+                                style={tw`bg-white dark:bg-[#4c1d95] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#8b5cf6]/30 shadow-sm`}
                             >
                                 <View style={tw`flex-row justify-between mb-3`}>
                                     <View>
@@ -237,12 +237,12 @@ export default function RegularizationsScreen({ navigation }: any) {
                 onRequestClose={() => setRejectingId(null)}
             >
                 <View style={tw`flex-1 justify-end bg-black/60`}>
-                    <View style={tw`bg-white dark:bg-slate-800 p-6 rounded-t-3xl border-t border-gray-200 dark:border-slate-700`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] p-6 rounded-t-3xl border-t border-gray-200 dark:border-[#8b5cf6]/30`}>
                         <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-2`}>Reject Request</Text>
                         <Text style={tw`text-xs text-gray-500 mb-4`}>Please provide a reason for rejecting this regularization request.</Text>
 
                         <TextInput
-                            style={tw`w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-300 dark:border-slate-650 rounded-xl text-gray-800 dark:text-white min-h-20 mb-6`}
+                            style={tw`w-full px-4 py-3 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white min-h-20 mb-6`}
                             placeholder="Enter rejection reason..."
                             placeholderTextColor="#cbd5e1"
                             multiline={true}
@@ -253,7 +253,7 @@ export default function RegularizationsScreen({ navigation }: any) {
                         <View style={tw`flex-row gap-4`}>
                             <TouchableOpacity
                                 onPress={() => setRejectingId(null)}
-                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-slate-700 rounded-xl items-center`}
+                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
                             >
                                 <Text style={tw`text-gray-655 dark:text-gray-300 font-bold`}>Cancel</Text>
                             </TouchableOpacity>

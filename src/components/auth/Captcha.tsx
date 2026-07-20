@@ -36,11 +36,11 @@ export const Captcha: React.FC<CaptchaProps> = ({ onVerify, children }) => {
           style={tw`p-1`}
           activeOpacity={0.7}
         >
-          <RefreshCw size={17} color="#4f46e5" />
+          <RefreshCw size={17} color="#8b5cf6" />
         </TouchableOpacity>
       </View>
       <View style={tw`flex-row gap-3 items-center`}>
-        <View style={tw`w-32 h-12 bg-gray-50 rounded-xl flex items-center justify-center border border-gray-300 shadow-sm`}>
+        <View style={tw`w-32 h-12 bg-[#f5f3ff] rounded-xl flex items-center justify-center border border-gray-300 shadow-sm`}>
           <Text
             style={[
               tw`text-xl font-bold tracking-widest text-gray-800 italic`,

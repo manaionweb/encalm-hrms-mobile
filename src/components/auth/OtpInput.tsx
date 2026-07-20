@@ -50,7 +50,7 @@ export const OtpInput: React.FC<OtpInputProps> = ({ length = 6, onComplete }) =>
       {otp.map((data, index) => (
         <TextInput
           key={index}
-          style={tw`w-12 h-14 text-center text-2xl font-bold text-gray-900 border-2 border-gray-300 rounded-xl bg-gray-50 focus:border-indigo-600 focus:bg-white`}
+          style={tw`w-12 h-14 text-center text-2xl font-bold text-gray-900 border-2 border-gray-300 rounded-xl bg-[#f5f3ff] focus:border-[#8b5cf6] focus:bg-white`}
           keyboardType="numeric"
           maxLength={1}
           ref={(el) => { inputs.current[index] = el; }}

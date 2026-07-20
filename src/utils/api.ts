@@ -4,12 +4,15 @@ import { Platform } from 'react-native';
 
 // Dynamically determine the API baseURL depending on the platform
 const getBaseURL = () => {
+    if (process.env.EXPO_PUBLIC_API_URL) {
+        return process.env.EXPO_PUBLIC_API_URL;
+    }
     if (Platform.OS === 'web') {
         const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
         return `http://${host}:3001/api`;
     }
     // Fallback to local IP for physical mobile devices on Wi-Fi
-    return 'http://192.168.1.4:3001/api';
+    return 'http://192.168.1.16:3001/api';
 };
 
 const baseURL = getBaseURL();
@@ -19,6 +22,11 @@ const api = axios.create({
 });
 
 let isRefreshing = false;
+let authFailureCallback: (() => void) | null = null;
+
+export const setAuthFailureCallback = (callback: () => void) => {
+    authFailureCallback = callback;
+};
 
 // Add a request interceptor to inject the auth token
 api.interceptors.request.use(
@@ -87,6 +95,10 @@ api.interceptors.response.use(
                 await AsyncStorage.removeItem('refreshToken');
                 await AsyncStorage.removeItem('tenantId');
                 await AsyncStorage.removeItem('encalm_user');
+
+                if (authFailureCallback) {
+                    authFailureCallback();
+                }
 
                 // Trigger navigation redirect through event or state reset if token fails
                 // In React Native, the Auth Provider state change will automatically route to Sign In

@@ -3,8 +3,10 @@ import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } fr
 import { Clock, Calendar, History, ArrowRight, CheckCircle2, AlertCircle, LogIn, LogOut } from 'lucide-react-native';
 import api from '../../utils/api';
 import tw from 'twrnc';
+import { useToast } from '../../context/ToastContext';
 
 export default function EmployeeDashboard({ user, navigation }: { user: any, navigation: any }) {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [punchStatus, setPunchStatus] = useState<any>(null);
     const [leaveBalances, setLeaveBalances] = useState<any[]>([]);
@@ -32,7 +34,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
 
         } catch (error) {
             console.error("Failed to fetch employee dashboard data:", error);
-            Alert.alert("Error", "Some dashboard data failed to load");
+            showToast("Some dashboard data failed to load", 'error');
         } finally {
             setLoading(false);
         }
@@ -56,21 +58,21 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                 status: res.data.record.status
             } : res.data);
 
-            Alert.alert("Success", res.data.message || 'Action successful');
+            showToast(res.data.message || 'Action successful', 'success');
 
             // Refresh history with correct parameters
             const historyRes = await api.get(`/attendance/history?year=${year}&month=${month}`);
             setRecentAttendance(historyRes.data.slice(0, 5));
         } catch (error: any) {
             console.error("Punch error:", error);
-            Alert.alert("Punch Failed", error.response?.data?.message || "Punch action failed");
+            showToast(error.response?.data?.message || "Punch action failed", 'error');
         }
     };
 
     if (loading) {
         return (
             <View style={tw`flex-1 items-center justify-center min-h-[400px]`}>
-                <ActivityIndicator size="large" color="#6366f1" />
+                <ActivityIndicator size="large" color="#8b5cf6" />
             </View>
         );
     }
@@ -95,7 +97,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
         <ScrollView style={tw`flex-1 px-4 py-4`} contentContainerStyle={tw`pb-12`}>
             
             {/* GREETING SECTION */}
-            <View style={tw`bg-indigo-600 rounded-[2rem] p-6 text-white shadow-lg mb-6`}>
+            <View style={tw`bg-[#8b5cf6] rounded-[2rem] p-6 text-white shadow-lg mb-6`}>
                 <Text style={tw`text-2xl font-extrabold mb-1`}>Welcome, {user.name}!</Text>
                 <Text style={tw`text-indigo-100 text-sm opacity-90 max-w-xs mb-6`}>Your personalized workspace is ready. Have a productive day!</Text>
 
@@ -109,7 +111,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                         {isHolidayToday ? (
                             <Calendar size={18} color="#8b5cf6" />
                         ) : isPunchedIn ? (
-                            <LogOut size={18} color="#4f46e5" />
+                            <LogOut size={18} color="#8b5cf6" />
                         ) : (
                             <LogIn size={18} color="#22c55e" />
                         )}
@@ -132,10 +134,10 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
             <View style={tw`flex-row flex-wrap justify-between mb-6`}>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Attendance')}
-                    style={tw`w-[47%] bg-white dark:bg-slate-800 p-4 rounded-3xl mb-4 border border-gray-100 dark:border-slate-700 shadow-sm`}
+                    style={tw`w-[47%] bg-white dark:bg-[#1a2235] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#374151]/50 shadow-sm`}
                 >
                     <View style={tw`flex-row justify-between items-center mb-3`}>
-                        <View style={tw`p-2 bg-blue-50 dark:bg-slate-700 rounded-xl`}>
+                        <View style={tw`p-2 bg-blue-50 dark:bg-[#1c1a45] rounded-xl`}>
                             <Clock size={18} color="#3b82f6" />
                         </View>
                         <Text style={tw`text-[9px] font-bold text-gray-400 uppercase tracking-widest`}>Attendance</Text>
@@ -148,11 +150,11 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
 
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Leave')}
-                    style={tw`w-[47%] bg-white dark:bg-slate-800 p-4 rounded-3xl mb-4 border border-gray-100 dark:border-slate-700 shadow-sm`}
+                    style={tw`w-[47%] bg-white dark:bg-[#1a2235] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#374151]/50 shadow-sm`}
                 >
                     <View style={tw`flex-row justify-between items-center mb-3`}>
-                        <View style={tw`p-2 bg-indigo-50 dark:bg-slate-700 rounded-xl`}>
-                            <Calendar size={18} color="#4f46e5" />
+                        <View style={tw`p-2 bg-[#f5f3ff] dark:bg-[#1c1a45] rounded-xl`}>
+                            <Calendar size={18} color="#8b5cf6" />
                         </View>
                         <Text style={tw`text-[9px] font-bold text-gray-400 uppercase tracking-widest`}>Leaves</Text>
                     </View>
@@ -160,9 +162,9 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                     <Text style={tw`text-sm font-bold text-gray-800 dark:text-white mt-0.5`}>{totalLeaves} Days</Text>
                 </TouchableOpacity>
 
-                <View style={tw`w-full bg-white dark:bg-slate-800 p-4 rounded-3xl border border-gray-100 dark:border-slate-700 shadow-sm`}>
+                <View style={tw`w-full bg-white dark:bg-[#1a2235] p-4 rounded-3xl border border-gray-100 dark:border-[#374151]/50 shadow-sm`}>
                     <View style={tw`flex-row justify-between items-center mb-3`}>
-                        <View style={tw`p-2 bg-purple-50 dark:bg-slate-700 rounded-xl`}>
+                        <View style={tw`p-2 bg-purple-50 dark:bg-[#1c1a45] rounded-xl`}>
                             <History size={18} color="#a855f7" />
                         </View>
                         <Text style={tw`text-[9px] font-bold text-gray-400 uppercase tracking-widest`}>Holidays</Text>
@@ -202,19 +204,19 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
             </View>
 
             {/* RECENT ACTIVITY */}
-            <View style={tw`bg-white dark:bg-slate-800 rounded-3xl p-5 border border-gray-100 dark:border-slate-700 shadow-sm mb-6`}>
+            <View style={tw`bg-white dark:bg-[#1a2235] rounded-3xl p-5 border border-gray-100 dark:border-[#374151]/50 shadow-sm mb-6`}>
                 <View style={tw`flex-row justify-between items-center mb-4`}>
                     <Text style={tw`text-lg font-bold text-gray-800 dark:text-white`}>My Recent Activity</Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Attendance')}>
-                        <Text style={tw`text-xs font-bold text-indigo-600 dark:text-indigo-400`}>View All</Text>
+                        <Text style={tw`text-xs font-bold text-[#8b5cf6] dark:text-[#c4b5fd]`}>View All</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={tw`space-y-3`}>
                     {recentAttendance.length > 0 ? recentAttendance.map((log, index) => (
-                        <View key={index} style={tw`flex-row items-center justify-between p-3.5 bg-gray-50 dark:bg-slate-700/50 rounded-2xl mb-2`}>
+                        <View key={index} style={tw`flex-row items-center justify-between p-3.5 bg-[#f5f3ff] dark:bg-white/5 rounded-2xl mb-2`}>
                             <View style={tw`flex-row items-center`}>
-                                <View style={tw`w-9 h-9 rounded-xl bg-white dark:bg-slate-700 flex items-center justify-center mr-3`}>
+                                <View style={tw`w-9 h-9 rounded-xl bg-white dark:bg-[#1c1a45] flex items-center justify-center mr-3`}>
                                     <Clock size={16} color="#94a3b8" />
                                 </View>
                                 <View>
@@ -242,7 +244,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                 <Text style={tw`text-lg font-bold text-white mb-4`}>My Profile</Text>
 
                 <View style={tw`flex-row items-center mb-6`}>
-                    <View style={tw`w-14 h-14 rounded-2xl bg-indigo-500 flex items-center justify-center mr-4`}>
+                    <View style={tw`w-14 h-14 rounded-2xl bg-[#8b5cf6] flex items-center justify-center mr-4`}>
                         <Text style={tw`text-white font-bold text-lg`}>{user.name.charAt(0)}</Text>
                     </View>
                     <View>
@@ -253,18 +255,18 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
 
                 <View style={tw`space-y-2 mb-6`}>
                     <View style={tw`flex-row items-center gap-2 mb-1`}>
-                        <CheckCircle2 size={14} color="#6366f1" />
+                        <CheckCircle2 size={14} color="#8b5cf6" />
                         <Text style={tw`text-xs text-gray-300`}>Employee ID: EMP{user.id.toString().padStart(4, '0')}</Text>
                     </View>
                     <View style={tw`flex-row items-center gap-2`}>
-                        <AlertCircle size={14} color="#6366f1" />
+                        <AlertCircle size={14} color="#8b5cf6" />
                         <Text style={tw`text-xs text-gray-300`}>{user.email}</Text>
                     </View>
                 </View>
 
                 <TouchableOpacity
                     onPress={() => navigation.navigate('EmployeeStack', { screen: 'EmployeeProfile', params: { id: user.id } })}
-                    style={tw`w-full py-3.5 bg-indigo-600 rounded-2xl flex-row items-center justify-center gap-2`}
+                    style={tw`w-full py-3.5 bg-[#8b5cf6] rounded-2xl flex-row items-center justify-center gap-2`}
                 >
                     <Text style={tw`text-white font-bold text-sm`}>View Full Profile</Text>
                     <ArrowRight size={16} color="white" />

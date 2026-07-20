@@ -30,7 +30,7 @@ const StatCard = ({
 
     return (
         <View
-            style={tw`w-[48%] bg-white dark:bg-slate-800 rounded-2xl p-4 mb-4 shadow`}
+            style={tw`w-[48%] bg-white dark:bg-[#1a2235] rounded-2xl p-4 mb-4 shadow border border-gray-100 dark:border-[#374151]/50`}
         >
             <View
                 style={tw`flex-row justify-between items-center`}

@@ -66,7 +66,7 @@ export default function useLeave(): UseLeaveReturn {
 
     const { user } = useAuth();
 
-    const isHrAdmin = user?.role === "HR_ADMIN";
+    const canApprove = user?.role === "HR_ADMIN" || user?.role === "MANAGER";
 
     const [loading, setLoading] = useState(true);
 
@@ -126,7 +126,7 @@ export default function useLeave(): UseLeaveReturn {
 
             setHolidays(holidayList);
 
-            if (isHrAdmin) {
+            if (canApprove) {
 
                 const adminLeaves =
 
@@ -152,7 +152,7 @@ export default function useLeave(): UseLeaveReturn {
 
         }
 
-    }, [isHrAdmin]);
+    }, [canApprove]);
 
     useEffect(() => {
 
