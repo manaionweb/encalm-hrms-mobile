@@ -83,7 +83,7 @@ export default function EmployeeListScreen({ navigation }: any) {
         return (
             <View 
                 style={[
-                    tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border-y border-r border-gray-150 dark:border-white/5 shadow-md border-l-4`,
+                    tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border-y border-r border-gray-200 dark:border-white/5 shadow-md border-l-4`,
                     profile.status === 'Inactive' ? tw`border-l-rose-500` : tw`border-l-green-500`
                 ]}
             >
@@ -175,7 +175,7 @@ export default function EmployeeListScreen({ navigation }: any) {
             <TouchableOpacity 
                 onPress={() => navigation.navigate('EmployeeProfile', { id: item.id })}
                 style={[
-                    tw`bg-white dark:bg-[#4c1d95] p-3 rounded-2xl mb-3 border-y border-r border-gray-150 dark:border-white/5 shadow-sm flex-row items-center justify-between border-l-4`,
+                    tw`bg-white dark:bg-[#4c1d95] p-3 rounded-2xl mb-3 border-y border-r border-gray-200 dark:border-white/5 shadow-sm flex-row items-center justify-between border-l-4`,
                     profile.status === 'Inactive' ? tw`border-l-rose-500` : tw`border-l-green-500`
                 ]}
             >
@@ -234,7 +234,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                     <View style={tw`flex-row gap-2`}>
                         <TouchableOpacity
                             onPress={handleExportCSV}
-                            style={tw`p-2.5 bg-white dark:bg-[#4c1d95] border border-gray-150 dark:border-white/5 rounded-2xl shadow-sm`}
+                            style={tw`p-2.5 bg-white dark:bg-[#4c1d95] border border-gray-200 dark:border-white/5 rounded-2xl shadow-sm`}
                         >
                             <FileText size={18} color="#64748b" />
                         </TouchableOpacity>
@@ -252,7 +252,7 @@ export default function EmployeeListScreen({ navigation }: any) {
 
                 {/* Search Bar and View Mode Toggle */}
                 <View style={tw`flex-row gap-2 mb-4`}>
-                    <View style={tw`flex-1 flex-row items-center bg-white dark:bg-[#4c1d95] border border-gray-150 dark:border-white/5 rounded-2xl px-3 py-1 shadow-sm`}>
+                    <View style={tw`flex-1 flex-row items-center bg-white dark:bg-[#4c1d95] border border-gray-200 dark:border-white/5 rounded-2xl px-3 py-1 shadow-sm`}>
                         <Search size={18} color="#94a3b8" style={tw`mr-2`} />
                         <TextInput
                             style={tw`flex-1 text-sm text-gray-800 dark:text-white h-10`}
@@ -267,7 +267,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                     </View>
 
                     {/* Grid/List Toggle */}
-                    <View style={tw`flex-row bg-white dark:bg-[#4c1d95] border border-gray-150 dark:border-white/5 rounded-2xl p-1 shadow-sm items-center gap-1`}>
+                    <View style={tw`flex-row bg-white dark:bg-[#4c1d95] border border-gray-200 dark:border-white/5 rounded-2xl p-1 shadow-sm items-center gap-1`}>
                         <TouchableOpacity
                             onPress={() => setViewMode('grid')}
                             style={tw`p-1.5 rounded-xl ${viewMode === 'grid' ? 'bg-[#8b5cf6]' : 'bg-transparent'}`}
@@ -285,12 +285,12 @@ export default function EmployeeListScreen({ navigation }: any) {
 
                 {/* Quick Filters */}
                 {showFilters && (
-                    <View style={tw`bg-white dark:bg-[#4c1d95] border border-gray-150 dark:border-white/5 p-3 rounded-2xl mb-4 shadow-sm flex-row gap-2`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] border border-gray-200 dark:border-white/5 p-3 rounded-2xl mb-4 shadow-sm flex-row gap-2`}>
                         {['All', 'Active', 'Inactive'].map((status) => (
                             <TouchableOpacity
                                 key={status}
                                 onPress={() => setSelectedStatus(status)}
-                                style={tw`px-4 py-1.5 rounded-full ${selectedStatus === status ? 'bg-[#8b5cf6]' : 'bg-gray-105 dark:bg-[#8b5cf6]/20'}`}
+                                style={tw`px-4 py-1.5 rounded-full ${selectedStatus === status ? 'bg-[#8b5cf6]' : 'bg-gray-100 dark:bg-[#8b5cf6]/20'}`}
                             >
                                 <Text style={tw`text-xs font-bold ${selectedStatus === status ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
                                     {status}
@@ -432,7 +432,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                 onRequestClose={() => setEmployeeToDelete(null)}
             >
                 <View style={tw`flex-1 justify-center items-center bg-black/70 px-6`}>
-                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-150 dark:border-white/10 text-center relative overflow-hidden`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-200 dark:border-white/10 text-center relative overflow-hidden`}>
                         {/* Top red stripe */}
                         <View style={tw`absolute top-0 left-0 right-0 h-1.5 bg-red-500`} />
 

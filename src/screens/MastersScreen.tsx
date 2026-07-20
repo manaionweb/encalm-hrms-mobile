@@ -772,7 +772,7 @@ export default function MastersScreen({ navigation }: any) {
                     </View>
 
                     {/* Permissions Preview */}
-                    <View style={tw`space-y-1.5 pt-2 border-t border-gray-55 dark:border-white/2`}>
+                    <View style={tw`gap-y-1.5 pt-2 border-t border-gray-100 dark:border-white/5`}>
                         {item.permissions && item.permissions.slice(0, 3).map((p: any) => (
                             <View key={p.id} style={tw`flex-row items-center gap-2`}>
                                 <Check size={10} color="#22c55e" />
@@ -935,7 +935,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-3`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Legal Name</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={legalName}
                             onChangeText={setLegalName}
                         />
@@ -945,7 +945,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>CIN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={cin}
                                 onChangeText={setCin}
                             />
@@ -953,7 +953,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>GSTIN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={gstin}
                                 onChangeText={setGstin}
                             />
@@ -964,7 +964,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>PAN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={pan}
                                 onChangeText={setPan}
                             />
@@ -972,7 +972,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>TAN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={tan}
                                 onChangeText={setTan}
                             />
@@ -987,7 +987,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-3`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Registered Address</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={address}
                             onChangeText={setAddress}
                         />
@@ -996,7 +996,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-4`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Website</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={website}
                             onChangeText={setWebsite}
                         />
@@ -1005,7 +1005,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`flex-row gap-3`}>
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Primary Color</Text>
-                            <View style={tw`flex-row items-center bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
+                            <View style={tw`flex-row items-center bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
                                 <View style={[tw`w-4 h-4 rounded mr-2`, { backgroundColor: primaryColor }]} />
                                 <TextInput
                                     style={tw`flex-1 text-xs text-gray-800 dark:text-white font-bold h-7 p-0`}
@@ -1016,7 +1016,7 @@ export default function MastersScreen({ navigation }: any) {
                         </View>
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Secondary Color</Text>
-                            <View style={tw`flex-row items-center bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
+                            <View style={tw`flex-row items-center bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
                                 <View style={[tw`w-4 h-4 rounded mr-2`, { backgroundColor: secondaryColor }]} />
                                 <TextInput
                                     style={tw`flex-1 text-xs text-gray-800 dark:text-white font-bold h-7 p-0`}
@@ -1046,7 +1046,7 @@ export default function MastersScreen({ navigation }: any) {
                 <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Authorized Signatory Name *</Text>
                     <TextInput
-                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                         placeholder="e.g. System Admin"
                         placeholderTextColor="#94a3b8"
                         value={signatoryName}
@@ -1141,7 +1141,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>EPF Number</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfNumber}
                                         onChangeText={setEpfNumber}
                                     />
@@ -1150,7 +1150,7 @@ export default function MastersScreen({ navigation }: any) {
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Wage Ceiling (₹15,000)</Text>
                                     <TouchableOpacity
                                         onPress={() => setEpfWageCeiling(!epfWageCeiling)}
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl justify-center h-[38px]`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl justify-center h-[38px]`}
                                     >
                                         <Text style={tw`text-xs text-gray-800 dark:text-white font-bold`}>
                                             {epfWageCeiling ? 'Cap at ₹15,000' : 'No Cap'}
@@ -1163,7 +1163,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Employee Rate (%)</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfEmployeeRate}
                                         onChangeText={setEpfEmployeeRate}
                                         keyboardType="numeric"
@@ -1172,7 +1172,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Employer EPF (%)</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfEmployerRate}
                                         onChangeText={setEpfEmployerRate}
                                         keyboardType="numeric"
@@ -1200,7 +1200,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>ESIC Number</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                    style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                     value={esicNumber}
                                     onChangeText={setEsicNumber}
                                 />
@@ -1208,7 +1208,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Wage Limit</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                    style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                     value={esicWageLimit}
                                     onChangeText={setEsicWageLimit}
                                     keyboardType="numeric"
@@ -1245,7 +1245,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Min Half Day</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={minHalfDayHours}
                                 onChangeText={setMinHalfDayHours}
                                 keyboardType="numeric"
@@ -1254,7 +1254,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Min Full Day</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={minFullDayHours}
                                 onChangeText={setMinFullDayHours}
                                 keyboardType="numeric"
@@ -1270,7 +1270,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`flex-row items-center gap-2 mb-4`}>
                         <Text style={tw`text-xs text-gray-500 font-bold`}>Every</Text>
                         <TextInput
-                            style={tw`w-14 px-3 py-2 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-center text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
+                            style={tw`w-14 px-3 py-2 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-center text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
                             value={lateMarkThreshold}
                             onChangeText={setLateMarkThreshold}
                             keyboardType="numeric"
@@ -1863,7 +1863,7 @@ export default function MastersScreen({ navigation }: any) {
             <CustomHeader navigation={navigation} title="Masters Configuration" subtitle="Manage organization structure, payroll rules, and system settings." />
 
             {/* Main Tabs Selection Row */}
-            <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-150 dark:border-white/5`}>
+            <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-200 dark:border-white/5`}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row px-4`}>
                     {mainTabs.map((tab) => {
                         const isSel = activeMainTab === tab.key;
@@ -1891,7 +1891,7 @@ export default function MastersScreen({ navigation }: any) {
 
             {/* Sub Tabs Selection Row */}
             {subTabs.length > 0 && (
-                <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-150 dark:border-white/5 py-2.5 px-4`}>
+                <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-200 dark:border-white/5 py-2.5 px-4`}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row`}>
                         {subTabs.map((sub, idx) => {
                             const isActiveSub = activeSubTab === sub;
@@ -2029,7 +2029,7 @@ export default function MastersScreen({ navigation }: any) {
                                                 setShowAddModal(false);
                                                 resetAddForm();
                                             }}
-                                            style={tw`flex-1 py-3.5 bg-gray-150 dark:bg-[#111827] rounded-xl items-center`}
+                                            style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#111827] rounded-xl items-center`}
                                         >
                                             <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
                                         </TouchableOpacity>
@@ -2059,7 +2059,7 @@ export default function MastersScreen({ navigation }: any) {
                 onRequestClose={() => setFieldToDelete(null)}
             >
                 <View style={tw`flex-1 justify-center items-center bg-black/70 px-6`}>
-                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-150 dark:border-white/10 text-center relative overflow-hidden`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-200 dark:border-white/10 text-center relative overflow-hidden`}>
                         {/* Top red stripe */}
                         <View style={tw`absolute top-0 left-0 right-0 h-1.5 bg-red-500`} />
 

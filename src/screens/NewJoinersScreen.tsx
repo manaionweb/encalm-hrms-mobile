@@ -77,7 +77,7 @@ export default function NewJoinersScreen({ navigation }: any) {
                     </View>
                 </View>
 
-                <View style={tw`space-y-2 mb-4`}>
+                <View style={tw`gap-y-2 mb-4`}>
                     <View style={tw`flex-row items-center gap-2 text-sm`}>
                         <Calendar size={14} color="#22c55e" />
                         <Text style={tw`text-gray-600 dark:text-gray-400 text-xs font-semibold`}>
@@ -118,13 +118,13 @@ export default function NewJoinersScreen({ navigation }: any) {
                 {/* Header info */}
                 <View style={tw`flex-row justify-between items-center mb-6`}>
                     <View style={tw`flex-1 mr-2`}>
-                        <Text style={tw`text-xs text-gray-550 dark:text-gray-400 font-medium`}>
+                        <Text style={tw`text-xs text-gray-500 dark:text-gray-400 font-medium`}>
                             Employees who joined this month
                         </Text>
                     </View>
                     <View style={tw`flex-row items-center gap-1.5 px-3.5 py-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl`}>
                         <UserCheck size={14} color="#22c55e" />
-                        <Text style={tw`text-xs font-bold text-emerald-700 dark:text-emerald-450`}>
+                        <Text style={tw`text-xs font-bold text-emerald-700 dark:text-emerald-400`}>
                             {newJoiners.length} Joiners
                         </Text>
                     </View>

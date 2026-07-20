@@ -54,7 +54,7 @@ export default function SignInScreen({ navigation }: any) {
                     </View>
 
                     {/* Form Fields */}
-                    <View style={tw`space-y-4`}>
+                    <View style={tw`gap-y-4`}>
                         <View style={tw`mb-4`}>
                             <Text style={tw`text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wide`}>Username or E-mail</Text>
                             <TextInput

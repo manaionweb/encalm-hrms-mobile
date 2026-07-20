@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { Menu, Bell, Sun, Moon, ArrowLeft } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import tw from 'twrnc';
 
@@ -15,27 +16,33 @@ interface CustomHeaderProps {
 
 export default function CustomHeader({ navigation, title, showBackButton, subtitle }: CustomHeaderProps) {
     const { theme, toggleTheme } = useTheme();
+    const { isAuthenticated } = useAuth();
     const isDark = theme === 'dark';
     const [unreadCount, setUnreadCount] = useState(0);
     const insets = useSafeAreaInsets();
 
     const fetchUnreadCount = async () => {
+        if (!isAuthenticated) return;
         try {
             const res = await api.get('/notifications');
             if (Array.isArray(res.data)) {
                 const unread = res.data.filter((n: any) => n.unread).length;
                 setUnreadCount(unread);
             }
-        } catch (e) {
-            console.error('Failed to get header notifications count:', e);
+        } catch (e: any) {
+            // Silently log or handle auth errors without throwing unhandled exceptions
+            if (e?.response?.status !== 401 && e?.message !== 'No refresh token found') {
+                console.log('Failed to get header notifications count:', e?.message || e);
+            }
         }
     };
 
     useEffect(() => {
+        if (!isAuthenticated) return;
         fetchUnreadCount();
         const interval = setInterval(fetchUnreadCount, 8000);
         return () => clearInterval(interval);
-    }, []);
+    }, [isAuthenticated]);
 
     const isDashboard = title.toLowerCase() === 'dashboard';
     const hasDrawer = navigation && typeof navigation.openDrawer === 'function';

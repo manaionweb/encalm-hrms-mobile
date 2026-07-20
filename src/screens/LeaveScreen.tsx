@@ -270,7 +270,7 @@ export default function LeaveScreen({ navigation }: any) {
                     </View>
 
                     {/* Status Badge */}
-                    {status && (
+                    {!!status && (
                         <View style={tw`w-full items-center mt-1`}>
                             {status.type === 'Holiday' ? (
                                 <View style={tw`bg-purple-100 px-1.5 py-0.5 rounded-full w-full items-center`}>
@@ -351,7 +351,7 @@ export default function LeaveScreen({ navigation }: any) {
                                     return (
                                         <View 
                                             key={balance.code || balance.leaveTypeCode || index} 
-                                            style={tw`${isFullWidth ? 'w-full' : 'w-[48%]'} bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-150 dark:border-white/5 shadow-sm`}
+                                            style={tw`${isFullWidth ? 'w-full' : 'w-[48%]'} bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-200 dark:border-white/5 shadow-sm`}
                                         >
                                             <View style={tw`flex-row justify-between items-start`}>
                                                 <View style={tw`flex-1 mr-2`}>
