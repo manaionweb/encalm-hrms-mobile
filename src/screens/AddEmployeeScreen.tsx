@@ -684,7 +684,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
                 placeholder={placeholder}
                 placeholderTextColor="#94a3b8"
                 keyboardType={keyboardType}
-                value={formData[field]}
+                value={formData[field] as string}
                 onChangeText={(text) => {
                     setErrors({ ...errors, [field]: '' });
                     setFormData({ ...formData, [field]: text });
@@ -962,11 +962,11 @@ export default function AddEmployeeScreen({ navigation }: any) {
                             </Text>
                             <ChevronRight size={14} color="white" />
                         </TouchableOpacity>
+                    </View>
                 </View>
             </View>
-        </View>
 
-        {/* Delete Document Confirmation Modal */}
+            {/* Delete Document Confirmation Modal */}
             <Modal
                 visible={!!confirmDeleteDoc}
                 transparent={true}
