@@ -33,11 +33,13 @@ const getLeaveTypeStyle = (code: string) => {
 import useLeave from "../hooks/useLeave";
 import CustomHeader from '../components/CustomHeader';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import tw from 'twrnc';
 import { useRoute } from "@react-navigation/native";
 
 export default function LeaveScreen({ navigation }: any) {
     const { user } = useAuth();
+    const { showToast } = useToast();
     const route = useRoute<any>();
     const canApprove = user?.role === 'HR_ADMIN' || user?.role === 'MANAGER';
     const {
@@ -79,7 +81,7 @@ export default function LeaveScreen({ navigation }: any) {
 
     const handleApplyLeave = async () => {
         if (!fromDate || !toDate || !reason.trim()) {
-            Alert.alert("Error", "Please fill in all fields.");
+            showToast("Please fill in all fields.", 'error');
             return;
         }
 
@@ -94,7 +96,7 @@ export default function LeaveScreen({ navigation }: any) {
             while (current <= end) {
                 const dayOfWeek = current.getDay();
                 if (dayOfWeek === 0 || dayOfWeek === 6) {
-                    Alert.alert('Error', 'Cannot apply for leave on weekends (Saturday/Sunday)');
+                    showToast('Cannot apply for leave on weekends (Saturday/Sunday)', 'error');
                     return;
                 }
                 current.setDate(current.getDate() + 1);
@@ -109,39 +111,39 @@ export default function LeaveScreen({ navigation }: any) {
                 reason,
             });
 
-            Alert.alert("Success", "Leave application submitted!");
+            showToast("Leave application submitted!", 'success');
             setShowApplyModal(false);
             setLeaveType("CL");
             setFromDate("");
             setToDate("");
             setReason("");
         } catch (err: any) {
-            Alert.alert("Error", err.message);
+            showToast(err.message, 'error');
         }
     };
 
     const handleApprove = async (leaveId: number) => {
         try {
             await approve(leaveId);
-            Alert.alert("Success", "Leave approved successfully.");
+            showToast("Leave approved successfully.", 'success');
         } catch (err: any) {
-            Alert.alert("Error", err.message);
+            showToast(err.message, 'error');
         }
     };
 
     const handleRejectSubmit = async () => {
         if (!rejectingId || !rejectComment.trim()) {
-            Alert.alert("Error", "Please enter rejection reason.");
+            showToast("Please enter rejection reason.", 'error');
             return;
         }
 
         try {
             await reject(rejectingId, rejectComment);
-            Alert.alert("Success", "Leave rejected.");
+            showToast("Leave rejected.", 'success');
             setRejectComment("");
             setRejectingId(null);
         } catch (err: any) {
-            Alert.alert("Error", err.message);
+            showToast(err.message, 'error');
         }
     };
 
@@ -238,11 +240,11 @@ export default function LeaveScreen({ navigation }: any) {
                     key={dateStr}
                     onPress={() => {
                         if (isWeekend) {
-                            Alert.alert('Info', 'Cannot apply for leave on weekends (Saturday/Sunday)');
+                            showToast('Cannot apply for leave on weekends (Saturday/Sunday)', 'info');
                             return;
                         }
                         if (isPast && !status) {
-                            Alert.alert('Info', 'Cannot apply for leave on past dates');
+                            showToast('Cannot apply for leave on past dates', 'info');
                             return;
                         }
                         if (!status) {

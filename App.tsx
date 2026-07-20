@@ -8,6 +8,7 @@ import tw from 'twrnc';
 
 import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { ToastProvider } from './src/context/ToastContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { Alert, Platform } from 'react-native';
 
@@ -47,10 +48,12 @@ function MainApp() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <AppNavigator />
-        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      </NavigationContainer>
+      <ToastProvider>
+        <NavigationContainer>
+          <AppNavigator />
+          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        </NavigationContainer>
+      </ToastProvider>
     </SafeAreaProvider>
   );
 }

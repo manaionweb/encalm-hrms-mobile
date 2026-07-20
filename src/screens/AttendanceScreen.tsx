@@ -4,10 +4,12 @@ import { Clock, Calendar, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, M
 import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import tw from 'twrnc';
+import { useToast } from '../context/ToastContext';
 
 export default function AttendanceScreen({ route, navigation }: any) {
     const targetUserId = route.params?.id; // If passed, view specific user attendance (Admin view)
     const isSelf = !targetUserId;
+    const { showToast } = useToast();
 
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isPunchedIn, setIsPunchedIn] = useState(false);
@@ -139,17 +141,17 @@ export default function AttendanceScreen({ route, navigation }: any) {
     const handlePunch = async () => {
         try {
             const res = await api.post('/attendance/punch');
-            Alert.alert("Attendance Update", res.data.message || 'Action completed successfully');
+            showToast(res.data.message || 'Action completed successfully', 'success');
             fetchStatusAndPolicy();
             fetchHistoryAndRequests();
         } catch (error: any) {
-            Alert.alert("Punch Failed", error.response?.data?.message || 'Error occurred during punch');
+            showToast(error.response?.data?.message || 'Error occurred during punch', 'error');
         }
     };
 
     const submitRegularization = async () => {
         if (!reason.trim()) {
-            Alert.alert("Required", "Please provide a reason for regularization.");
+            showToast("Please provide a reason for regularization.", 'error');
             return;
         }
 
@@ -163,14 +165,14 @@ export default function AttendanceScreen({ route, navigation }: any) {
             };
 
             await api.post('/attendance/regularize', payload);
-            Alert.alert("Success", "Regularization request submitted!");
+            showToast("Regularization request submitted!", 'success');
             setRegularizeDate(null);
             setReason('');
             setInInputText('09:00 AM');
             setOutInputText('06:00 PM');
             fetchHistoryAndRequests();
         } catch (error: any) {
-            Alert.alert("Error", error.response?.data?.message || "Failed to submit request.");
+            showToast(error.response?.data?.message || "Failed to submit request.", 'error');
         } finally {
             setSubmittingRequest(false);
         }
