@@ -119,14 +119,14 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         setFormBloodGroup(prof.bloodGroup || '');
         setFormAddress(prof.address || '');
 
-        setFormPan(stat.panNumber || '');
-        setFormAadhaar(stat.aadhaarNumber || '');
-        setFormUan(stat.uanNumber || '');
-        setFormEsic(stat.esicNumber || '');
+        setFormPan(stat.pan || stat.panNumber || '');
+        setFormAadhaar(stat.aadhaar || stat.aadhaarNumber || '');
+        setFormUan(stat.uan || stat.uanNumber || '');
+        setFormEsic(stat.esic || stat.esicNumber || '');
 
         setFormBankName(bank.bankName || '');
         setFormAccountNumber(bank.accountNumber || '');
-        setFormIfscCode(bank.ifscCode || '');
+        setFormIfscCode(bank.ifsc || bank.ifscCode || '');
 
         setFormBasicSalary(sal.basic ? sal.basic.toString() : '');
 
@@ -1121,90 +1121,254 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                     <Text style={tw`text-sm font-bold text-gray-900 dark:text-white`}>Document Vault</Text>
                                 </View>
 
-                                {documentFields.length > 0 ? (
-                                    documentFields.map(ca => {
-                                        return (
-                                            <View key={ca.id} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
-                                                <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
-                                                    <View style={tw`p-2.5 bg-[#8b5cf6]/10 rounded-xl`}>
-                                                        <FileText size={18} color="#8b5cf6" />
+                                {/* Standard Documents uploaded during onboarding */}
+                                {Array.isArray(profile.documents) && profile.documents.length > 0 && (
+                                    <View style={tw`mb-4`}>
+                                        <Text style={tw`text-xs font-black text-gray-400 dark:text-purple-300 uppercase tracking-widest mb-3`}>Uploaded Documents</Text>
+                                        {profile.documents.map((doc: any) => {
+                                            const docUrl = doc.url.startsWith('/') || doc.url.startsWith('http') ? doc.url : `/uploads/documents/${doc.url}`;
+                                            return (
+                                                <View key={doc.id || doc.url} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
+                                                    <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                                        <View style={tw`p-2.5 bg-[#8b5cf6]/10 rounded-xl`}>
+                                                            <FileText size={18} color="#8b5cf6" />
+                                                        </View>
+                                                        <View style={tw`flex-1`}>
+                                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                                {doc.name}
+                                                            </Text>
+                                                            <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                                {doc.originalName || 'Document Uploaded'}
+                                                            </Text>
+                                                        </View>
                                                     </View>
-                                                    <View style={tw`flex-1`}>
-                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                            {ca.field.name} <Text style={tw`text-red-500`}>*</Text>
-                                                        </Text>
-                                                        {ca.documentUrl ? (
-                                                            <Text style={tw`text-[10px] text-green-650 dark:text-green-400 mt-1`} numberOfLines={1}>
-                                                                {ca.documentName || 'Document Uploaded'}
+                                                    <TouchableOpacity
+                                                        onPress={() => handleViewDocument(docUrl)}
+                                                        style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
+                                                    >
+                                                        <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            );
+                                        })}
+                                    </View>
+                                )}
+
+                                {/* Custom Document Fields */}
+                                {documentFields.length > 0 && (
+                                    <View style={tw`mb-2`}>
+                                        {Array.isArray(profile.documents) && profile.documents.length > 0 && (
+                                            <Text style={tw`text-xs font-black text-gray-400 dark:text-purple-300 uppercase tracking-widest mb-3 mt-2`}>Custom Documents</Text>
+                                        )}
+                                        {documentFields.map(ca => {
+                                            return (
+                                                <View key={ca.id} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
+                                                    <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                                        <View style={tw`p-2.5 bg-[#8b5cf6]/10 rounded-xl`}>
+                                                            <FileText size={18} color="#8b5cf6" />
+                                                        </View>
+                                                        <View style={tw`flex-1`}>
+                                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                                {ca.field?.name || 'Document'} {ca.field?.required ? <Text style={tw`text-red-500`}>*</Text> : null}
                                                             </Text>
-                                                        ) : (
-                                                            <Text style={tw`text-[10px] text-gray-400 dark:text-purple-300 mt-1`}>
-                                                                No document uploaded
-                                                            </Text>
+                                                            {ca.documentUrl ? (
+                                                                <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                                    {ca.documentName || 'Document Uploaded'}
+                                                                </Text>
+                                                            ) : (
+                                                                <Text style={tw`text-[10px] text-gray-400 dark:text-purple-300 mt-1`}>
+                                                                    No document uploaded
+                                                                </Text>
+                                                            )}
+                                                        </View>
+                                                    </View>
+
+                                                    <View style={tw`flex-row items-center gap-2`}>
+                                                        {/* Upload Button in Edit Mode if no file exists */}
+                                                        {isEditing && !ca.documentUrl && (
+                                                            <TouchableOpacity
+                                                                onPress={() => handleUploadDocument(ca.fieldId)}
+                                                                style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl mr-1`}
+                                                            >
+                                                                <Upload size={12} color="#fff" />
+                                                                <Text style={tw`text-xs font-bold text-white`}>Upload</Text>
+                                                            </TouchableOpacity>
+                                                        )}
+
+                                                        {/* Eye view button styled exactly like web */}
+                                                        {ca.documentUrl && (
+                                                            <TouchableOpacity
+                                                                onPress={() => handleViewDocument(ca.documentUrl)}
+                                                                style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
+                                                            >
+                                                                <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
+                                                            </TouchableOpacity>
+                                                        )}
+
+                                                        {/* Delete Button in Edit Mode if file exists */}
+                                                        {isEditing && ca.documentUrl && (
+                                                            <TouchableOpacity
+                                                                onPress={() => handleDeleteDocument(ca.fieldId, ca.field.name)}
+                                                                style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
+                                                            >
+                                                                <Trash2 size={18} color="#ef4444" />
+                                                            </TouchableOpacity>
                                                         )}
                                                     </View>
                                                 </View>
+                                            );
+                                        })}
+                                    </View>
+                                )}
 
-                                                <View style={tw`flex-row items-center gap-2`}>
-                                                    {/* Upload Button in Edit Mode if no file exists */}
-                                                    {isEditing && !ca.documentUrl && (
-                                                        <TouchableOpacity
-                                                            onPress={() => handleUploadDocument(ca.fieldId)}
-                                                            style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl mr-1`}
-                                                        >
-                                                            <Upload size={12} color="#fff" />
-                                                            <Text style={tw`text-xs font-bold text-white`}>Upload</Text>
-                                                        </TouchableOpacity>
-                                                    )}
-
-                                                    {/* Eye view button styled exactly like web */}
-                                                    {ca.documentUrl && (
-                                                        <TouchableOpacity
-                                                            onPress={() => handleViewDocument(ca.documentUrl)}
-                                                            style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
-                                                        >
-                                                            <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
-                                                        </TouchableOpacity>
-                                                    )}
-
-                                                    {/* Delete Button in Edit Mode if file exists */}
-                                                    {isEditing && ca.documentUrl && (
-                                                        <TouchableOpacity
-                                                            onPress={() => handleDeleteDocument(ca.fieldId, ca.field.name)}
-                                                            style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
-                                                        >
-                                                            <Trash2 size={18} color="#ef4444" />
-                                                        </TouchableOpacity>
-                                                    )}
-                                                </View>
-                                            </View>
-                                        );
-                                    })
-                                ) : (
-                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-300 italic text-center py-6`}>No documents configured.</Text>
+                                {(!profile.documents || profile.documents.length === 0) && documentFields.length === 0 && (
+                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-300 italic text-center py-6`}>No documents uploaded or configured.</Text>
                                 )}
                             </View>
                         )}
 
                         {activeTab === 'statutory' && (
                             <View>
-                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory Details</Text>
-                                {renderDetailRow('PAN Card', profile.statutory?.panNumber)}
-                                {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber)}
-                                {renderDetailRow('UAN (PF)', profile.statutory?.uanNumber)}
-                                {renderDetailRow('ESIC Number', profile.statutory?.esicNumber)}
-                                {renderDetailRow('Bank Name', profile.bank?.bankName)}
-                                {renderDetailRow('IFSC Code', profile.bank?.ifscCode)}
-                                {renderDetailRow('Account Number', profile.bank?.accountNumber)}
+                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory & Bank Details</Text>
+                                {renderEditableDetailRow('PAN Card', profile.statutory?.pan || profile.statutory?.panNumber, formPan, setFormPan, 'ABCDE1234F')}
+                                {renderEditableDetailRow('Aadhaar Number', profile.statutory?.aadhaar || profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, '123456789012', 'number-pad')}
+                                {renderEditableDetailRow('UAN (PF)', profile.statutory?.uan || profile.statutory?.uanNumber, formUan, setFormUan, '100123456789', 'number-pad')}
+                                {renderEditableDetailRow('ESIC Number', profile.statutory?.esic || profile.statutory?.esicNumber, formEsic, setFormEsic, '1234567890', 'number-pad')}
+                                {renderEditableDetailRow('Bank Name', profile.bank?.bankName, formBankName, setFormBankName, 'Bank Name')}
+                                {renderEditableDetailRow('IFSC Code', profile.bank?.ifsc || profile.bank?.ifscCode, formIfscCode, setFormIfscCode, 'IFSC Code')}
+                                {renderEditableDetailRow('Account Number', profile.bank?.accountNumber, formAccountNumber, setFormAccountNumber, 'Account Number', 'number-pad')}
                             </View>
                         )}
 
-                        {activeTab === 'salary' && (
-                            <View>
-                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Salary Structure</Text>
-                                {renderEditableDetailRow('Basic Monthly', profile.salary?.basic ? `INR ${profile.salary.basic}` : '0', formBasicSalary, setFormBasicSalary, 'Enter basic monthly salary', 'number-pad')}
-                            </View>
-                        )}
+                        {activeTab === 'salary' && (() => {
+                            const rawComponents =
+                                Array.isArray(profile.selectedSalaryComponents) && profile.selectedSalaryComponents.length > 0
+                                    ? profile.selectedSalaryComponents
+                                    : Array.isArray(profile.salaryComponents) && profile.salaryComponents.length > 0
+                                        ? profile.salaryComponents
+                                        : Array.isArray(profile.salary?.selectedSalaryComponents) && profile.salary.selectedSalaryComponents.length > 0
+                                            ? profile.salary.selectedSalaryComponents
+                                            : [];
+
+                            const components = rawComponents.map((item: any) => item.component ? item.component : item);
+                            const earnings = components.filter((c: any) => c.type === 'EARNING');
+                            const deductions = components.filter((c: any) => c.type === 'DEDUCTION');
+
+                            const basicNum = Number(profile.salary?.basic || formBasicSalary || 0);
+
+                            const getCompAmt = (comp: any) => {
+                                const val = Number(comp.value || 0);
+                                if (comp.calculationType === 'FLAT') return val;
+                                if (comp.calculationType === '%_BASIC') return (basicNum * val) / 100;
+                                return val;
+                            };
+
+                            const totalEarningsAmt = basicNum + earnings.reduce((acc: number, c: any) => acc + getCompAmt(c), 0);
+                            const totalDeductionsAmt = deductions.reduce((acc: number, c: any) => acc + getCompAmt(c), 0);
+                            const netSalaryAmt = Math.max(0, totalEarningsAmt - totalDeductionsAmt);
+
+                            return (
+                                <View>
+                                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Salary Structure</Text>
+
+                                    {/* Salary Summary Card */}
+                                    <View style={tw`bg-[#1e1b4b] dark:bg-[#111827] p-4 rounded-2xl mb-4 border border-purple-500/20`}>
+                                        <Text style={tw`text-[10px] font-bold text-purple-300 uppercase tracking-widest mb-1`}>Net Estimated Monthly Salary</Text>
+                                        <Text style={tw`text-2xl font-black text-white mb-3`}>
+                                            ₹ {netSalaryAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </Text>
+
+                                        <View style={tw`flex-row justify-between pt-2.5 border-t border-white/10`}>
+                                            <View>
+                                                <Text style={tw`text-[9px] text-purple-200 font-medium`}>Gross Earnings</Text>
+                                                <Text style={tw`text-xs font-bold text-green-400 mt-0.5`}>
+                                                    ₹ {totalEarningsAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </Text>
+                                            </View>
+                                            <View style={tw`items-end`}>
+                                                <Text style={tw`text-[9px] text-purple-200 font-medium`}>Total Deductions</Text>
+                                                <Text style={tw`text-xs font-bold text-red-400 mt-0.5`}>
+                                                    ₹ {totalDeductionsAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+
+                                    {/* Basic Monthly Salary Row */}
+                                    {renderEditableDetailRow('Basic Monthly', profile.salary?.basic ? `INR ${profile.salary.basic}` : '0', formBasicSalary, setFormBasicSalary, 'Enter basic monthly salary', 'number-pad')}
+
+                                    {/* Earnings Section */}
+                                    <View style={tw`mt-4`}>
+                                        <View style={tw`flex-row items-center justify-between mb-2`}>
+                                            <Text style={tw`text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-wider`}>Earnings Breakdown</Text>
+                                            <View style={tw`px-2 py-0.5 bg-green-500/10 rounded-full`}>
+                                                <Text style={tw`text-[9px] font-bold text-green-600 dark:text-green-400`}>{earnings.length + 1} Items</Text>
+                                            </View>
+                                        </View>
+
+                                        <View style={tw`bg-gray-50 dark:bg-white/5 rounded-2xl p-3 mb-3 border border-gray-100 dark:border-white/5`}>
+                                            <View style={tw`flex-row justify-between items-center py-2 border-b border-gray-200 dark:border-white/10`}>
+                                                <View>
+                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Basic Salary</Text>
+                                                    <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>Base Pay</Text>
+                                                </View>
+                                                <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>
+                                                    ₹ {basicNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </Text>
+                                            </View>
+
+                                            {earnings.map((comp: any) => {
+                                                const amt = getCompAmt(comp);
+                                                const typeLabel = comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`;
+                                                return (
+                                                    <View key={comp.id || comp.name} style={tw`flex-row justify-between items-center py-2 border-b border-gray-200 dark:border-white/5`}>
+                                                        <View>
+                                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
+                                                            <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>{typeLabel}</Text>
+                                                        </View>
+                                                        <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>
+                                                            ₹ {amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </Text>
+                                                    </View>
+                                                );
+                                            })}
+                                        </View>
+                                    </View>
+
+                                    {/* Deductions Section */}
+                                    <View style={tw`mt-2`}>
+                                        <View style={tw`flex-row items-center justify-between mb-2`}>
+                                            <Text style={tw`text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-wider`}>Deductions Breakdown</Text>
+                                            <View style={tw`px-2 py-0.5 bg-red-500/10 rounded-full`}>
+                                                <Text style={tw`text-[9px] font-bold text-red-600 dark:text-red-400`}>{deductions.length} Items</Text>
+                                            </View>
+                                        </View>
+
+                                        {deductions.length > 0 ? (
+                                            <View style={tw`bg-gray-50 dark:bg-white/5 rounded-2xl p-3 border border-gray-100 dark:border-white/5`}>
+                                                {deductions.map((comp: any) => {
+                                                    const amt = getCompAmt(comp);
+                                                    const typeLabel = comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`;
+                                                    return (
+                                                        <View key={comp.id || comp.name} style={tw`flex-row justify-between items-center py-2 border-b border-gray-200 dark:border-white/5`}>
+                                                            <View>
+                                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
+                                                                <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>{typeLabel}</Text>
+                                                            </View>
+                                                            <Text style={tw`text-xs font-bold text-red-600 dark:text-red-400`}>
+                                                                ₹ {amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                            </Text>
+                                                        </View>
+                                                    );
+                                                })}
+                                            </View>
+                                        ) : (
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-300 italic text-center py-3`}>No deduction components assigned.</Text>
+                                        )}
+                                    </View>
+                                </View>
+                            );
+                        })()}
 
                         {activeTab === 'shifts' && (
                             <View>
