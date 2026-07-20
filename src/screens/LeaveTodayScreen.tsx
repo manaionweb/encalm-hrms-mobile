@@ -89,7 +89,7 @@ export default function LeaveTodayScreen({ navigation }: any) {
                     </View>
                 </View>
 
-                <View style={tw`space-y-2 mb-4`}>
+                <View style={tw`gap-y-2 mb-4`}>
                     <View style={tw`flex-row items-center gap-2 text-sm`}>
                         <Calendar size={14} color="#f97316" />
                         <Text style={tw`text-gray-600 dark:text-gray-400 text-xs font-semibold`}>
@@ -130,13 +130,13 @@ export default function LeaveTodayScreen({ navigation }: any) {
                 {/* Header info */}
                 <View style={tw`flex-row justify-between items-center mb-6`}>
                     <View style={tw`flex-1 mr-2`}>
-                        <Text style={tw`text-xs text-gray-550 dark:text-gray-400 font-medium`}>
+                        <Text style={tw`text-xs text-gray-500 dark:text-gray-400 font-medium`}>
                             List of employees currently away from work
                         </Text>
                     </View>
                     <View style={tw`flex-row items-center gap-1.5 px-3.5 py-2 bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-2xl`}>
                         <UserMinus size={14} color="#f97316" />
-                        <Text style={tw`text-xs font-bold text-orange-700 dark:text-orange-450`}>
+                        <Text style={tw`text-xs font-bold text-orange-700 dark:text-orange-400`}>
                             {employeesOnLeave.length} Employees
                         </Text>
                     </View>

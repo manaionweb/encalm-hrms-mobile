@@ -203,8 +203,8 @@ export default function AttendanceScreen({ route, navigation }: any) {
             if (statusLabel !== 'Weekend') return null;
         }
 
-        let badgeBg = 'bg-gray-150 dark:bg-gray-850';
-        let badgeText = 'text-gray-750 dark:text-gray-300';
+        let badgeBg = 'bg-gray-100 dark:bg-gray-800';
+        let badgeText = 'text-gray-700 dark:text-gray-300';
         let borderStyle = '';
         let displayLabel = statusLabel;
 
@@ -418,7 +418,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
 
                 {/* Real-time Punch Card */}
                 {isSelf && (
-                    <View style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl border border-gray-150 dark:border-white/5 shadow-xl mb-5 items-center w-full relative overflow-hidden`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl border border-gray-200 dark:border-white/5 shadow-xl mb-5 items-center w-full relative overflow-hidden`}>
                         {/* Top gradient accent line */}
                         <View style={[tw`absolute top-0 left-0 right-0 h-1.5`, { backgroundColor: '#8b5cf6' }]} />
 
@@ -494,7 +494,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                             </TouchableOpacity>
                         </View>
 
-                        {isPunchedIn && punchInTime && (
+                        {!!isPunchedIn && !!punchInTime && (
                             <View style={tw`mt-1 px-3 py-1.5 bg-gray-50 dark:bg-white/5 rounded-2xl flex-row items-center gap-2 border border-gray-100 dark:border-white/5`}>
                                 <Clock size={12} color="#8b5cf6" />
                                 <Text style={tw`text-[11px] text-purple-700 dark:text-purple-300 font-medium`}>
@@ -688,7 +688,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
 
                                             {/* Middle Details (Holiday Name or Leave Type Name) */}
                                             <View style={tw`w-full items-center`}>
-                                                {holiday && (
+                                                {!!holiday && (
                                                     <View style={tw`bg-purple-100 dark:bg-purple-900/30 px-0.5 py-0.2 rounded w-full items-center mt-0.5`}>
                                                         <Text numberOfLines={1} style={[tw`text-[5px] font-bold text-purple-700 dark:text-purple-300`, { lineHeight: 6.5 }]}>
                                                             {holiday.name}
@@ -723,7 +723,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
 
                                             {/* In/Out timings if log exists */}
                                             {log && (log.inTime || log.outTime) ? (
-                                                <View style={tw`w-full border-t border-gray-150 dark:border-white/5 pt-0.5 mt-0.5 items-center`}>
+                                                <View style={tw`w-full border-t border-gray-200 dark:border-white/5 pt-0.5 mt-0.5 items-center`}>
                                                     <Text style={[tw`text-[5.5px] font-semibold text-green-600 dark:text-green-400`, { lineHeight: 7 }]}>
                                                         {log.inTime ? formatTime(log.inTime) : '--'}
                                                     </Text>
@@ -844,7 +844,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                         {rejectedRequestToShow && (
                             <View style={tw`gap-4`}>
                                 <View>
-                                    <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-gray-450 uppercase tracking-wider mb-1.5`}>Date Requested</Text>
+                                    <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-1.5`}>Date Requested</Text>
                                     <View style={tw`p-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl`}>
                                         <Text style={tw`font-bold text-sm text-gray-800 dark:text-gray-200`}>
                                             {(() => {
@@ -860,7 +860,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
 
                                 <View style={tw`flex-row gap-4`}>
                                     <View style={tw`flex-1`}>
-                                        <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-gray-450 uppercase tracking-wider mb-1.5`}>Proposed In Time</Text>
+                                        <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-1.5`}>Proposed In Time</Text>
                                         <View style={tw`p-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl flex-row items-center gap-1.5`}>
                                             <Clock size={14} color="#10b981" />
                                             <Text style={tw`text-sm font-semibold text-emerald-600 dark:text-emerald-400`}>
@@ -936,7 +936,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                             <View style={tw`gap-4`}>
                                 <View style={tw`flex-row gap-4`}>
                                     <View style={tw`flex-1`}>
-                                        <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-gray-450 uppercase tracking-wider mb-1.5`}>Leave Type</Text>
+                                        <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-1.5`}>Leave Type</Text>
                                         <View style={tw`p-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl`}>
                                             <Text style={tw`font-bold text-sm text-gray-800 dark:text-gray-200`}>
                                                 {rejectedLeaveToShow.leaveType?.name || 'Leave'}

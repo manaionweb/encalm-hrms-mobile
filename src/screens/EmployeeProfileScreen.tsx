@@ -385,8 +385,8 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                         <Text style={tw`text-xl font-bold text-gray-900 dark:text-white`}>{employee.name}</Text>
                     )}
 
-                    <Text style={tw`text-xs text-gray-550 dark:text-purple-200 mt-1`}>
-                        {(employee.role && typeof employee.role === 'object' ? employee.role.name : employee.role) || 'HR_ADMIN'} - {profile.title || 'hr'}
+                    <Text style={tw`text-xs text-gray-500 dark:text-purple-200 mt-1`}>
+                        {String((typeof employee.role === 'object' ? employee.role?.name : employee.role) || 'HR_ADMIN')} - {String(profile.title || 'hr')}
                     </Text>
                     
                     {/* Badges matching web */}
@@ -395,7 +395,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                             <Text style={tw`text-[10px] font-bold text-gray-500 dark:text-purple-200`}>ID: {employee.id}</Text>
                         </View>
                         <View style={tw`px-2.5 py-0.5 bg-gray-50 dark:bg-white/10 rounded-full border border-gray-100 dark:border-white/5`}>
-                            <Text style={tw`text-[10px] font-bold text-gray-550 dark:text-purple-200`}>{profile.department || 'Head Office'}</Text>
+                            <Text style={tw`text-[10px] font-bold text-gray-500 dark:text-purple-200`}>{profile.department || 'Head Office'}</Text>
                         </View>
                     </View>
 
@@ -444,7 +444,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                 style={tw`flex-row items-center gap-1.5 px-4 py-2 rounded-xl mr-2 ${activeTab === tab.key ? 'bg-[#8b5cf6]' : 'bg-gray-100 dark:bg-[#5b21b6]'}`}
                             >
                                 <tab.icon size={14} color={activeTab === tab.key ? '#fff' : (isDark ? '#e2e8f0' : '#64748b')} />
-                                <Text style={tw`text-xs font-bold ${activeTab === tab.key ? 'text-white' : 'text-gray-550 dark:text-gray-200'}`}>
+                                <Text style={tw`text-xs font-bold ${activeTab === tab.key ? 'text-white' : 'text-gray-500 dark:text-gray-200'}`}>
                                     {tab.label}
                                 </Text>
                             </TouchableOpacity>
@@ -462,7 +462,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                             {renderDetailRow('Email', employee.email)}
                             {renderEditableDetailRow('Date of Birth (YYYY-MM-DD)', profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : '', formDob, setFormDob, 'YYYY-MM-DD')}
                             {renderDetailRow('Date of Joining', profile.joiningDate ? new Date(profile.joiningDate).toLocaleDateString('en-IN') : '')}
-                            {renderDetailRow('System Role', employee.role && typeof employee.role === 'object' ? employee.role.name : employee.role)}
+                            {renderDetailRow('System Role', typeof employee.role === 'object' ? employee.role?.name : String(employee.role || 'EMPLOYEE'))}
                             {renderDetailRow('Designation', profile.title)}
                             {renderDetailRow('Department', profile.department)}
                             {renderEditableDetailRow('Blood Group', profile.bloodGroup, formBloodGroup, setFormBloodGroup, 'e.g. AB+')}
@@ -483,10 +483,11 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                 <View style={tw`mt-6 pt-4 border-t border-gray-100 dark:border-white/5`}>
                                     <Text style={tw`text-xs font-black text-gray-400 dark:text-purple-300 uppercase tracking-widest mb-3`}>Additional Details</Text>
                                     {personalFields.map(ca => {
+                                        const val = ca.value || ca.fieldValue || (formCustomFields && formCustomFields[ca.fieldId]) || 'N/A';
                                         if (isEditing) {
                                             return (
                                                 <View key={ca.id} style={tw`py-2.5 border-b border-gray-50 dark:border-slate-700/20`}>
-                                                    <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-1.5`}>{ca.field.name}</Text>
+                                                    <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-1.5`}>{ca.field?.name || 'Custom Field'}</Text>
                                                     <TextInput
                                                         style={tw`w-full px-3 py-2 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-9`}
                                                         value={formCustomFields[ca.fieldId] || ''}
@@ -496,14 +497,14 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                                 [ca.fieldId]: text
                                                             }));
                                                         }}
-                                                        placeholder={`Enter ${ca.field.name}`}
+                                                        placeholder={`Enter ${ca.field?.name || 'field'}`}
                                                         placeholderTextColor="#94a3b8"
                                                     />
                                                 </View>
                                             );
                                         }
 
-                                        return renderDetailRow(ca.field?.name || 'Custom Field', val);
+                                        return renderDetailRow(ca.field?.name || 'Custom Field', String(val));
                                     })}
                                 </View>
                             )}
@@ -527,10 +528,10 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                 </View>
                                                 <View style={tw`flex-1`}>
                                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                        {ca.field.name} <Text style={tw`text-red-500`}>*</Text>
+                                                        {ca.field?.name || 'Document'} {ca.field?.required ? <Text style={tw`text-red-500`}>*</Text> : null}
                                                     </Text>
                                                     {ca.documentUrl ? (
-                                                        <Text style={tw`text-[10px] text-green-650 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                        <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
                                                             {ca.documentName || 'Document Uploaded'}
                                                         </Text>
                                                     ) : (
@@ -554,7 +555,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                 )}
 
                                                 {/* Eye view button styled exactly like web */}
-                                                {ca.documentUrl && (
+                                                {!!ca.documentUrl && (
                                                     <TouchableOpacity 
                                                         onPress={() => handleViewDocument(ca.documentUrl)}
                                                         style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
@@ -564,7 +565,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                 )}
 
                                                 {/* Delete Button in Edit Mode if file exists */}
-                                                {isEditing && ca.documentUrl && (
+                                                {isEditing && !!ca.documentUrl && (
                                                     <TouchableOpacity 
                                                         onPress={() => handleDeleteDocument(ca.fieldId, ca.field.name)}
                                                         style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
@@ -611,28 +612,28 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                 <Text style={tw`text-base font-bold text-[#8b5cf6] mb-3 capitalize`}>{profile.shift?.name || 'morning'}</Text>
                                 
                                 <View style={tw`flex-row justify-between mb-2`}>
-                                    <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Timing:</Text>
+                                    <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Timing:</Text>
                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
                                         {profile.shift?.inTime || '09:00'} - {profile.shift?.outTime || '18:00'}
                                     </Text>
                                 </View>
                                 
                                 <View style={tw`flex-row justify-between mb-2`}>
-                                    <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Break:</Text>
+                                    <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Break:</Text>
                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
                                         {profile.shift?.breakDuration ?? 60} mins
                                     </Text>
                                 </View>
                                 
                                 <View style={tw`flex-row justify-between mb-2`}>
-                                    <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Grace Time:</Text>
+                                    <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Grace Time:</Text>
                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
                                         {profile.shift?.graceTime ?? 15} mins
                                     </Text>
                                 </View>
                                 
                                 <View style={tw`flex-row justify-between`}>
-                                    <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Night Shift:</Text>
+                                    <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Night Shift:</Text>
                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
                                         {profile.shift?.isNightShift ? 'Yes' : 'No'}
                                     </Text>
@@ -657,17 +658,17 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                             {t.description ? <Text style={tw`text-xs text-gray-500 mb-3`}>{t.description}</Text> : null}
                                             
                                             <View style={tw`flex-row justify-between mb-2`}>
-                                                <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Name</Text>
+                                                <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Team Manager Name</Text>
                                                 <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.name || 'System Admin'}</Text>
                                             </View>
                                             
                                             <View style={tw`flex-row justify-between mb-2`}>
-                                                <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Email</Text>
+                                                <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Team Manager Email</Text>
                                                 <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.email || 'admin@example.com'}</Text>
                                             </View>
                                             
                                             <View style={tw`flex-row justify-between`}>
-                                                <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Phone</Text>
+                                                <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Team Manager Phone</Text>
                                                 <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.employeeProfile?.phone || '1119299291'}</Text>
                                             </View>
                                         </View>
@@ -680,17 +681,17 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                     {profile.department ? <Text style={tw`text-xs text-gray-500 mb-3`}>{profile.department}</Text> : null}
                                     
                                     <View style={tw`flex-row justify-between mb-2`}>
-                                        <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Name</Text>
+                                        <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Team Manager Name</Text>
                                         <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>System Admin</Text>
                                     </View>
                                     
                                     <View style={tw`flex-row justify-between mb-2`}>
-                                        <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Email</Text>
+                                        <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Team Manager Email</Text>
                                         <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>admin@example.com</Text>
                                     </View>
                                     
                                     <View style={tw`flex-row justify-between`}>
-                                        <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Phone</Text>
+                                        <Text style={tw`text-xs text-gray-500 dark:text-purple-200`}>Team Manager Phone</Text>
                                         <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>1119299291</Text>
                                     </View>
                                 </View>

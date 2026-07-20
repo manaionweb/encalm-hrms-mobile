@@ -96,7 +96,7 @@ export default function NotificationsScreen({ navigation }: any) {
                 }}
                 style={tw`p-4 rounded-3xl mb-4 border ${
                     item.unread 
-                        ? 'bg-white dark:bg-[#4c1d95] border-gray-150 dark:border-[#8b5cf6]/30' 
+                        ? 'bg-white dark:bg-[#4c1d95] border-gray-200 dark:border-[#8b5cf6]/30' 
                         : 'bg-white/50 dark:bg-[#4c1d95]/40 border-gray-100 dark:border-[#8b5cf6]/30'
                 } shadow-sm`}
             >
@@ -139,7 +139,7 @@ export default function NotificationsScreen({ navigation }: any) {
                                     <View style={tw`w-1.5 h-1.5 rounded-full bg-[#8b5cf6]`} />
                                 )}
                             </View>
-                            {item.time && (
+                            {!!item.time && (
                                 <Text style={tw`text-[10px] text-gray-400 dark:text-gray-500 font-medium`}>
                                     {item.time}
                                 </Text>

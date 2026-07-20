@@ -273,7 +273,7 @@ export default function TeamScreen({ navigation }: any) {
                         return (
                             <View 
                                 key={team.id}
-                                style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-150 dark:border-white/5 shadow-md`}
+                                style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-200 dark:border-white/5 shadow-md`}
                             >
                                 {/* Top Section: Suitcase Icon + Title/Description + 3-dots */}
                                 <View style={tw`flex-row justify-between items-start mb-4`}>
@@ -544,7 +544,7 @@ export default function TeamScreen({ navigation }: any) {
                 onRequestClose={() => setShowDeleteConfirm(false)}
             >
                 <View style={tw`flex-1 bg-black/60 justify-center items-center p-6`}>
-                    <View style={tw`bg-white dark:bg-[#1c1a45] p-6 rounded-3xl border border-gray-250 dark:border-white/5 w-full max-w-sm text-center items-center shadow-2xl`}>
+                    <View style={tw`bg-white dark:bg-[#1c1a45] p-6 rounded-3xl border border-gray-200 dark:border-white/5 w-full max-w-sm text-center items-center shadow-2xl`}>
                         <View style={tw`w-16 h-16 mb-4 bg-rose-50 dark:bg-rose-500/10 rounded-full flex items-center justify-center`}>
                             <Trash2 size={32} color="#ef4444" />
                         </View>

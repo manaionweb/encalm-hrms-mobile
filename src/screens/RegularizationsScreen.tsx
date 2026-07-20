@@ -182,15 +182,15 @@ export default function RegularizationsScreen({ navigation }: any) {
                                     </View>
                                 </View>
 
-                                {/* Proposed In/Out times */}
+                                 {/* Proposed In/Out times */}
                                 <View style={tw`flex-row gap-4 mb-3`}>
-                                    {req.proposedIn && (
+                                    {!!req.proposedIn && (
                                         <View style={tw`flex-row items-center gap-1`}>
                                             <Clock size={12} color="#10b981" />
                                             <Text style={tw`text-xs font-bold text-green-600`}>In: {req.proposedIn}</Text>
                                         </View>
                                     )}
-                                    {req.proposedOut && (
+                                    {!!req.proposedOut && (
                                         <View style={tw`flex-row items-center gap-1`}>
                                             <Clock size={12} color="#f43f5e" />
                                             <Text style={tw`text-xs font-bold text-rose-500`}>Out: {req.proposedOut}</Text>
@@ -198,7 +198,7 @@ export default function RegularizationsScreen({ navigation }: any) {
                                     )}
                                 </View>
 
-                                <Text style={tw`text-xs text-gray-655 dark:text-gray-300 italic mb-4`}>
+                                <Text style={tw`text-xs text-gray-600 dark:text-gray-300 italic mb-4`}>
                                     "{req.reason}"
                                 </Text>
 
