@@ -3,8 +3,10 @@ import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator } fr
 import { Clock, Calendar, History, ArrowRight, CheckCircle2, AlertCircle, LogIn, LogOut } from 'lucide-react-native';
 import api from '../../utils/api';
 import tw from 'twrnc';
+import { useToast } from '../../context/ToastContext';
 
 export default function EmployeeDashboard({ user, navigation }: { user: any, navigation: any }) {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [punchStatus, setPunchStatus] = useState<any>(null);
     const [leaveBalances, setLeaveBalances] = useState<any[]>([]);
@@ -32,7 +34,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
 
         } catch (error) {
             console.error("Failed to fetch employee dashboard data:", error);
-            Alert.alert("Error", "Some dashboard data failed to load");
+            showToast("Some dashboard data failed to load", 'error');
         } finally {
             setLoading(false);
         }
@@ -56,14 +58,14 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                 status: res.data.record.status
             } : res.data);
 
-            Alert.alert("Success", res.data.message || 'Action successful');
+            showToast(res.data.message || 'Action successful', 'success');
 
             // Refresh history with correct parameters
             const historyRes = await api.get(`/attendance/history?year=${year}&month=${month}`);
             setRecentAttendance(historyRes.data.slice(0, 5));
         } catch (error: any) {
             console.error("Punch error:", error);
-            Alert.alert("Punch Failed", error.response?.data?.message || "Punch action failed");
+            showToast(error.response?.data?.message || "Punch action failed", 'error');
         }
     };
 

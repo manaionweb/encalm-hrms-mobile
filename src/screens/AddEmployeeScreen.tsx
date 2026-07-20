@@ -962,11 +962,11 @@ export default function AddEmployeeScreen({ navigation }: any) {
                             </Text>
                             <ChevronRight size={14} color="white" />
                         </TouchableOpacity>
+                    </View>
                 </View>
             </View>
-        </View>
 
-        {/* Delete Document Confirmation Modal */}
+            {/* Delete Document Confirmation Modal */}
             <Modal
                 visible={!!confirmDeleteDoc}
                 transparent={true}
