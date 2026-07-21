@@ -86,11 +86,19 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     const getToastStyle = (type?: ToastType) => {
         switch (type) {
             case 'error':
-                return { backgroundColor: 'red' };
+                return { backgroundColor: '#1f2937', borderColor: '#ef4444', borderWidth: 1 };
             case 'success':
-                return { backgroundColor: 'green' };
+                return { backgroundColor: '#1f2937', borderColor: '#10b981', borderWidth: 1 };
             default:
-                return { backgroundColor: '#333333' };
+                return { backgroundColor: '#1f2937', borderColor: '#374151', borderWidth: 1 };
+        }
+    };
+
+    const getIconColor = (type?: ToastType) => {
+        switch (type) {
+            case 'error': return '#ef4444';
+            case 'success': return '#10b981';
+            default: return '#3b82f6';
         }
     };
 
@@ -100,9 +108,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             {visible && toast ? (
                 <Animated.View
                     style={[
-                        tw`absolute z-50 items-center justify-center`,
+                        tw`absolute z-50 items-center justify-center pointer-events-none`,
                         {
-                            top: insets.top > 0 ? insets.top + 8 : 16,
+                            top: insets.top > 0 ? insets.top + 12 : 20,
                             opacity: fadeAnim,
                             transform: [{ translateY: slideAnim }],
                             alignSelf: 'center',
@@ -112,27 +120,27 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 >
                     <View
                         style={[
-                            tw`flex-row items-center rounded-full shadow-lg`,
+                            tw`flex-row items-center rounded-2xl shadow-2xl bg-gray-900 border`,
                             getToastStyle(toast.type),
-                            { paddingVertical: 8, paddingHorizontal: 16, maxWidth: SCREEN_WIDTH - 40 },
+                            { paddingVertical: 12, paddingHorizontal: 16, maxWidth: SCREEN_WIDTH - 32, elevation: 10 },
                         ]}
                     >
                         <View
                             style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: 10,
-                                backgroundColor: 'white',
+                                width: 24,
+                                height: 24,
+                                borderRadius: 12,
+                                backgroundColor: getIconColor(toast.type) + '20',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                marginRight: 8,
+                                marginRight: 10,
                             }}
                         >
-                            {toast.type === 'success' ? <Check size={12} color="green" strokeWidth={4} /> : null}
-                            {toast.type === 'error' ? <X size={12} color="red" strokeWidth={4} /> : null}
-                            {toast.type === 'info' ? <Info size={12} color="#333" strokeWidth={4} /> : null}
+                            {toast.type === 'success' ? <Check size={14} color="#10b981" strokeWidth={3} /> : null}
+                            {toast.type === 'error' ? <X size={14} color="#ef4444" strokeWidth={3} /> : null}
+                            {toast.type === 'info' ? <Info size={14} color="#3b82f6" strokeWidth={3} /> : null}
                         </View>
-                        <Text style={[tw`text-white font-semibold text-sm leading-5`, { flexShrink: 1 }]}>
+                        <Text style={[tw`text-white font-semibold text-xs leading-5`, { flexShrink: 1 }]}>
                             {toast.message || ''}
                         </Text>
                     </View>

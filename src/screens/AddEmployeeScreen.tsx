@@ -6,8 +6,10 @@ import * as DocumentPicker from 'expo-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import api from '../utils/api';
 import tw from 'twrnc';
+import { useToast } from '../context/ToastContext';
 
 export default function AddEmployeeScreen({ navigation }: any) {
+    const { showToast } = useToast();
     const insets = useSafeAreaInsets();
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -123,7 +125,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
 
             const asset = res.assets[0];
             if (isDuplicateFile(asset.name || 'document.pdf', asset.size, fieldId)) {
-                Alert.alert("Duplicate File", "This file has already been uploaded Please select a unique document.");
+                showToast("This file has already been uploaded. Please select a unique document.", 'error');
                 return;
             }
 
@@ -151,7 +153,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
             }));
         } catch (error) {
             console.error('Failed to pick custom field file:', error);
-            Alert.alert('Error', 'Failed to select file.');
+            showToast('Failed to select file.', 'error');
         }
     };
 
@@ -346,7 +348,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
         } else if (currentStep === 4) {
             // Validation for standard documents
             if (!documents.aadhaar || !documents.pan || !documents.degree) {
-                Alert.alert("Required Documents", "Please upload all required standard documents (Aadhaar Card, PAN Card, and Highest Qualification Degree).");
+                showToast("Please upload all required standard documents (Aadhaar Card, PAN Card, and Highest Qualification Degree).", 'error');
                 return;
             }
 
@@ -452,12 +454,13 @@ export default function AddEmployeeScreen({ navigation }: any) {
                 });
             }
 
-            Alert.alert("Success", "Employee added successfully!", [
-                { text: "OK", onPress: () => navigation.goBack() }
-            ]);
+            showToast("Employee added successfully!", 'success');
+            setTimeout(() => {
+                navigation.goBack();
+            }, 1000);
         } catch (error: any) {
             console.error(error);
-            Alert.alert("Error", error.response?.data?.message || "Failed to add employee.");
+            showToast(error.response?.data?.message || "Failed to add employee.", 'error');
         } finally {
             setLoading(false);
         }
@@ -472,7 +475,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
             if (res.assets && res.assets.length > 0) {
                 const asset = res.assets[0];
                 if (isDuplicateFile(asset.name || 'document.pdf', asset.size, docKey)) {
-                    Alert.alert("Duplicate File", "This file has already been uploaded Please select a unique document.");
+                    showToast("This file has already been uploaded. Please select a unique document.", 'error');
                     return;
                 }
 

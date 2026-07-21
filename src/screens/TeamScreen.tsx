@@ -15,8 +15,10 @@ import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import { useAuth } from '../context/AuthContext';
 import tw from 'twrnc';
+import { useToast } from '../context/ToastContext';
 
 export default function TeamScreen({ navigation }: any) {
+    const { showToast } = useToast();
     const { user } = useAuth();
     const isAdmin = user?.role === 'HR_ADMIN';
 
@@ -90,7 +92,7 @@ export default function TeamScreen({ navigation }: any) {
 
     const handleProceedToMembers = () => {
         if (!newTeamName.trim()) {
-            Alert.alert("Required", "Please provide a team name.");
+            showToast("Please provide a team name.", 'error');
             return;
         }
         setShowCreateModal(false);
@@ -109,7 +111,7 @@ export default function TeamScreen({ navigation }: any) {
                     members: selectedEmployees,
                     managerId: selectedManagerId
                 });
-                Alert.alert("Success", "Team roster updated successfully!");
+                showToast("Team roster updated successfully!", 'success');
             } else {
                 // Creating team + adding members
                 const res = await createTeamApi({ name: newTeamName, description: newTeamDesc });
@@ -119,7 +121,7 @@ export default function TeamScreen({ navigation }: any) {
                         managerId: selectedManagerId
                     });
                 }
-                Alert.alert("Success", "Team created successfully!");
+                showToast("Team created successfully!", 'success');
                 setNewTeamName('');
                 setNewTeamDesc('');
             }
@@ -130,7 +132,7 @@ export default function TeamScreen({ navigation }: any) {
             fetchTeams();
         } catch (error: any) {
             console.error(error);
-            Alert.alert("Error", error.response?.data?.message || "Failed to save team members.");
+            showToast(error.response?.data?.message || "Failed to save team members.", 'error');
         }
     };
 
@@ -160,19 +162,19 @@ export default function TeamScreen({ navigation }: any) {
         if (!activeTeam) return;
         try {
             await saveTeamAccessControl(activeTeam.id, permissions);
-            Alert.alert("Success", "Access control updated successfully!");
+            showToast("Access control updated successfully!", 'success');
             setShowAccessControlModal(false);
             fetchTeams();
         } catch (e) {
             console.error(e);
-            Alert.alert("Error", "Failed to save access control permissions.");
+            showToast("Failed to save access control permissions.", 'error');
         }
     };
 
     const handleEditTeam = async () => {
         if (!activeTeam) return;
         if (!editTeamName.trim()) {
-            Alert.alert("Required", "Please provide a team name.");
+            showToast("Please provide a team name.", 'error');
             return;
         }
         try {
@@ -180,12 +182,12 @@ export default function TeamScreen({ navigation }: any) {
                 name: editTeamName,
                 description: editTeamDesc
             });
-            Alert.alert("Success", "Team updated successfully!");
+            showToast("Team updated successfully!", 'success');
             setShowEditModal(false);
             fetchTeams();
         } catch (error: any) {
             console.error(error);
-            Alert.alert("Error", error.response?.data?.message || "Failed to update team.");
+            showToast(error.response?.data?.message || "Failed to update team.", 'error');
         }
     };
 
@@ -193,12 +195,12 @@ export default function TeamScreen({ navigation }: any) {
         if (!activeTeam) return;
         try {
             await deleteTeam(activeTeam.id);
-            Alert.alert("Success", "Team deleted successfully!");
+            showToast("Team deleted successfully!", 'success');
             setShowDeleteConfirm(false);
             fetchTeams();
         } catch (error: any) {
             console.error(error);
-            Alert.alert("Error", error.response?.data?.message || "Failed to delete team.");
+            showToast(error.response?.data?.message || "Failed to delete team.", 'error');
         }
     };
 
@@ -218,7 +220,7 @@ export default function TeamScreen({ navigation }: any) {
             setConfirmRemoveEmployeeId(null);
         } catch (err) {
             console.error(err);
-            Alert.alert("Error", "Failed to remove member.");
+            showToast("Failed to remove member.", 'error');
         }
     };
 
@@ -273,7 +275,7 @@ export default function TeamScreen({ navigation }: any) {
                         return (
                             <View 
                                 key={team.id}
-                                style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-150 dark:border-white/5 shadow-md`}
+                                style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-md`}
                             >
                                 {/* Top Section: Suitcase Icon + Title/Description + 3-dots */}
                                 <View style={tw`flex-row justify-between items-start mb-4`}>
@@ -328,7 +330,7 @@ export default function TeamScreen({ navigation }: any) {
                                             setShowRosterModal(true);
                                         }}
                                     >
-                                        <Text style={tw`text-xs text-purple-650 dark:text-[#c4b5fd] font-black`}>
+                                        <Text style={tw`text-xs text-purple-600 dark:text-[#c4b5fd] font-black`}>
                                             View Members
                                         </Text>
                                     </TouchableOpacity>

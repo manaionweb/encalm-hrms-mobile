@@ -91,7 +91,7 @@ export default function LeaveScreen({ navigation }: any) {
         if (partsStart.length === 3 && partsEnd.length === 3) {
             const start = new Date(parseInt(partsStart[0]), parseInt(partsStart[1]) - 1, parseInt(partsStart[2]));
             const end = new Date(parseInt(partsEnd[0]), parseInt(partsEnd[1]) - 1, parseInt(partsEnd[2]));
-            
+
             const current = new Date(start);
             while (current <= end) {
                 const dayOfWeek = current.getDay();
@@ -215,7 +215,7 @@ export default function LeaveScreen({ navigation }: any) {
 
             let cellBg = 'bg-white dark:bg-[#5b21b6]';
             let cellBorder = 'border-gray-100 dark:border-white/5';
-            
+
             if (status?.type === 'Holiday') {
                 cellBg = 'bg-purple-50 dark:bg-purple-950/20';
                 cellBorder = 'border-purple-200 dark:border-purple-500/20';
@@ -283,8 +283,8 @@ export default function LeaveScreen({ navigation }: any) {
                                     style={[
                                         tw`px-1.5 py-0.5 rounded-full w-full items-center`,
                                         status.status === 'APPROVED' ? tw`bg-green-100` :
-                                        status.status === 'REJECTED' ? tw`bg-rose-100` :
-                                        tw`bg-orange-100`
+                                            status.status === 'REJECTED' ? tw`bg-rose-100` :
+                                                tw`bg-orange-100`
                                     ]}
                                 >
                                     <Text
@@ -292,8 +292,8 @@ export default function LeaveScreen({ navigation }: any) {
                                         style={[
                                             tw`text-[7px] font-extrabold`,
                                             status.status === 'APPROVED' ? tw`text-green-700` :
-                                            status.status === 'REJECTED' ? tw`text-rose-700` :
-                                            tw`text-orange-700`
+                                                status.status === 'REJECTED' ? tw`text-rose-700` :
+                                                    tw`text-orange-700`
                                         ]}
                                     >
                                         {status.label}
@@ -349,9 +349,9 @@ export default function LeaveScreen({ navigation }: any) {
                                     const percent = Math.min(100, Math.max(0, (balance.balance / total) * 100));
 
                                     return (
-                                        <View 
-                                            key={balance.code || balance.leaveTypeCode || index} 
-                                            style={tw`${isFullWidth ? 'w-full' : 'w-[48%]'} bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-150 dark:border-white/5 shadow-sm`}
+                                        <View
+                                            key={balance.code || balance.leaveTypeCode || index}
+                                            style={tw`${isFullWidth ? 'w-full' : 'w-[48%]'} bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}
                                         >
                                             <View style={tw`flex-row justify-between items-start`}>
                                                 <View style={tw`flex-1 mr-2`}>
@@ -440,15 +440,15 @@ export default function LeaveScreen({ navigation }: any) {
                                         const leaveStatus = String(leave.status).toUpperCase();
                                         const isApproved = leaveStatus === 'APPROVED';
                                         const isRejected = leaveStatus === 'REJECTED';
-                                        
+
                                         const dotColor = isApproved ? 'bg-green-500' : isRejected ? 'bg-red-500' : 'bg-orange-500';
                                         const badgeBg = isApproved ? 'bg-green-100' :
-                                                        isRejected ? 'bg-red-100' :
-                                                        'bg-orange-100';
+                                            isRejected ? 'bg-red-100' :
+                                                'bg-orange-100';
                                         const badgeTextColor = isApproved ? 'text-green-700' :
-                                                               isRejected ? 'text-red-700' :
-                                                               'text-orange-700';
-                                        
+                                            isRejected ? 'text-red-700' :
+                                                'text-orange-700';
+
                                         return (
                                             <View key={leave.id} style={tw`py-3.5 border-b border-gray-50 dark:border-white/5 last:border-0 flex-row items-start gap-3`}>
                                                 <View style={tw`w-2 h-2 rounded-full mt-1.5 ${dotColor}`} />

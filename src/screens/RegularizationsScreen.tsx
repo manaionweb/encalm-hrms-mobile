@@ -5,10 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import api from '../utils/api';
 import tw from 'twrnc';
 import useRegularizations from "../hooks/useRegularizations";
+import { useToast } from '../context/ToastContext';
 
 export default function RegularizationsScreen({ navigation }: any) {
-    // const [requests, setRequests] = useState<any[]>([]);
-    // const [loading, setLoading] = useState(true);
+    const { showToast } = useToast();
     const [searchQuery, setSearchQuery] = useState('');
     const [rejectingId, setRejectingId] = useState<string | null>(null);
     const [rejectComment, setRejectComment] = useState('');
@@ -43,64 +43,31 @@ export default function RegularizationsScreen({ navigation }: any) {
     // }, []);
 
     const handleApprove = async (id: string) => {
-
         try {
-
             await approve(id);
-
-            Alert.alert(
-                "Success",
-                "Attendance correction approved successfully."
-            );
-
+            showToast("Attendance correction approved successfully.", 'success');
         } catch (err: any) {
-
-            Alert.alert(
-                "Error",
-                err.message
-            );
-
+            showToast(err.message || "Failed to approve regularization", 'error');
         }
-
     };
 
     const handleRejectSubmit = async () => {
-
         if (!rejectingId || !rejectComment.trim()) {
-
-            Alert.alert(
-                "Required",
-                "Please enter a rejection reason."
-            );
-
+            showToast("Please enter a rejection reason.", 'error');
             return;
         }
 
         try {
-
             await reject(
                 rejectingId,
                 rejectComment
             );
-
-            Alert.alert(
-                "Success",
-                "Attendance correction rejected."
-            );
-
+            showToast("Attendance correction rejected.", 'success');
             setRejectComment("");
-
             setRejectingId(null);
-
         } catch (err: any) {
-
-            Alert.alert(
-                "Error",
-                err.message
-            );
-
+            showToast(err.message || "Failed to reject regularization", 'error');
         }
-
     };
 
     const filteredRequests = requests.filter(req => {
@@ -184,13 +151,13 @@ export default function RegularizationsScreen({ navigation }: any) {
 
                                 {/* Proposed In/Out times */}
                                 <View style={tw`flex-row gap-4 mb-3`}>
-                                    {req.proposedIn && (
+                                    {!!req.proposedIn && (
                                         <View style={tw`flex-row items-center gap-1`}>
                                             <Clock size={12} color="#10b981" />
                                             <Text style={tw`text-xs font-bold text-green-600`}>In: {req.proposedIn}</Text>
                                         </View>
                                     )}
-                                    {req.proposedOut && (
+                                    {!!req.proposedOut && (
                                         <View style={tw`flex-row items-center gap-1`}>
                                             <Clock size={12} color="#f43f5e" />
                                             <Text style={tw`text-xs font-bold text-rose-500`}>Out: {req.proposedOut}</Text>

@@ -5,10 +5,12 @@ import { Captcha } from '../components/auth/Captcha';
 import { OtpInput } from '../components/auth/OtpInput';
 import api from '../utils/api';
 import tw from 'twrnc';
+import { useToast } from '../context/ToastContext';
 
 type AuthStep = 'INITIAL_FORM' | 'OTP_VERIFICATION';
 
 export default function ForgotPasswordScreen({ navigation }: any) {
+    const { showToast } = useToast();
     const [step, setStep] = useState<AuthStep>('INITIAL_FORM');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -22,17 +24,17 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
     const handleSendOTP = async () => {
         if (!email.trim() || !password.trim() || !confirmPassword.trim() || !captchaInput.trim()) {
-            Alert.alert("Error", "Please fill in all required fields.");
+            showToast("Please fill in all required fields.", 'error');
             return;
         }
 
         if (captchaInput.toUpperCase() !== generatedCaptcha.toUpperCase()) {
-            Alert.alert("Error", "Invalid Captcha. Please try again.");
+            showToast("Invalid Captcha. Please try again.", 'error');
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert("Error", "Passwords do not match.");
+            showToast("Passwords do not match.", 'error');
             return;
         }
 
@@ -41,7 +43,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
             await api.post('/auth/send-otp', { email, mode: 'FORGOT_PASSWORD' });
             setStep('OTP_VERIFICATION');
         } catch (err: any) {
-            Alert.alert("Error", err.response?.data?.message || "Failed to send OTP. Please try again.");
+            showToast(err.response?.data?.message || "Failed to send OTP. Please try again.", 'error');
         } finally {
             setLoading(false);
         }
@@ -49,7 +51,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
     const handleVerifyOTP = async () => {
         if (otp.length < 6) {
-            Alert.alert("Error", "Please enter a valid 6-digit OTP.");
+            showToast("Please enter a valid 6-digit OTP.", 'error');
             return;
         }
 
@@ -61,11 +63,12 @@ export default function ForgotPasswordScreen({ navigation }: any) {
                 otp
             });
 
-            Alert.alert("Success", "Password reset successfully! Please login.", [
-                { text: "OK", onPress: () => navigation.navigate('SignIn') }
-            ]);
+            showToast("Password reset successfully! Please login.", 'success');
+            setTimeout(() => {
+                navigation.navigate('SignIn');
+            }, 1000);
         } catch (err: any) {
-            Alert.alert("Error", err.response?.data?.message || "Verification failed. Invalid OTP.");
+            showToast(err.response?.data?.message || "Verification failed. Invalid OTP.", 'error');
         } finally {
             setLoading(false);
         }

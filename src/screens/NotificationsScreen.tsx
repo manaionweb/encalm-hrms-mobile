@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Modal, FlatList } from 'react-native';
 import { Bell, Check, Trash2, Search, ArrowLeft, FileText, Calendar } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
+import { useToast } from '../context/ToastContext';
 import api from '../utils/api';
 import tw from 'twrnc';
 
 export default function NotificationsScreen({ navigation }: any) {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
+    const { showToast } = useToast();
     const isDark = theme === 'dark';
     const [notifications, setNotifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const fetchNotifications = async () => {
         setLoading(true);
@@ -46,24 +49,27 @@ export default function NotificationsScreen({ navigation }: any) {
         try {
             await api.post('/notifications/read-all');
             setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-            Alert.alert('Success', 'All notifications marked as read.');
+            showToast('All notifications marked as read', 'success');
         } catch (e) {
             setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
         }
     };
 
     const deleteSelected = async () => {
-        if (selectedIds.length === 0) return;
+        const idsToDelete = [...selectedIds];
+        if (idsToDelete.length === 0) return;
 
         try {
-            await api.post('/notifications/delete-bulk', { ids: selectedIds });
-            setNotifications(prev => prev.filter(n => !selectedIds.includes(n.id)));
+            await api.post('/notifications/delete-bulk', { ids: idsToDelete });
+            setNotifications(prev => prev.filter(n => !idsToDelete.includes(n.id)));
             setSelectedIds([]);
-            Alert.alert('Success', 'Notifications deleted.');
+            setShowDeleteModal(false);
+            showToast(`${idsToDelete.length} notification${idsToDelete.length > 1 ? 's' : ''} deleted`, 'success');
         } catch (e) {
-            setNotifications(prev => prev.filter(n => !selectedIds.includes(n.id)));
+            setNotifications(prev => prev.filter(n => !idsToDelete.includes(n.id)));
             setSelectedIds([]);
-            Alert.alert('Success', 'Deleted successfully');
+            setShowDeleteModal(false);
+            showToast('Deleted successfully', 'success');
         }
     };
 
@@ -96,7 +102,7 @@ export default function NotificationsScreen({ navigation }: any) {
                 }}
                 style={tw`p-4 rounded-3xl mb-4 border ${
                     item.unread 
-                        ? 'bg-white dark:bg-[#4c1d95] border-gray-150 dark:border-[#8b5cf6]/30' 
+                        ? 'bg-white dark:bg-[#4c1d95] border-gray-100 dark:border-[#8b5cf6]/30' 
                         : 'bg-white/50 dark:bg-[#4c1d95]/40 border-gray-100 dark:border-[#8b5cf6]/30'
                 } shadow-sm`}
             >
@@ -135,11 +141,11 @@ export default function NotificationsScreen({ navigation }: any) {
                                 <Text style={tw`font-bold text-sm text-gray-900 dark:text-white flex-shrink`} numberOfLines={1}>
                                     {item.title}
                                 </Text>
-                                {item.unread && (
+                                {!!item.unread && (
                                     <View style={tw`w-1.5 h-1.5 rounded-full bg-[#8b5cf6]`} />
                                 )}
                             </View>
-                            {item.time && (
+                            {!!item.time && (
                                 <Text style={tw`text-[10px] text-gray-400 dark:text-gray-500 font-medium`}>
                                     {item.time}
                                 </Text>
@@ -175,7 +181,7 @@ export default function NotificationsScreen({ navigation }: any) {
                 </View>
                 <View style={tw`flex-row gap-2`}>
                     {selectedIds.length > 0 && (
-                        <TouchableOpacity onPress={deleteSelected} style={tw`p-2`}>
+                        <TouchableOpacity onPress={() => setShowDeleteModal(true)} style={tw`p-2`}>
                             <Trash2 size={20} color="#ef4444" />
                         </TouchableOpacity>
                     )}
@@ -245,6 +251,47 @@ export default function NotificationsScreen({ navigation }: any) {
                 />
             )}
 
+            {/* Delete Confirmation Modal */}
+            <Modal
+                visible={showDeleteModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowDeleteModal(false)}
+            >
+                <View style={tw`flex-1 bg-black/60 items-center justify-center p-4`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] rounded-[32px] p-6 w-full max-w-sm border border-gray-100 dark:border-[#8b5cf6]/30 shadow-2xl items-center`}>
+                        <View style={tw`w-16 h-16 bg-rose-100 dark:bg-rose-500/20 rounded-2xl items-center justify-center mb-4`}>
+                            <Trash2 size={32} color="#f43f5e" />
+                        </View>
+                        <Text style={tw`text-2xl font-black text-gray-900 dark:text-white text-center mb-2`}>
+                            Delete Notifications?
+                        </Text>
+                        <Text style={tw`text-xs text-gray-500 dark:text-gray-300 text-center mb-6 font-medium leading-relaxed`}>
+                            Are you sure you want to delete {selectedIds.length} notification{selectedIds.length > 1 ? 's' : ''}? This action cannot be undone.
+                        </Text>
+                        <View style={tw`flex-row gap-3 w-full`}>
+                            <TouchableOpacity
+                                onPress={() => setShowDeleteModal(false)}
+                                style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-white/10 rounded-2xl items-center`}
+                            >
+                                <Text style={tw`text-xs font-black text-gray-700 dark:text-gray-300 tracking-wider uppercase`}>
+                                    Cancel
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={deleteSelected}
+                                style={tw`flex-1 py-3.5 bg-[#f43f5e] rounded-2xl items-center shadow-lg shadow-rose-500/30`}
+                            >
+                                <Text style={tw`text-xs font-black text-white tracking-wider uppercase`}>
+                                    Delete
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
         </View>
     );
 }
+

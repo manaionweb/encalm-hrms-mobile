@@ -7,9 +7,12 @@ import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import tw from 'twrnc';
 
+import { useToast } from '../context/ToastContext';
+
 type MainTab = 'ORG' | 'PAYROLL' | 'SHIFTS' | 'ACCESS' | 'CUSTOM';
 
 export default function MastersScreen({ navigation }: any) {
+    const { showToast } = useToast();
     const [activeMainTab, setActiveMainTab] = useState<MainTab>('ORG');
     const [activeSubTab, setActiveSubTab] = useState<string>('Company');
     const [loading, setLoading] = useState(false);
@@ -193,9 +196,9 @@ export default function MastersScreen({ navigation }: any) {
                 primaryColor,
                 secondaryColor
             });
-            Alert.alert('Success', 'Legal entity details updated successfully.');
+            showToast('Legal entity details updated successfully.', 'success');
         } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.message || 'Failed to update company settings');
+            showToast(e.response?.data?.message || 'Failed to update company settings', 'error');
         } finally {
             setSavingCompany(false);
         }
@@ -233,13 +236,13 @@ export default function MastersScreen({ navigation }: any) {
             });
         } catch (error) {
             console.error('Failed to pick signature document:', error);
-            Alert.alert('Error', 'Failed to pick image file.');
+            showToast('Failed to pick image file.', 'error');
         }
     };
 
     const handleSaveSignature = async () => {
         if (!signatoryName.trim()) {
-            Alert.alert('Required', 'Please enter the authorized signatory name.');
+            showToast('Please enter the authorized signatory name.', 'error');
             return;
         }
 
@@ -263,11 +266,11 @@ export default function MastersScreen({ navigation }: any) {
                 }
             });
 
-            Alert.alert('Success', 'Authorized signature updated successfully.');
+            showToast('Authorized signature updated successfully.', 'success');
             fetchSignatureSettings();
         } catch (e: any) {
             console.error('Error saving signature settings:', e);
-            Alert.alert('Error', e.response?.data?.message || 'Failed to save authorized signature settings.');
+            showToast(e.response?.data?.message || 'Failed to save authorized signature settings.', 'error');
         } finally {
             setSavingSignature(false);
         }
@@ -287,9 +290,9 @@ export default function MastersScreen({ navigation }: any) {
                             await api.delete('/company-setting/signature');
                             setServerSignatureImage(null);
                             setSelectedSignatureFile(null);
-                            Alert.alert('Deleted', 'Authorized signature deleted successfully.');
+                            showToast('Authorized signature deleted successfully.', 'success');
                         } catch (e) {
-                            Alert.alert('Error', 'Failed to delete signature.');
+                            showToast('Failed to delete signature.', 'error');
                         }
                     }
                 }
@@ -343,9 +346,9 @@ export default function MastersScreen({ navigation }: any) {
                 esicEmployeeRate: Number(esicEmployeeRate) || 0,
                 esicEmployerRate: Number(esicEmployerRate) || 0,
             });
-            Alert.alert('Success', 'Statutory compliance configuration updated successfully.');
+            showToast('Statutory compliance configuration updated successfully.', 'success');
         } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.message || 'Failed to update compliance settings.');
+            showToast(e.response?.data?.message || 'Failed to update compliance settings.', 'error');
         } finally {
             setSavingStatutory(false);
         }
@@ -378,9 +381,9 @@ export default function MastersScreen({ navigation }: any) {
                 lateMarkDeduction,
                 otEnabled,
             });
-            Alert.alert('Success', 'Attendance policy rules updated successfully.');
+            showToast('Attendance policy rules updated successfully.', 'success');
         } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.message || 'Failed to save attendance policy settings.');
+            showToast(e.response?.data?.message || 'Failed to save attendance policy settings.', 'error');
         } finally {
             setSavingPolicy(false);
         }
@@ -418,9 +421,9 @@ export default function MastersScreen({ navigation }: any) {
                 applyEarnedLeave,
             };
             await AsyncStorage.setItem('sandwich_rules', JSON.stringify(rules));
-            Alert.alert('Success', 'Sandwich rules saved successfully.');
+            showToast('Sandwich rules saved successfully.', 'success');
         } catch (e) {
-            Alert.alert('Error', 'Failed to save sandwich rules.');
+            showToast('Failed to save sandwich rules.', 'error');
         } finally {
             setSavingSandwich(false);
         }
@@ -539,10 +542,10 @@ export default function MastersScreen({ navigation }: any) {
                     onPress: async () => {
                         try {
                             await api.delete(`/masters/roles/${roleId}`);
-                            Alert.alert('Deleted', 'Role deleted successfully.');
+                            showToast('Role deleted successfully.', 'success');
                             fetchListData('/masters/roles');
                         } catch (e) {
-                            Alert.alert('Error', 'Failed to delete role.');
+                            showToast('Failed to delete role.', 'error');
                         }
                     }
                 }
@@ -568,13 +571,13 @@ export default function MastersScreen({ navigation }: any) {
 
     const handleAddSubmit = async () => {
         if (!addName.trim()) {
-            Alert.alert('Required', 'Please fill in the required name.');
+            showToast('Please fill in the required name.', 'error');
             return;
         }
 
         if (activeMainTab === 'ORG' && activeSubTab === 'Locations') {
             if (!addAddress.trim() || !addCity.trim() || !addState.trim() || !addCountry.trim() || !addPincode.trim()) {
-                Alert.alert('Required', 'Please fill in all location fields (Address, City, State, Country, and Pincode).');
+                showToast('Please fill in all location fields (Address, City, State, Country, and Pincode).', 'error');
                 return;
             }
         }
@@ -593,10 +596,10 @@ export default function MastersScreen({ navigation }: any) {
 
                 if (editingRole) {
                     await api.put(`/masters/roles/${editingRole.id}`, payload);
-                    Alert.alert('Success', 'Role updated successfully.');
+                    showToast('Role updated successfully.', 'success');
                 } else {
                     await api.post('/masters/roles', payload);
-                    Alert.alert('Success', 'Role created successfully.');
+                    showToast('Role created successfully.', 'success');
                 }
                 setShowAddModal(false);
                 resetAddForm();
@@ -678,7 +681,7 @@ export default function MastersScreen({ navigation }: any) {
 
             if (endpoint) {
                 await api.post(endpoint, payload);
-                Alert.alert('Success', 'Record created successfully.');
+                showToast('Record created successfully.', 'success');
                 setShowAddModal(false);
                 resetAddForm();
                 
@@ -698,7 +701,7 @@ export default function MastersScreen({ navigation }: any) {
                 }
             }
         } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.error || e.response?.data?.message || 'Failed to create record.');
+            showToast(e.response?.data?.error || e.response?.data?.message || 'Failed to create record.', 'error');
         } finally {
             setSubmittingAdd(false);
         }
@@ -772,8 +775,8 @@ export default function MastersScreen({ navigation }: any) {
                     </View>
 
                     {/* Permissions Preview */}
-                    <View style={tw`space-y-1.5 pt-2 border-t border-gray-55 dark:border-white/2`}>
-                        {item.permissions && item.permissions.slice(0, 3).map((p: any) => (
+                    <View style={tw`space-y-1.5 pt-2 border-t border-gray-100 dark:border-white/5`}>
+                        {Array.isArray(item.permissions) && item.permissions.slice(0, 3).map((p: any) => (
                             <View key={p.id} style={tw`flex-row items-center gap-2`}>
                                 <Check size={10} color="#22c55e" />
                                 <Text style={tw`text-[11px] text-gray-600 dark:text-gray-300`}>{p.name}</Text>
@@ -935,7 +938,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-3`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Legal Name</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={legalName}
                             onChangeText={setLegalName}
                         />
@@ -945,7 +948,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>CIN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={cin}
                                 onChangeText={setCin}
                             />
@@ -953,7 +956,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>GSTIN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={gstin}
                                 onChangeText={setGstin}
                             />
@@ -964,7 +967,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>PAN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={pan}
                                 onChangeText={setPan}
                             />
@@ -972,7 +975,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>TAN</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={tan}
                                 onChangeText={setTan}
                             />
@@ -987,7 +990,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-3`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Registered Address</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={address}
                             onChangeText={setAddress}
                         />
@@ -996,7 +999,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`mb-4`}>
                         <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Website</Text>
                         <TextInput
-                            style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                            style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                             value={website}
                             onChangeText={setWebsite}
                         />
@@ -1005,7 +1008,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`flex-row gap-3`}>
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Primary Color</Text>
-                            <View style={tw`flex-row items-center bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
+                            <View style={tw`flex-row items-center bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
                                 <View style={[tw`w-4 h-4 rounded mr-2`, { backgroundColor: primaryColor }]} />
                                 <TextInput
                                     style={tw`flex-1 text-xs text-gray-800 dark:text-white font-bold h-7 p-0`}
@@ -1016,7 +1019,7 @@ export default function MastersScreen({ navigation }: any) {
                         </View>
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Secondary Color</Text>
-                            <View style={tw`flex-row items-center bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
+                            <View style={tw`flex-row items-center bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-1.5`}>
                                 <View style={[tw`w-4 h-4 rounded mr-2`, { backgroundColor: secondaryColor }]} />
                                 <TextInput
                                     style={tw`flex-1 text-xs text-gray-800 dark:text-white font-bold h-7 p-0`}
@@ -1046,7 +1049,7 @@ export default function MastersScreen({ navigation }: any) {
                 <View style={tw`bg-white dark:bg-[#1e293b] p-5 rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm mb-5`}>
                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Authorized Signatory Name *</Text>
                     <TextInput
-                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                         placeholder="e.g. System Admin"
                         placeholderTextColor="#94a3b8"
                         value={signatoryName}
@@ -1141,7 +1144,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>EPF Number</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfNumber}
                                         onChangeText={setEpfNumber}
                                     />
@@ -1150,7 +1153,7 @@ export default function MastersScreen({ navigation }: any) {
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Wage Ceiling (₹15,000)</Text>
                                     <TouchableOpacity
                                         onPress={() => setEpfWageCeiling(!epfWageCeiling)}
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl justify-center h-[38px]`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl justify-center h-[38px]`}
                                     >
                                         <Text style={tw`text-xs text-gray-800 dark:text-white font-bold`}>
                                             {epfWageCeiling ? 'Cap at ₹15,000' : 'No Cap'}
@@ -1163,7 +1166,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Employee Rate (%)</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfEmployeeRate}
                                         onChangeText={setEpfEmployeeRate}
                                         keyboardType="numeric"
@@ -1172,7 +1175,7 @@ export default function MastersScreen({ navigation }: any) {
                                 <View style={tw`flex-1`}>
                                     <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Employer EPF (%)</Text>
                                     <TextInput
-                                        style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                        style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                         value={epfEmployerRate}
                                         onChangeText={setEpfEmployerRate}
                                         keyboardType="numeric"
@@ -1200,7 +1203,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>ESIC Number</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                    style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                     value={esicNumber}
                                     onChangeText={setEsicNumber}
                                 />
@@ -1208,7 +1211,7 @@ export default function MastersScreen({ navigation }: any) {
                             <View style={tw`flex-1`}>
                                 <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Wage Limit</Text>
                                 <TextInput
-                                    style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                    style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                     value={esicWageLimit}
                                     onChangeText={setEsicWageLimit}
                                     keyboardType="numeric"
@@ -1245,7 +1248,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Min Half Day</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={minHalfDayHours}
                                 onChangeText={setMinHalfDayHours}
                                 keyboardType="numeric"
@@ -1254,7 +1257,7 @@ export default function MastersScreen({ navigation }: any) {
                         <View style={tw`flex-1`}>
                             <Text style={tw`text-[10px] font-bold text-gray-400 mb-1.5`}>Min Full Day</Text>
                             <TextInput
-                                style={tw`w-full px-4 py-2.5 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
+                                style={tw`w-full px-4 py-2.5 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold`}
                                 value={minFullDayHours}
                                 onChangeText={setMinFullDayHours}
                                 keyboardType="numeric"
@@ -1270,7 +1273,7 @@ export default function MastersScreen({ navigation }: any) {
                     <View style={tw`flex-row items-center gap-2 mb-4`}>
                         <Text style={tw`text-xs text-gray-500 font-bold`}>Every</Text>
                         <TextInput
-                            style={tw`w-14 px-3 py-2 bg-gray-55 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-center text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
+                            style={tw`w-14 px-3 py-2 bg-gray-50 dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-center text-xs text-gray-800 dark:text-white font-bold h-[34px]`}
                             value={lateMarkThreshold}
                             onChangeText={setLateMarkThreshold}
                             keyboardType="numeric"
@@ -1863,7 +1866,7 @@ export default function MastersScreen({ navigation }: any) {
             <CustomHeader navigation={navigation} title="Masters Configuration" subtitle="Manage organization structure, payroll rules, and system settings." />
 
             {/* Main Tabs Selection Row */}
-            <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-150 dark:border-white/5`}>
+            <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-100 dark:border-white/5`}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row px-4`}>
                     {mainTabs.map((tab) => {
                         const isSel = activeMainTab === tab.key;
@@ -1891,7 +1894,7 @@ export default function MastersScreen({ navigation }: any) {
 
             {/* Sub Tabs Selection Row */}
             {subTabs.length > 0 && (
-                <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-150 dark:border-white/5 py-2.5 px-4`}>
+                <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-100 dark:border-white/5 py-2.5 px-4`}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row`}>
                         {subTabs.map((sub, idx) => {
                             const isActiveSub = activeSubTab === sub;
@@ -2029,7 +2032,7 @@ export default function MastersScreen({ navigation }: any) {
                                                 setShowAddModal(false);
                                                 resetAddForm();
                                             }}
-                                            style={tw`flex-1 py-3.5 bg-gray-150 dark:bg-[#111827] rounded-xl items-center`}
+                                            style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#111827] rounded-xl items-center`}
                                         >
                                             <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
                                         </TouchableOpacity>
@@ -2059,7 +2062,7 @@ export default function MastersScreen({ navigation }: any) {
                 onRequestClose={() => setFieldToDelete(null)}
             >
                 <View style={tw`flex-1 justify-center items-center bg-black/70 px-6`}>
-                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-150 dark:border-white/10 text-center relative overflow-hidden`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-100 dark:border-white/10 text-center relative overflow-hidden`}>
                         {/* Top red stripe */}
                         <View style={tw`absolute top-0 left-0 right-0 h-1.5 bg-red-500`} />
 
@@ -2096,10 +2099,10 @@ export default function MastersScreen({ navigation }: any) {
                                     setFieldToDelete(null);
                                     try {
                                         await api.delete(`/custom-fields/masters/${id}`);
-                                        Alert.alert('Deleted', 'Custom field deleted successfully.');
+                                        showToast('Custom field deleted successfully.', 'success');
                                         fetchCustomFieldsList();
                                     } catch (e) {
-                                        Alert.alert('Error', 'Failed to delete custom field.');
+                                        showToast('Failed to delete custom field.', 'error');
                                     }
                                 }}
                                 style={tw`flex-1 py-3.5 bg-red-500 rounded-2xl items-center justify-center shadow-lg shadow-red-500/20`}
