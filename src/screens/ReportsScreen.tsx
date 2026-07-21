@@ -8,8 +8,10 @@ import CustomHeader from '../components/CustomHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import tw from 'twrnc';
 import Svg, { Circle } from 'react-native-svg';
+import { useToast } from '../context/ToastContext';
 
 export default function ReportsScreen({ navigation }: any) {
+    const { showToast } = useToast();
     const [period, setPeriod] = useState('monthly');
     const [stats, setStats] = useState<any>({});
     const [attendanceData, setAttendanceData] = useState<any[]>([]);
@@ -60,7 +62,7 @@ export default function ReportsScreen({ navigation }: any) {
             const downloadUrl = `${api.defaults.baseURL}${endpoint}?period=${period}`;
             const fileUri = `${FileSystem.documentDirectory}${filename}`;
 
-            Alert.alert("Downloading", "Please wait while your report is being generated...");
+            showToast("Generating report...", 'info', 2000);
 
             const headers: Record<string, string> = {};
             if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -73,11 +75,11 @@ export default function ReportsScreen({ navigation }: any) {
             if (await Sharing.isAvailableAsync()) {
                 await Sharing.shareAsync(uri);
             } else {
-                Alert.alert("Success", `Report saved successfully to ${uri}`);
+                showToast(`Report saved successfully to ${uri}`, 'success');
             }
         } catch (error: any) {
             console.error('Download report failed:', error);
-            Alert.alert('Error', 'Failed to generate and download report.');
+            showToast('Failed to generate and download report.', 'error');
         }
     };
 

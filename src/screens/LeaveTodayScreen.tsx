@@ -4,8 +4,10 @@ import { Search, Filter, Calendar, Mail, ArrowLeft, UserMinus } from 'lucide-rea
 import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import tw from 'twrnc';
+import { useToast } from '../context/ToastContext';
 
 export default function LeaveTodayScreen({ navigation }: any) {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [employeesOnLeave, setEmployeesOnLeave] = useState<any[]>([]);
     const [searchText, setSearchText] = useState('');
@@ -39,7 +41,7 @@ export default function LeaveTodayScreen({ navigation }: any) {
             setEmployeesOnLeave(onLeaveToday);
         } catch (error) {
             console.error('Error fetching leave data:', error);
-            Alert.alert('Error', 'Failed to load leave data');
+            showToast('Failed to load leave data', 'error');
         } finally {
             setLoading(false);
         }
@@ -130,13 +132,13 @@ export default function LeaveTodayScreen({ navigation }: any) {
                 {/* Header info */}
                 <View style={tw`flex-row justify-between items-center mb-6`}>
                     <View style={tw`flex-1 mr-2`}>
-                        <Text style={tw`text-xs text-gray-550 dark:text-gray-400 font-medium`}>
+                        <Text style={tw`text-xs text-gray-500 dark:text-gray-400 font-medium`}>
                             List of employees currently away from work
                         </Text>
                     </View>
                     <View style={tw`flex-row items-center gap-1.5 px-3.5 py-2 bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-2xl`}>
                         <UserMinus size={14} color="#f97316" />
-                        <Text style={tw`text-xs font-bold text-orange-700 dark:text-orange-450`}>
+                        <Text style={tw`text-xs font-bold text-orange-700 dark:text-orange-400`}>
                             {employeesOnLeave.length} Employees
                         </Text>
                     </View>
@@ -181,7 +183,7 @@ export default function LeaveTodayScreen({ navigation }: any) {
                         </Text>
                     </View>
                 ) : filteredLeaves.length === 0 ? (
-                    <View style={tw`flex-1 justify-center items-center py-20 bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-[#8b5cf6]/30 shadow-inner mt-4 h-64`}>
+                    <View style={tw`flex-1 justify-center items-center py-20 bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-[#8b5cf6]/30 shadow-sm mt-4 h-64`}>
                         <Calendar size={48} color="#cbd5e1" style={tw`mb-4 opacity-50`} />
                         <Text style={tw`text-lg font-bold text-gray-800 dark:text-white`}>No Employees Found</Text>
                         <Text style={tw`text-gray-500 dark:text-gray-400 mt-2 text-xs text-center px-4`}>

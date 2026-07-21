@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, useColorScheme, TextInput, Linking, Modal, KeyboardAvoidingView, Platform } from 'react-native';
-import { ArrowLeft, User, CreditCard, Briefcase, Calendar, Users, FileText, Trash2, Upload, Eye, X, Check, Info, ChevronDown } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, useColorScheme, TextInput, Linking, Modal, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { ArrowLeft, User, CreditCard, Briefcase, Calendar, Users, FileText, Trash2, Upload, Eye, X, Check, Info, ChevronDown, Printer, TrendingUp, TrendingDown, Coins } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
@@ -8,9 +8,12 @@ import * as DocumentPicker from 'expo-document-picker';
 import api from '../utils/api';
 import tw from 'twrnc';
 
+import { useToast } from '../context/ToastContext';
+
 type ProfileTab = 'personal' | 'documents' | 'statutory' | 'salary' | 'shifts' | 'team';
 
 export default function EmployeeProfileScreen({ route, navigation }: any) {
+    const { showToast } = useToast();
     const { id } = route.params || {};
     const insets = useSafeAreaInsets();
     const colorScheme = useColorScheme();
@@ -23,13 +26,27 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     const [leaves, setLeaves] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<ProfileTab>('statutory'); // Start at Statutory & Bank Info matching web default tab
 
+    // Masters Data
+    const [roles, setRoles] = useState<any[]>([]);
+    const [designations, setDesignations] = useState<any[]>([]);
+    const [departments, setDepartments] = useState<any[]>([]);
+    const [shifts, setShifts] = useState<any[]>([]);
+    const [salaryComponents, setSalaryComponents] = useState<any[]>([]);
+
     // Edit Profile States
     const [isEditing, setIsEditing] = useState(false);
     const [formName, setFormName] = useState('');
+    const [formEmail, setFormEmail] = useState('');
     const [formPhone, setFormPhone] = useState('');
     const [formDob, setFormDob] = useState('');
+    const [formJoiningDate, setFormJoiningDate] = useState('');
+    const [formRoleId, setFormRoleId] = useState<string | number>('');
+    const [formDesignationId, setFormDesignationId] = useState<string | number>('');
+    const [formDepartmentId, setFormDepartmentId] = useState<string | number>('');
     const [formBloodGroup, setFormBloodGroup] = useState('');
     const [formAddress, setFormAddress] = useState('');
+    const [formStatus, setFormStatus] = useState('Active');
+    const [formShiftId, setFormShiftId] = useState<string | number>('');
 
     // Statutory & Bank Info States
     const [formPan, setFormPan] = useState('');
@@ -43,6 +60,14 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
     // Salary Info State
     const [formBasicSalary, setFormBasicSalary] = useState('');
+    const [selectedSalaryComponents, setSelectedSalaryComponents] = useState<any[]>([]);
+
+    // Picker Modals States
+    const [componentPickerType, setComponentPickerType] = useState<'EARNING' | 'DEDUCTION' | null>(null);
+    const [showRolePicker, setShowRolePicker] = useState(false);
+    const [showDesignationPicker, setShowDesignationPicker] = useState(false);
+    const [showDepartmentPicker, setShowDepartmentPicker] = useState(false);
+    const [showBloodGroupPicker, setShowBloodGroupPicker] = useState(false);
 
     // Custom Fields mapping
     const [formCustomFields, setFormCustomFields] = useState<Record<number, string>>({});
@@ -76,7 +101,47 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     });
     const [showMonthDropdown, setShowMonthDropdown] = useState(false);
     const [showYearDropdown, setShowYearDropdown] = useState(false);
-    const [payslipError, setPayslipError] = useState('');
+    // ID Card & Profile Picture States
+    const [showIDCardModal, setShowIDCardModal] = useState(false);
+    const [companySignature, setCompanySignature] = useState<string | null>(null);
+    const [profileImgError, setProfileImgError] = useState(false);
+
+    const getHostUrl = () => {
+        return api.defaults.baseURL?.replace('/api', '') || 'http://localhost:3001';
+    };
+
+    const buildProfilePictureUrl = (value?: string | null) => {
+        if (!value || typeof value !== 'string') return null;
+        if (value.startsWith('bg-')) return null;
+        if (/^https?:\/\//i.test(value)) return value;
+
+        const normalizedPath = value.replace(/\\/g, '/').replace(/^\/+/, '');
+        const baseUrl = getHostUrl();
+        if (normalizedPath.startsWith('uploads/')) {
+            return `${baseUrl}/${normalizedPath}`;
+        }
+        return `${baseUrl}/uploads/${normalizedPath}`;
+    };
+
+    const fetchMasterData = async () => {
+        try {
+            const [rolesRes, desigRes, deptRes, shiftsRes, salCompRes] = await Promise.allSettled([
+                api.get('/masters/roles'),
+                api.get('/masters/designations'),
+                api.get('/masters/departments'),
+                api.get('/masters/shifts'),
+                api.get('/masters/salary-components'),
+            ]);
+
+            if (rolesRes.status === 'fulfilled') setRoles(rolesRes.value.data || []);
+            if (desigRes.status === 'fulfilled') setDesignations(desigRes.value.data || []);
+            if (deptRes.status === 'fulfilled') setDepartments(Array.isArray(deptRes.value.data) ? deptRes.value.data : deptRes.value.data.departments || []);
+            if (shiftsRes.status === 'fulfilled') setShifts(shiftsRes.value.data || []);
+            if (salCompRes.status === 'fulfilled') setSalaryComponents(salCompRes.value.data || []);
+        } catch (error) {
+            console.error('Error fetching master data:', error);
+        }
+    };
 
     const fetchEmployeeData = async () => {
         try {
@@ -96,14 +161,76 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
             setLeaves(Array.isArray(leavesRes.data) ? leavesRes.data : []);
         } catch (error) {
             console.error('Error fetching employee, custom fields, and leaves:', error);
-            Alert.alert('Error', 'Failed to load employee profile');
+            showToast('Failed to load employee profile', 'error');
         } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchCompanySignature = async () => {
+        try {
+            const res = await api.get('/company-setting');
+            setCompanySignature(res.data?.authorizedSignature || null);
+        } catch (error) {
+            console.error('Error fetching company signature:', error);
+        }
+    };
+
+    const handleUploadProfilePicture = async () => {
+        try {
+            const res = await DocumentPicker.getDocumentAsync({
+                type: 'image/*',
+                copyToCacheDirectory: true,
+            });
+
+            if (res.canceled || !res.assets || res.assets.length === 0) {
+                return;
+            }
+
+            const asset = res.assets[0];
+            setLoading(true);
+
+            const formData = new FormData();
+            formData.append('profilePicture', {
+                uri: asset.uri,
+                name: asset.name || 'profile.jpg',
+                type: asset.mimeType || 'image/jpeg',
+            } as any);
+
+            const endpoint = id ? `/employee/${id}/profile-picture` : '/employee/me/profile-picture';
+            await api.put(endpoint, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            showToast('Profile picture updated successfully!', 'success');
+            fetchEmployeeData();
+        } catch (error: any) {
+            console.error('Failed to upload profile picture:', error);
+            showToast(error.response?.data?.message || 'Failed to upload profile picture', 'error');
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteProfilePicture = async () => {
+        try {
+            setLoading(true);
+            const endpoint = id ? `/employee/${id}/profile-picture` : '/employee/me/profile-picture';
+            await api.delete(endpoint);
+            showToast('Profile picture deleted successfully!', 'success');
+            fetchEmployeeData();
+        } catch (error: any) {
+            console.error('Failed to delete profile picture:', error);
+            showToast(error.response?.data?.message || 'Failed to delete profile picture', 'error');
             setLoading(false);
         }
     };
 
     useEffect(() => {
         fetchEmployeeData();
+        fetchCompanySignature();
+        fetchMasterData();
     }, [id]);
 
     const startEditing = () => {
@@ -114,21 +241,32 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         const sal = prof.salary || {};
 
         setFormName(employee.name || '');
+        setFormEmail(employee.email || '');
         setFormPhone(prof.phone || '');
         setFormDob(prof.dob ? new Date(prof.dob).toISOString().split('T')[0] : '');
+        setFormJoiningDate(prof.joiningDate ? new Date(prof.joiningDate).toISOString().split('T')[0] : '');
+        setFormRoleId(employee.roleId || employee.role?.id || '');
+        setFormDesignationId(prof.designationId || '');
+        setFormDepartmentId(prof.departmentId || '');
         setFormBloodGroup(prof.bloodGroup || '');
         setFormAddress(prof.address || '');
+        setFormStatus(prof.status || 'Active');
 
-        setFormPan(stat.panNumber || '');
-        setFormAadhaar(stat.aadhaarNumber || '');
-        setFormUan(stat.uanNumber || '');
-        setFormEsic(stat.esicNumber || '');
+        setFormPan(stat.panNumber || stat.pan || '');
+        setFormAadhaar(stat.aadhaarNumber || stat.aadhaar || '');
+        setFormUan(stat.uanNumber || stat.uan || '');
+        setFormEsic(stat.esicNumber || stat.esic || '');
 
         setFormBankName(bank.bankName || '');
         setFormAccountNumber(bank.accountNumber || '');
-        setFormIfscCode(bank.ifscCode || '');
+        setFormIfscCode(bank.ifscCode || bank.ifsc || '');
 
-        setFormBasicSalary(sal.basic ? sal.basic.toString() : '');
+        setFormShiftId(prof.shiftId || '');
+
+        setFormBasicSalary(sal.basic ? sal.basic.toString() : '0');
+
+        const selComp = prof.selectedSalaryComponents || prof.salaryComponents || [];
+        setSelectedSalaryComponents(Array.isArray(selComp) ? selComp : []);
 
         // Map custom assignments values
         const customValues: Record<number, string> = {};
@@ -146,14 +284,27 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
             const employeeId = id || 'me';
             const endpoint = id ? `/employee/${id}` : '/employee/me';
 
+            const selectedRoleObj = roles.find((r: any) => String(r.id) === String(formRoleId));
+            const selectedDesigObj = designations.find((d: any) => String(d.id) === String(formDesignationId));
+            const selectedDeptObj = departments.find((d: any) => String(d.id) === String(formDepartmentId));
+
             // Build profileData structure matching backend expectations
             const profileData = {
                 name: formName.trim(),
-                email: employee.email,
+                email: formEmail.trim(),
                 phone: formPhone.trim(),
                 dob: formDob ? new Date(formDob).toISOString() : null,
+                joiningDate: formJoiningDate ? new Date(formJoiningDate).toISOString() : null,
                 bloodGroup: formBloodGroup.trim(),
                 address: formAddress.trim(),
+                status: formStatus || 'Active',
+                roleId: formRoleId ? Number(formRoleId) : undefined,
+                role: selectedRoleObj?.name || selectedRoleObj?.title || (typeof employee.role === 'string' ? employee.role : employee.role?.name),
+                designationId: formDesignationId ? Number(formDesignationId) : undefined,
+                title: selectedDesigObj?.name || employee?.employeeProfile?.title,
+                departmentId: formDepartmentId ? Number(formDepartmentId) : undefined,
+                department: selectedDeptObj?.name || employee?.employeeProfile?.department,
+                shiftId: formShiftId ? Number(formShiftId) : undefined,
 
                 // Statutory
                 pan: formPan.trim(),
@@ -167,7 +318,9 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 ifsc: formIfscCode.trim(),
 
                 // Salary
-                salary: formBasicSalary ? { basic: Number(formBasicSalary) } : undefined
+                salary: formBasicSalary ? { basic: Number(formBasicSalary) } : undefined,
+                selectedSalaryComponents: selectedSalaryComponents,
+                salaryComponents: selectedSalaryComponents
             };
 
             await api.put(endpoint, profileData);
@@ -180,12 +333,12 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
             const customFieldsEndpoint = id ? `/custom-fields/employee/${id}` : '/custom-fields/employee/me';
             await api.put(customFieldsEndpoint, { customFields: customFieldsPayload });
 
-            Alert.alert('Success', 'Profile updated successfully!');
+            showToast('Profile updated successfully!', 'success');
             setIsEditing(false);
             fetchEmployeeData();
         } catch (error: any) {
             console.error('Failed to save profile:', error);
-            Alert.alert('Error', error.response?.data?.message || 'Failed to save profile changes');
+            showToast(error.response?.data?.message || 'Failed to save profile changes', 'error');
             setLoading(false);
         }
     };
@@ -219,11 +372,61 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 },
             });
 
-            Alert.alert('Success', 'Document uploaded successfully!');
+            showToast('Document uploaded successfully!', 'success');
             fetchEmployeeData();
         } catch (error: any) {
             console.error('Failed to upload document:', error);
-            Alert.alert('Error', error.response?.data?.message || 'Failed to upload document');
+            showToast(error.response?.data?.message || 'Failed to upload document', 'error');
+            setLoading(false);
+        }
+    };
+
+    const handleUploadStandardDocument = async (docName: string, docKey: string) => {
+        try {
+            const res = await DocumentPicker.getDocumentAsync({
+                type: ['application/pdf', 'image/*'],
+                copyToCacheDirectory: true,
+            });
+
+            if (res.canceled || !res.assets || res.assets.length === 0) return;
+
+            const asset = res.assets[0];
+            const employeeId = id || employee?.id || 'me';
+
+            setLoading(true);
+            const formData = new FormData();
+            formData.append('file', {
+                uri: asset.uri,
+                name: asset.name || `${docKey}.pdf`,
+                type: asset.mimeType || 'application/pdf',
+            } as any);
+            formData.append('name', docName);
+
+            await api.post(`/employee/${employeeId}/documents`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            showToast(`${docName} uploaded successfully!`, 'success');
+            fetchEmployeeData();
+        } catch (error: any) {
+            console.error('Failed to upload document:', error);
+            showToast(error.response?.data?.message || `Failed to upload ${docName}`, 'error');
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteStandardDocument = async (docId: number, docName: string) => {
+        try {
+            setLoading(true);
+            const employeeId = id || employee?.id || 'me';
+            await api.delete(`/employee/${employeeId}/documents/${docId}`);
+            showToast(`${docName} deleted successfully!`, 'success');
+            fetchEmployeeData();
+        } catch (error: any) {
+            console.error('Failed to delete document:', error);
+            showToast(error.response?.data?.message || `Failed to delete ${docName}`, 'error');
             setLoading(false);
         }
     };
@@ -241,11 +444,11 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
             setLoading(true);
             const employeeId = id || 'me';
             await api.delete(`/custom-fields/employee/${employeeId}/field/${docToFieldId}/document`);
-            Alert.alert('Success', 'Document deleted successfully!');
+            showToast('Document deleted successfully!', 'success');
             fetchEmployeeData();
         } catch (error: any) {
             console.error('Failed to delete document:', error);
-            Alert.alert('Error', error.response?.data?.message || 'Failed to delete document');
+            showToast(error.response?.data?.message || 'Failed to delete document', 'error');
             setLoading(false);
         } finally {
             setDocToFieldId(null);
@@ -266,7 +469,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
             try {
                 await Sharing.shareAsync(encodeURI(fullUrl));
             } catch (shareErr) {
-                Alert.alert('Error', 'Failed to view or share document');
+                showToast('Failed to view or share document', 'error');
             }
         }
     };
@@ -513,7 +716,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         if (!details) return;
 
         if (details.payslipBlockMessage) {
-            Alert.alert("Cannot Generate Payslip", details.payslipBlockMessage);
+            showToast(details.payslipBlockMessage, 'error');
             return;
         }
 
@@ -876,7 +1079,215 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
             const { uri } = await Print.printToFileAsync({ html: htmlContent });
             await Sharing.shareAsync(uri);
         } catch (error: any) {
-            Alert.alert("Error", error.message || "Failed to generate Payslip");
+            showToast(error.message || "Failed to generate Payslip", 'error');
+        }
+    };
+
+    const exportIDCardPDF = async () => {
+        if (!employee) return;
+        const prof = employee.employeeProfile || {};
+        const qrData = encodeURIComponent(`Employee ID: ${employee.id}\nName: ${employee.name}\nRole: ${prof.title || 'Employee'}\nDept: ${prof.department || 'N/A'}`);
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}`;
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 40px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background: #000000;
+                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                    }
+                    .id-card {
+                        width: 320px;
+                        height: 540px;
+                        background: white;
+                        border-radius: 24px;
+                        overflow: hidden;
+                        box-shadow: 0 0 40px rgba(0,0,0,0.5);
+                        position: relative;
+                        box-sizing: border-box;
+                    }
+                    .card-header {
+                        background: linear-gradient(135deg, #5b21b6, #7c3aed);
+                        height: 190px;
+                        padding: 16px 24px;
+                        color: white;
+                        position: relative;
+                        border-bottom-left-radius: 40px;
+                        border-bottom-right-radius: 40px;
+                        box-sizing: border-box;
+                    }
+                    .top-pill {
+                        width: 60px;
+                        height: 8px;
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 4px;
+                        margin: 0 auto 12px;
+                    }
+                    .brand-title {
+                        font-size: 18px;
+                        font-weight: bold;
+                        letter-spacing: 1px;
+                    }
+                    .brand-sub {
+                        color: #c4b5fd;
+                    }
+                    .chip {
+                        position: absolute;
+                        top: 24px;
+                        right: 24px;
+                        width: 40px;
+                        height: 30px;
+                        background: linear-gradient(135deg, #fef08a, #eab308);
+                        border-radius: 6px;
+                        border: 1px solid rgba(253,224,71,0.5);
+                    }
+                    .avatar-container {
+                        text-align: center;
+                        margin-top: -60px;
+                        position: relative;
+                        z-index: 10;
+                    }
+                    .avatar-img {
+                        width: 120px;
+                        height: 120px;
+                        border-radius: 60px;
+                        border: 4px solid white;
+                        object-fit: cover;
+                        background: #7c3aed;
+                        color: white;
+                        font-size: 36px;
+                        font-weight: bold;
+                        line-height: 120px;
+                        margin: 0 auto;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    }
+                    .name {
+                        font-size: 22px;
+                        font-weight: bold;
+                        color: #1f2937;
+                        margin-top: 12px;
+                        text-align: center;
+                    }
+                    .title {
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: #7c3aed;
+                        margin-top: 4px;
+                        text-align: center;
+                    }
+                    .divider {
+                        width: 48px;
+                        height: 4px;
+                        background: #ddd6fe;
+                        border-radius: 2px;
+                        margin: 12px auto;
+                    }
+                    .details-grid {
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        gap: 12px 16px;
+                        padding: 0 24px;
+                        text-align: left;
+                    }
+                    .label {
+                        font-size: 9px;
+                        color: #9ca3af;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                    }
+                    .val {
+                        font-size: 13px;
+                        color: #374151;
+                        font-weight: 600;
+                    }
+                    .card-footer {
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        padding: 16px 24px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        background: white;
+                        box-sizing: border-box;
+                    }
+                    .qr-img {
+                        width: 60px;
+                        height: 60px;
+                    }
+                    .sig-box {
+                        text-align: right;
+                    }
+                    .sig-img {
+                        max-width: 100px;
+                        max-height: 35px;
+                        display: block;
+                        margin-left: auto;
+                    }
+                    .sig-text {
+                        font-size: 11px;
+                        font-style: italic;
+                        color: #9ca3af;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="id-card">
+                    <div class="card-header">
+                        <div class="top-pill"></div>
+                        <div class="brand-title">EnCalm <span class="brand-sub">HRX</span></div>
+                        <div class="chip"></div>
+                    </div>
+                    <div class="avatar-container">
+                        ${profilePictureUrl ? `<img class="avatar-img" src="${profilePictureUrl}" />` : `<div class="avatar-img">${initials}</div>`}
+                    </div>
+                    <div class="name">${employee.name}</div>
+                    <div class="title">${prof.title || 'Employee'}</div>
+                    <div class="divider"></div>
+                    <div class="details-grid">
+                        <div>
+                            <div class="label">Employee ID</div>
+                            <div class="val">${employee.id}</div>
+                        </div>
+                        <div>
+                            <div class="label">Blood Group</div>
+                            <div class="val">${prof.bloodGroup || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div class="label">Department</div>
+                            <div class="val">${prof.department || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div class="label">Mobile Number</div>
+                            <div class="val">${prof.phone || 'N/A'}</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <img class="qr-img" src="${qrUrl}" />
+                        <div class="sig-box">
+                            ${adminSignatureUrl ? `<img class="sig-img" src="${adminSignatureUrl}" />` : ''}
+                            <div class="sig-text">Authorized Sig.</div>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `;
+
+        try {
+            const { uri } = await Print.printToFileAsync({ html: htmlContent });
+            await Sharing.shareAsync(uri);
+        } catch (error: any) {
+            showToast(error.message || "Failed to export ID Card", 'error');
         }
     };
 
@@ -910,7 +1321,22 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     }
 
     const profile = employee.employeeProfile || {};
+    const rawProfilePicture =
+        profile.avatar ||
+        profile.profilePicture ||
+        profile.profilePictureUrl ||
+        employee.avatar ||
+        employee.profilePicture ||
+        employee.profilePictureUrl ||
+        null;
+    const profilePictureUrl = buildProfilePictureUrl(rawProfilePicture);
     const initials = employee.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2);
+
+    const adminSignatureUrl = companySignature
+        ? companySignature.startsWith('http')
+            ? companySignature
+            : `${getHostUrl()}${companySignature.startsWith('/') ? companySignature : `/uploads/${companySignature}`}`
+        : null;
 
     const renderDetailRow = (label: string, value: string | null | undefined) => (
         <View style={tw`flex-row justify-between py-3 border-b border-gray-50 dark:border-slate-700/50`}>
@@ -974,8 +1400,17 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
                     {/* Profile Banner */}
                     <View style={tw`items-center py-6 bg-white dark:bg-[#4c1d95] border-b border-gray-100 dark:border-white/5 mb-4`}>
-                        <View style={tw`w-20 h-20 rounded-3xl bg-[#ede9fe] dark:bg-[#8b5cf6] flex items-center justify-center mb-3 shadow-md shadow-[#8b5cf6]/20`}>
-                            <Text style={tw`text-[#8b5cf6] dark:text-white font-extrabold text-2xl`}>{initials}</Text>
+                        <View style={tw`w-20 h-20 rounded-3xl bg-[#ede9fe] dark:bg-[#8b5cf6] flex items-center justify-center mb-3 shadow-md shadow-[#8b5cf6]/20 overflow-hidden`}>
+                            {profilePictureUrl && !profileImgError ? (
+                                <Image
+                                    source={{ uri: profilePictureUrl }}
+                                    style={tw`w-full h-full`}
+                                    resizeMode="cover"
+                                    onError={() => setProfileImgError(true)}
+                                />
+                            ) : (
+                                <Text style={tw`text-[#8b5cf6] dark:text-white font-extrabold text-2xl`}>{initials}</Text>
+                            )}
                         </View>
 
                         {isEditing ? (
@@ -989,7 +1424,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                             <Text style={tw`text-xl font-bold text-gray-900 dark:text-white`}>{employee.name}</Text>
                         )}
 
-                        <Text style={tw`text-xs text-gray-550 dark:text-purple-200 mt-1`}>
+                        <Text style={tw`text-xs text-gray-500 dark:text-purple-200 mt-1`}>
                             {(employee.role && typeof employee.role === 'object' ? employee.role.name : employee.role) || 'HR_ADMIN'} - {profile.title || 'hr'}
                         </Text>
 
@@ -999,7 +1434,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                 <Text style={tw`text-[10px] font-bold text-gray-500 dark:text-purple-200`}>ID: {employee.id}</Text>
                             </View>
                             <View style={tw`px-2.5 py-0.5 bg-gray-50 dark:bg-white/10 rounded-full border border-gray-100 dark:border-white/5`}>
-                                <Text style={tw`text-[10px] font-bold text-gray-550 dark:text-purple-200`}>{profile.department || 'Head Office'}</Text>
+                                <Text style={tw`text-[10px] font-bold text-gray-500 dark:text-purple-200`}>{profile.department || 'Head Office'}</Text>
                             </View>
                         </View>
 
@@ -1048,7 +1483,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                     style={tw`flex-row items-center gap-1.5 px-4 py-2 rounded-xl mr-2 ${activeTab === tab.key ? 'bg-[#8b5cf6]' : 'bg-gray-100 dark:bg-[#5b21b6]'}`}
                                 >
                                     <tab.icon size={14} color={activeTab === tab.key ? '#fff' : (isDark ? '#e2e8f0' : '#64748b')} />
-                                    <Text style={tw`text-xs font-bold ${activeTab === tab.key ? 'text-white' : 'text-gray-550 dark:text-gray-200'}`}>
+                                    <Text style={tw`text-xs font-bold ${activeTab === tab.key ? 'text-white' : 'text-gray-500 dark:text-gray-200'}`}>
                                         {tab.label}
                                     </Text>
                                 </TouchableOpacity>
@@ -1062,25 +1497,113 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                         {activeTab === 'personal' && (
                             <View>
                                 <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Personal Information</Text>
-                                {renderEditableDetailRow('Phone', profile.phone, formPhone, setFormPhone, 'e.g. 1119299291', 'number-pad')}
-                                {renderDetailRow('Email', employee.email)}
-                                {renderEditableDetailRow('Date of Birth (YYYY-MM-DD)', profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : '', formDob, setFormDob, 'YYYY-MM-DD')}
-                                {renderDetailRow('Date of Joining', profile.joiningDate ? new Date(profile.joiningDate).toLocaleDateString('en-IN') : '')}
-                                {renderDetailRow('System Role', employee.role && typeof employee.role === 'object' ? employee.role.name : employee.role)}
-                                {renderDetailRow('Designation', profile.title)}
-                                {renderDetailRow('Department', profile.department)}
-                                {renderEditableDetailRow('Blood Group', profile.bloodGroup, formBloodGroup, setFormBloodGroup, 'e.g. AB+')}
-                                {renderEditableDetailRow('Address', profile.address, formAddress, setFormAddress, 'Enter home address')}
 
-                                {/* Status Row */}
-                                <View style={tw`flex-row justify-between py-3 border-b border-gray-50 dark:border-slate-700/20 items-center`}>
-                                    <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase`}>Status</Text>
-                                    <View style={tw`px-2.5 py-0.5 bg-green-100 dark:bg-green-950/40 rounded-full`}>
-                                        <Text style={tw`text-[9px] font-bold text-green-700 dark:text-green-400 uppercase`}>
-                                            {employee.status || 'ACTIVE'}
-                                        </Text>
+                                {isEditing ? (
+                                    <View>
+                                        {renderEditableDetailRow('Phone', profile.phone, formPhone, setFormPhone, 'e.g. 1119299291', 'number-pad')}
+                                        {renderEditableDetailRow('Email', employee.email, formEmail, setFormEmail, 'Enter email address', 'email-address')}
+                                        {renderEditableDetailRow('Date of Birth (YYYY-MM-DD)', profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : '', formDob, setFormDob, 'YYYY-MM-DD')}
+                                        {renderEditableDetailRow('Date of Joining (YYYY-MM-DD)', profile.joiningDate ? new Date(profile.joiningDate).toISOString().split('T')[0] : '', formJoiningDate, setFormJoiningDate, 'YYYY-MM-DD')}
+
+                                        {/* System Role Selector */}
+                                        <TouchableOpacity
+                                            onPress={() => setShowRolePicker(true)}
+                                            style={tw`py-3 border-b border-gray-50 dark:border-slate-700/20`}
+                                        >
+                                            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-1.5`}>System Role</Text>
+                                            <View style={tw`flex-row justify-between items-center bg-[#f5f3ff] dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2.5`}>
+                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                    {roles.find(r => String(r.id) === String(formRoleId))?.name || (typeof employee.role === 'object' ? employee.role?.name : employee.role) || 'Select Role'}
+                                                </Text>
+                                                <ChevronDown size={16} color="#94a3b8" />
+                                            </View>
+                                        </TouchableOpacity>
+
+                                        {/* Designation Selector */}
+                                        <TouchableOpacity
+                                            onPress={() => setShowDesignationPicker(true)}
+                                            style={tw`py-3 border-b border-gray-50 dark:border-slate-700/20`}
+                                        >
+                                            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-1.5`}>Designation</Text>
+                                            <View style={tw`flex-row justify-between items-center bg-[#f5f3ff] dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2.5`}>
+                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                    {designations.find(d => String(d.id) === String(formDesignationId))?.name || profile.title || 'Select Designation'}
+                                                </Text>
+                                                <ChevronDown size={16} color="#94a3b8" />
+                                            </View>
+                                        </TouchableOpacity>
+
+                                        {/* Department Selector */}
+                                        <TouchableOpacity
+                                            onPress={() => setShowDepartmentPicker(true)}
+                                            style={tw`py-3 border-b border-gray-50 dark:border-slate-700/20`}
+                                        >
+                                            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-1.5`}>Department</Text>
+                                            <View style={tw`flex-row justify-between items-center bg-[#f5f3ff] dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2.5`}>
+                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                    {departments.find(d => String(d.id) === String(formDepartmentId))?.name || profile.department || 'Select Department'}
+                                                </Text>
+                                                <ChevronDown size={16} color="#94a3b8" />
+                                            </View>
+                                        </TouchableOpacity>
+
+                                        {/* Blood Group Selector */}
+                                        <TouchableOpacity
+                                            onPress={() => setShowBloodGroupPicker(true)}
+                                            style={tw`py-3 border-b border-gray-50 dark:border-slate-700/20`}
+                                        >
+                                            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-1.5`}>Blood Group</Text>
+                                            <View style={tw`flex-row justify-between items-center bg-[#f5f3ff] dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2.5`}>
+                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                    {formBloodGroup || 'Select Blood Group'}
+                                                </Text>
+                                                <ChevronDown size={16} color="#94a3b8" />
+                                            </View>
+                                        </TouchableOpacity>
+
+                                        {renderEditableDetailRow('Address', profile.address, formAddress, setFormAddress, 'Enter home address')}
+
+                                        {/* Employment Status Options */}
+                                        <View style={tw`py-3 border-b border-gray-50 dark:border-slate-700/20`}>
+                                            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-2`}>Employment Status</Text>
+                                            <View style={tw`flex-row gap-2`}>
+                                                {['Active', 'Inactive', 'OnNotice'].map((st) => (
+                                                    <TouchableOpacity
+                                                        key={st}
+                                                        onPress={() => setFormStatus(st)}
+                                                        style={tw`px-3.5 py-1.5 rounded-full ${formStatus === st ? 'bg-[#8b5cf6]' : 'bg-gray-100 dark:bg-white/5'}`}
+                                                    >
+                                                        <Text style={tw`text-xs font-bold ${formStatus === st ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                                                            {st}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        </View>
                                     </View>
-                                </View>
+                                ) : (
+                                    <View>
+                                        {renderDetailRow('Phone', profile.phone)}
+                                        {renderDetailRow('Email', employee.email)}
+                                        {renderDetailRow('Date of Birth', profile.dob ? new Date(profile.dob).toLocaleDateString('en-IN') : '')}
+                                        {renderDetailRow('Date of Joining', profile.joiningDate ? new Date(profile.joiningDate).toLocaleDateString('en-IN') : '')}
+                                        {renderDetailRow('System Role', employee.role && typeof employee.role === 'object' ? employee.role.name : employee.role)}
+                                        {renderDetailRow('Designation', profile.title)}
+                                        {renderDetailRow('Department', profile.department)}
+                                        {renderDetailRow('Blood Group', profile.bloodGroup)}
+                                        {renderDetailRow('Address', profile.address)}
+
+                                        {/* Status Row */}
+                                        <View style={tw`flex-row justify-between py-3 border-b border-gray-50 dark:border-slate-700/20 items-center`}>
+                                            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase`}>Status</Text>
+                                            <View style={tw`px-2.5 py-0.5 bg-green-100 dark:bg-green-950/40 rounded-full`}>
+                                                <Text style={tw`text-[9px] font-bold text-green-700 dark:text-green-400 uppercase`}>
+                                                    {employee.status || 'ACTIVE'}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                )}
 
                                 {/* Additional Custom Personal Details */}
                                 {personalFields.length > 0 && (
@@ -1114,15 +1637,150 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                             </View>
                         )}
 
-                        {activeTab === 'documents' && (
-                            <View>
-                                <View style={tw`flex-row items-center gap-2 mb-4`}>
-                                    <FileText size={18} color="#8b5cf6" />
-                                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white`}>Document Vault</Text>
-                                </View>
+                        {activeTab === 'documents' && (() => {
+                            const REQUIRED_DOCUMENTS = [
+                                { key: 'aadhaar', name: 'Aadhaar Card' },
+                                { key: 'pan', name: 'PAN Card' },
+                                { key: 'degree', name: 'Highest Qualification Degree' },
+                            ];
+                            const documentsList = employee?.employeeProfile?.documents || employee?.documents || [];
 
-                                {documentFields.length > 0 ? (
-                                    documentFields.map(ca => {
+                            return (
+                                <View>
+                                    <View style={tw`flex-row items-center gap-2 mb-4`}>
+                                        <FileText size={18} color="#8b5cf6" />
+                                        <Text style={tw`text-sm font-bold text-gray-900 dark:text-white`}>Document Vault</Text>
+                                    </View>
+
+                                    {/* Standard Mandatory Documents (Aadhaar Card, PAN Card, Degree) */}
+                                    {REQUIRED_DOCUMENTS.map((doc) => {
+                                        const savedDoc = documentsList.find((d: any) => d.name === doc.name);
+                                        return (
+                                            <View key={doc.name} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
+                                                <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                                    <View style={tw`p-2.5 bg-[#8b5cf6]/10 rounded-xl`}>
+                                                        <FileText size={18} color="#8b5cf6" />
+                                                    </View>
+                                                    <View style={tw`flex-1`}>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                            {doc.name} <Text style={tw`text-red-500`}>*</Text>
+                                                        </Text>
+                                                        {savedDoc ? (
+                                                            <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                                {savedDoc.originalName || savedDoc.url || 'Document Uploaded'}
+                                                            </Text>
+                                                        ) : (
+                                                            <Text style={tw`text-[10px] text-gray-400 dark:text-purple-300 mt-1`}>
+                                                                No document uploaded
+                                                            </Text>
+                                                        )}
+                                                    </View>
+                                                </View>
+
+                                                <View style={tw`flex-row items-center gap-2`}>
+                                                    {/* Upload Button in Edit Mode if no file exists */}
+                                                    {isEditing && !savedDoc && (
+                                                        <TouchableOpacity
+                                                            onPress={() => handleUploadStandardDocument(doc.name, doc.key)}
+                                                            style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl mr-1`}
+                                                        >
+                                                            <Upload size={12} color="#fff" />
+                                                            <Text style={tw`text-xs font-bold text-white`}>Upload</Text>
+                                                        </TouchableOpacity>
+                                                    )}
+
+                                                    {/* View button */}
+                                                    {savedDoc && Boolean(savedDoc.url) && (
+                                                        <TouchableOpacity
+                                                            onPress={() => handleViewDocument(savedDoc.url)}
+                                                            style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
+                                                        >
+                                                            <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
+                                                        </TouchableOpacity>
+                                                    )}
+
+                                                    {/* Delete Button in Edit Mode if file exists */}
+                                                    {isEditing && savedDoc && (
+                                                        <TouchableOpacity
+                                                            onPress={() => handleDeleteStandardDocument(savedDoc.id, doc.name)}
+                                                            style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
+                                                        >
+                                                            <Trash2 size={18} color="#ef4444" />
+                                                        </TouchableOpacity>
+                                                    )}
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
+
+                                    {/* Dedicated Profile Picture Slot */}
+                                    <View style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
+                                        <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                            <View style={tw`w-10 h-10 rounded-xl bg-[#8b5cf6]/10 flex items-center justify-center overflow-hidden`}>
+                                                {profilePictureUrl && !profileImgError ? (
+                                                    <Image
+                                                        source={{ uri: profilePictureUrl }}
+                                                        style={tw`w-full h-full`}
+                                                        resizeMode="cover"
+                                                    />
+                                                ) : (
+                                                    <User size={18} color="#8b5cf6" />
+                                                )}
+                                            </View>
+                                            <View style={tw`flex-1`}>
+                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                    Profile Picture <Text style={tw`text-red-500`}>*</Text>
+                                                </Text>
+                                                {profilePictureUrl ? (
+                                                    <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                        Profile picture uploaded
+                                                    </Text>
+                                                ) : (
+                                                    <Text style={tw`text-[10px] text-gray-400 dark:text-purple-300 mt-1`}>
+                                                        No profile picture uploaded
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        </View>
+
+                                        <View style={tw`flex-row items-center gap-2`}>
+                                            {/* Upload/Change Button in Edit Mode */}
+                                            {isEditing && (
+                                                <TouchableOpacity
+                                                    onPress={handleUploadProfilePicture}
+                                                    style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl mr-1`}
+                                                >
+                                                    <Upload size={12} color="#fff" />
+                                                    <Text style={tw`text-xs font-bold text-white`}>
+                                                        {profilePictureUrl ? 'Change' : 'Upload'}
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            )}
+
+                                            {/* View Profile Picture Button */}
+                                            {Boolean(profilePictureUrl) && (
+                                                <TouchableOpacity
+                                                    onPress={() => handleViewDocument(profilePictureUrl)}
+                                                    style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
+                                                >
+                                                    <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
+                                                </TouchableOpacity>
+                                            )}
+
+                                            {/* Delete Profile Picture Button in Edit Mode */}
+                                            {isEditing && Boolean(profilePictureUrl) && (
+                                                <TouchableOpacity
+                                                    onPress={handleDeleteProfilePicture}
+                                                    style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
+                                                >
+                                                    <Trash2 size={18} color="#ef4444" />
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    </View>
+
+                                    {/* Dynamic Custom Fields Documents */}
+                                    {documentFields.map(ca => {
                                         return (
                                             <View key={ca.id} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
                                                 <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
@@ -1134,7 +1792,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                             {ca.field.name} <Text style={tw`text-red-500`}>*</Text>
                                                         </Text>
                                                         {ca.documentUrl ? (
-                                                            <Text style={tw`text-[10px] text-green-650 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                            <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
                                                                 {ca.documentName || 'Document Uploaded'}
                                                             </Text>
                                                         ) : (
@@ -1157,8 +1815,8 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                         </TouchableOpacity>
                                                     )}
 
-                                                    {/* Eye view button styled exactly like web */}
-                                                    {ca.documentUrl && (
+                                                    {/* Eye view button */}
+                                                    {Boolean(ca.documentUrl) && (
                                                         <TouchableOpacity
                                                             onPress={() => handleViewDocument(ca.documentUrl)}
                                                             style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
@@ -1168,7 +1826,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                     )}
 
                                                     {/* Delete Button in Edit Mode if file exists */}
-                                                    {isEditing && ca.documentUrl && (
+                                                    {isEditing && Boolean(ca.documentUrl) && (
                                                         <TouchableOpacity
                                                             onPress={() => handleDeleteDocument(ca.fieldId, ca.field.name)}
                                                             style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
@@ -1179,80 +1837,294 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                 </View>
                                             </View>
                                         );
-                                    })
-                                ) : (
-                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-300 italic text-center py-6`}>No documents configured.</Text>
-                                )}
-                            </View>
-                        )}
+                                    })}
+                                </View>
+                            );
+                        })()}
 
                         {activeTab === 'statutory' && (
                             <View>
                                 <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory Details</Text>
-                                {renderDetailRow('PAN Card', profile.statutory?.panNumber)}
-                                {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber)}
-                                {renderDetailRow('UAN (PF)', profile.statutory?.uanNumber)}
-                                {renderDetailRow('ESIC Number', profile.statutory?.esicNumber)}
-                                {renderDetailRow('Bank Name', profile.bank?.bankName)}
-                                {renderDetailRow('IFSC Code', profile.bank?.ifscCode)}
-                                {renderDetailRow('Account Number', profile.bank?.accountNumber)}
+                                {isEditing ? (
+                                    <View>
+                                        {renderEditableDetailRow('UAN (Provident Fund)', profile.statutory?.uanNumber, formUan, setFormUan, '12-digit UAN', 'number-pad')}
+                                        {renderEditableDetailRow('ESIC Number', profile.statutory?.esicNumber, formEsic, setFormEsic, '10-digit ESIC Number', 'number-pad')}
+                                        {renderEditableDetailRow('PAN Number', profile.statutory?.panNumber, formPan, setFormPan, 'e.g. ABCDE1234F')}
+                                        {renderEditableDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, '12-digit Aadhaar', 'number-pad')}
+
+                                        <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mt-6 mb-4`}>Bank Account</Text>
+                                        {renderEditableDetailRow('Bank Name', profile.bank?.bankName, formBankName, setFormBankName, 'e.g. HDFC Bank')}
+                                        {renderEditableDetailRow('Account Number', profile.bank?.accountNumber, formAccountNumber, setFormAccountNumber, '9 to 18 digits', 'number-pad')}
+                                        {renderEditableDetailRow('IFSC Code', profile.bank?.ifscCode, formIfscCode, setFormIfscCode, 'e.g. SBIN0123456')}
+                                    </View>
+                                ) : (
+                                    <View>
+                                        {renderDetailRow('PAN Card', profile.statutory?.panNumber)}
+                                        {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber)}
+                                        {renderDetailRow('UAN (PF)', profile.statutory?.uanNumber)}
+                                        {renderDetailRow('ESIC Number', profile.statutory?.esicNumber)}
+                                        {renderDetailRow('Bank Name', profile.bank?.bankName)}
+                                        {renderDetailRow('IFSC Code', profile.bank?.ifscCode)}
+                                        {renderDetailRow('Account Number', profile.bank?.accountNumber)}
+                                    </View>
+                                )}
                             </View>
                         )}
 
-                        {activeTab === 'salary' && (
-                            <View>
-                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Salary Structure</Text>
-                                {renderEditableDetailRow('Basic Monthly', profile.salary?.basic ? `INR ${profile.salary.basic}` : '0', formBasicSalary, setFormBasicSalary, 'Enter basic monthly salary', 'number-pad')}
-                            </View>
-                        )}
+                        {activeTab === 'salary' && (() => {
+                            const getComponentAmount = (comp: any) => {
+                                const basic = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
+                                if (comp.calculationType === 'FLAT') {
+                                    return Number(comp.value || 0);
+                                }
+                                return (basic * Number(comp.value || 0)) / 100;
+                            };
+
+                            const activeSalaryComponents = isEditing
+                                ? selectedSalaryComponents
+                                : (profile?.selectedSalaryComponents || profile?.salaryComponents || []);
+
+                            const earningsComponents = activeSalaryComponents.filter((c: any) => c.type === 'EARNING');
+                            const deductionComponents = activeSalaryComponents.filter((c: any) => c.type === 'DEDUCTION');
+
+                            const currentBasicAmount = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
+                            const salaryOverviewEarnings = currentBasicAmount + earningsComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
+                            const salaryOverviewDeductions = deductionComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
+                            const salaryOverviewNet = salaryOverviewEarnings - salaryOverviewDeductions;
+
+                            return (
+                                <View>
+                                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Salary Overview</Text>
+
+                                    {/* Salary Overview 3 Cards */}
+                                    <View style={tw`flex-row flex-wrap justify-between gap-2 mb-6`}>
+                                        {/* Total Earnings */}
+                                        <View style={tw`w-[31%] p-3.5 rounded-2xl bg-green-500/10 border border-green-500/30 relative overflow-hidden`}>
+                                            <View style={tw`w-7 h-7 rounded-lg bg-green-500/20 items-center justify-center mb-2`}>
+                                                <TrendingUp size={16} color="#22c55e" />
+                                            </View>
+                                            <Text style={tw`text-[10px] font-bold text-green-600 dark:text-green-400`}>Total Earnings</Text>
+                                            <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
+                                                ₹ {salaryOverviewEarnings.toLocaleString('en-IN')}
+                                            </Text>
+                                            <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
+                                        </View>
+
+                                        {/* Total Deductions */}
+                                        <View style={tw`w-[31%] p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 relative overflow-hidden`}>
+                                            <View style={tw`w-7 h-7 rounded-lg bg-red-500/20 items-center justify-center mb-2`}>
+                                                <TrendingDown size={16} color="#ef4444" />
+                                            </View>
+                                            <Text style={tw`text-[10px] font-bold text-red-500 dark:text-red-400`}>Total Deductions</Text>
+                                            <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
+                                                ₹ {salaryOverviewDeductions.toLocaleString('en-IN')}
+                                            </Text>
+                                            <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
+                                        </View>
+
+                                        {/* Net Salary */}
+                                        <View style={tw`w-[31%] p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 relative overflow-hidden`}>
+                                            <View style={tw`w-7 h-7 rounded-lg bg-blue-500/20 items-center justify-center mb-2`}>
+                                                <Coins size={16} color="#3b82f6" />
+                                            </View>
+                                            <Text style={tw`text-[10px] font-bold text-blue-600 dark:text-blue-400`}>Net Salary</Text>
+                                            <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
+                                                ₹ {salaryOverviewNet.toLocaleString('en-IN')}
+                                            </Text>
+                                            <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
+                                        </View>
+                                    </View>
+
+                                    {/* Earnings & Deductions Containers */}
+                                    <View style={tw`gap-5`}>
+                                        {/* Earnings Container */}
+                                        <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
+                                            <Text style={tw`text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-wider mb-3`}>Earnings</Text>
+                                            
+                                            {/* Basic Salary Row */}
+                                            <View style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
+                                                <View>
+                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Basic Salary</Text>
+                                                    <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>Fixed Base Pay</Text>
+                                                </View>
+                                                {isEditing ? (
+                                                    <TextInput
+                                                        style={tw`px-3 py-1.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold w-32 text-right`}
+                                                        value={formBasicSalary}
+                                                        onChangeText={setFormBasicSalary}
+                                                        keyboardType="number-pad"
+                                                        placeholder="Enter Basic"
+                                                        placeholderTextColor="#94a3b8"
+                                                    />
+                                                ) : (
+                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                        ₹ {Number(profile.salary?.basic || 0).toLocaleString('en-IN')}
+                                                    </Text>
+                                                )}
+                                            </View>
+
+                                            {/* Earning Components List */}
+                                            {earningsComponents.map((comp: any) => (
+                                                <View key={comp.id} style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
+                                                    <View>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
+                                                        <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
+                                                            {comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`}
+                                                        </Text>
+                                                    </View>
+                                                    <View style={tw`flex-row items-center gap-3`}>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                            ₹ {getComponentAmount(comp).toLocaleString('en-IN')}
+                                                        </Text>
+                                                        {isEditing && (
+                                                            <TouchableOpacity
+                                                                onPress={() => {
+                                                                    setSelectedSalaryComponents(prev => prev.filter(c => String(c.id) !== String(comp.id)));
+                                                                }}
+                                                                style={tw`p-1.5 bg-red-500/10 rounded-lg`}
+                                                            >
+                                                                <Trash2 size={14} color="#ef4444" />
+                                                            </TouchableOpacity>
+                                                        )}
+                                                    </View>
+                                                </View>
+                                            ))}
+
+                                            {/* Add Earnings Component Button */}
+                                            {isEditing && (
+                                                <TouchableOpacity
+                                                    onPress={() => setComponentPickerType('EARNING')}
+                                                    style={tw`mt-3 py-2.5 rounded-xl border border-dashed border-green-500/40 items-center justify-center bg-green-500/5`}
+                                                >
+                                                    <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>+ Add Earnings Component</Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+
+                                        {/* Deductions Container */}
+                                        <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
+                                            <Text style={tw`text-xs font-black text-red-500 dark:text-red-400 uppercase tracking-wider mb-3`}>Deductions</Text>
+                                            
+                                            {deductionComponents.length === 0 && !isEditing && (
+                                                <Text style={tw`text-xs text-gray-400 italic py-2`}>No deductions applied</Text>
+                                            )}
+
+                                            {/* Deduction Components List */}
+                                            {deductionComponents.map((comp: any) => (
+                                                <View key={comp.id} style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
+                                                    <View>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
+                                                        <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
+                                                            {comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`}
+                                                        </Text>
+                                                    </View>
+                                                    <View style={tw`flex-row items-center gap-3`}>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                            ₹ {getComponentAmount(comp).toLocaleString('en-IN')}
+                                                        </Text>
+                                                        {isEditing && (
+                                                            <TouchableOpacity
+                                                                onPress={() => {
+                                                                    setSelectedSalaryComponents(prev => prev.filter(c => String(c.id) !== String(comp.id)));
+                                                                }}
+                                                                style={tw`p-1.5 bg-red-500/10 rounded-lg`}
+                                                            >
+                                                                <Trash2 size={14} color="#ef4444" />
+                                                            </TouchableOpacity>
+                                                        )}
+                                                    </View>
+                                                </View>
+                                            ))}
+
+                                            {/* Add Deductions Component Button */}
+                                            {isEditing && (
+                                                <TouchableOpacity
+                                                    onPress={() => setComponentPickerType('DEDUCTION')}
+                                                    style={tw`mt-3 py-2.5 rounded-xl border border-dashed border-red-500/40 items-center justify-center bg-red-500/5`}
+                                                >
+                                                    <Text style={tw`text-xs font-bold text-red-500 dark:text-red-400`}>+ Add Deduction Component</Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
+                                    </View>
+                                </View>
+                            );
+                        })()}
 
                         {activeTab === 'shifts' && (
                             <View>
                                 <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Shift & Roster</Text>
-                                <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-300 uppercase mb-3`}>Assigned Shift</Text>
+                                <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-300 uppercase mb-3`}>
+                                    {isEditing ? 'Select Shift to Assign' : 'Assigned Shift'}
+                                </Text>
 
-                                <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
-                                    <Text style={tw`text-base font-bold text-[#8b5cf6] mb-3 capitalize`}>{profile.shift?.name || 'morning'}</Text>
-
-                                    <View style={tw`flex-row justify-between mb-2`}>
-                                        <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Timing:</Text>
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                            {profile.shift?.inTime || '09:00'} - {profile.shift?.outTime || '18:00'}
-                                        </Text>
+                                {isEditing ? (
+                                    <View style={tw`gap-3`}>
+                                        {shifts.map((shift: any) => {
+                                            const isSelected = String(formShiftId) === String(shift.id);
+                                            return (
+                                                <TouchableOpacity
+                                                    key={shift.id}
+                                                    onPress={() => setFormShiftId(shift.id)}
+                                                    style={tw`p-4 rounded-2xl border ${isSelected ? 'border-[#8b5cf6] bg-[#8b5cf6]/10' : 'border-gray-100 dark:border-white/5 bg-[#f5f3ff] dark:bg-[#111827]'}`}
+                                                >
+                                                    <View style={tw`flex-row justify-between items-center mb-2`}>
+                                                        <Text style={tw`text-base font-bold ${isSelected ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'} capitalize`}>
+                                                            {shift.name}
+                                                        </Text>
+                                                        {isSelected && (
+                                                            <View style={tw`w-5 h-5 rounded-full bg-[#8b5cf6] items-center justify-center`}>
+                                                                <Check size={12} color="#fff" />
+                                                            </View>
+                                                        )}
+                                                    </View>
+                                                    <View style={tw`flex-row justify-between mb-1`}>
+                                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Timing:</Text>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.startTime} - {shift.endTime}</Text>
+                                                    </View>
+                                                    <View style={tw`flex-row justify-between mb-1`}>
+                                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Break:</Text>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.breakDuration} mins</Text>
+                                                    </View>
+                                                    <View style={tw`flex-row justify-between`}>
+                                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Night Shift:</Text>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.isNightShift ? 'Yes' : 'No'}</Text>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            );
+                                        })}
                                     </View>
+                                ) : (
+                                    <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
+                                        <Text style={tw`text-base font-bold text-[#8b5cf6] mb-3 capitalize`}>{profile.shift?.name || 'morning'}</Text>
 
-                                    <View style={tw`flex-row justify-between mb-2`}>
-                                        <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Break:</Text>
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                            {profile.shift?.breakDuration ?? 60} mins
-                                        </Text>
-                                    </View>
+                                        <View style={tw`flex-row justify-between mb-2`}>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Timing:</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.startTime || '09:00'} - {profile.shift?.endTime || '18:00'}</Text>
+                                        </View>
 
-                                    <View style={tw`flex-row justify-between mb-2`}>
-                                        <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Grace Time:</Text>
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                            {profile.shift?.graceTime ?? 15} mins
-                                        </Text>
-                                    </View>
+                                        <View style={tw`flex-row justify-between mb-2`}>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Break:</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.breakDuration || 60} mins</Text>
+                                        </View>
 
-                                    <View style={tw`flex-row justify-between`}>
-                                        <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Night Shift:</Text>
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                            {profile.shift?.isNightShift ? 'Yes' : 'No'}
-                                        </Text>
+                                        <View style={tw`flex-row justify-between mb-2`}>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Grace Time:</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.graceTime || 15} mins</Text>
+                                        </View>
+
+                                        <View style={tw`flex-row justify-between`}>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Night Shift:</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.isNightShift ? 'Yes' : 'No'}</Text>
+                                        </View>
                                     </View>
-                                </View>
+                                )}
                             </View>
                         )}
 
                         {activeTab === 'team' && (
                             <View>
-                                <View style={tw`flex-row items-center gap-2 mb-4`}>
-                                    <Users size={18} color="#8b5cf6" />
-                                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white`}>Team & Manager Details</Text>
-                                </View>
-
-                                {employee.teams && employee.teams.length > 0 ? (
+                                {Array.isArray(employee?.teams) && employee.teams.length > 0 ? (
                                     employee.teams.map((t: any, idx: number) => {
                                         return (
                                             <View key={idx} style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5 mb-3`}>
@@ -1261,17 +2133,17 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                                 {t.description ? <Text style={tw`text-xs text-gray-500 mb-3`}>{t.description}</Text> : null}
 
                                                 <View style={tw`flex-row justify-between mb-2`}>
-                                                    <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Name</Text>
+                                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Name</Text>
                                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.name || 'System Admin'}</Text>
                                                 </View>
 
                                                 <View style={tw`flex-row justify-between mb-2`}>
-                                                    <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Email</Text>
+                                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Email</Text>
                                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.email || 'admin@example.com'}</Text>
                                                 </View>
 
                                                 <View style={tw`flex-row justify-between`}>
-                                                    <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Phone</Text>
+                                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Phone</Text>
                                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.employeeProfile?.phone || '1119299291'}</Text>
                                                 </View>
                                             </View>
@@ -1284,17 +2156,17 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                         {profile.department ? <Text style={tw`text-xs text-gray-500 mb-3`}>{profile.department}</Text> : null}
 
                                         <View style={tw`flex-row justify-between mb-2`}>
-                                            <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Name</Text>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Name</Text>
                                             <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>System Admin</Text>
                                         </View>
 
                                         <View style={tw`flex-row justify-between mb-2`}>
-                                            <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Email</Text>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Email</Text>
                                             <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>admin@example.com</Text>
                                         </View>
 
                                         <View style={tw`flex-row justify-between`}>
-                                            <Text style={tw`text-xs text-gray-450 dark:text-purple-200`}>Team Manager Phone</Text>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Phone</Text>
                                             <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>1119299291</Text>
                                         </View>
                                     </View>
@@ -1315,7 +2187,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                             <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Generate Payslip</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            onPress={() => Alert.alert('ID Card', 'Generating ID Card preview...')}
+                            onPress={() => setShowIDCardModal(true)}
                             style={tw`flex-row items-center gap-3 p-3.5 bg-gray-50 dark:bg-white/10 rounded-2xl border border-gray-100 dark:border-white/5`}
                         >
                             <User size={18} color={isDark ? '#fff' : '#8b5cf6'} />
@@ -1683,6 +2555,288 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
                     </View>
                 </View>
+            </Modal>
+
+            {/* ID Card Preview Modal */}
+            <Modal
+                visible={showIDCardModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowIDCardModal(false)}
+            >
+                <View style={tw`flex-1 bg-black/85 justify-center items-center p-4`}>
+                    <View style={tw`relative items-center`}>
+                        {/* Close Button */}
+                        <TouchableOpacity
+                            onPress={() => setShowIDCardModal(false)}
+                            style={tw`absolute -top-10 right-0 p-2 z-50`}
+                        >
+                            <X size={24} color="#ffffff" />
+                        </TouchableOpacity>
+
+                        {/* ID Card Container */}
+                        <View style={tw`w-[320px] h-[540px] bg-white rounded-3xl overflow-hidden relative flex-col shadow-2xl`}>
+                            {/* Purple Header */}
+                            <View style={tw`absolute top-0 inset-x-0 h-44 rounded-b-[40px] bg-[#5b21b6] z-0`} />
+                            <View style={tw`mx-auto w-16 h-2.5 bg-white/20 rounded-full mt-4 relative z-10`} />
+
+                            <View style={tw`flex-row justify-between items-start mb-2 px-6 pt-2 relative z-10`}>
+                                <Text style={tw`text-white font-bold text-lg tracking-widest`}>
+                                    EnCalm <Text style={tw`text-purple-300`}>HRX</Text>
+                                </Text>
+                                <View style={tw`w-10 h-7 bg-amber-400 rounded-md border border-yellow-200/50 shadow-sm`} />
+                            </View>
+
+                            {/* Profile Avatar */}
+                            <View style={tw`relative z-10 mx-auto mt-4`}>
+                                <View style={tw`w-28 h-28 rounded-full border-4 border-white bg-[#7c3aed] shadow-lg overflow-hidden items-center justify-center`}>
+                                    {profilePictureUrl && !profileImgError ? (
+                                        <Image
+                                            source={{ uri: profilePictureUrl }}
+                                            style={tw`w-full h-full`}
+                                            resizeMode="cover"
+                                            onError={() => setProfileImgError(true)}
+                                        />
+                                    ) : (
+                                        <Text style={tw`text-white font-bold text-3xl`}>{initials}</Text>
+                                    )}
+                                </View>
+                            </View>
+
+                            {/* Employee Info */}
+                            <View style={tw`mt-3 items-center flex-1`}>
+                                <Text style={tw`text-xl font-bold text-gray-800 px-4 text-center`}>{employee.name}</Text>
+                                <Text style={tw`text-purple-600 font-bold text-xs mt-1`}>{profile.title || 'Employee'}</Text>
+                                <View style={tw`w-12 h-1 bg-purple-200 rounded-full my-3`} />
+
+                                {/* Details Grid */}
+                                <View style={tw`w-full px-7 gap-y-2.5`}>
+                                    <View style={tw`flex-row justify-between`}>
+                                        <View style={tw`flex-1 mr-2`}>
+                                            <Text style={tw`text-[9px] text-gray-400 uppercase font-bold`}>Employee ID</Text>
+                                            <Text style={tw`text-xs font-semibold text-gray-700`}>{employee.id}</Text>
+                                        </View>
+                                        <View style={tw`flex-1`}>
+                                            <Text style={tw`text-[9px] text-gray-400 uppercase font-bold`}>Blood Group</Text>
+                                            <Text style={tw`text-xs font-semibold text-gray-700`}>{profile.bloodGroup || 'N/A'}</Text>
+                                        </View>
+                                    </View>
+
+                                    <View style={tw`flex-row justify-between`}>
+                                        <View style={tw`flex-1 mr-2`}>
+                                            <Text style={tw`text-[9px] text-gray-400 uppercase font-bold`}>Department</Text>
+                                            <Text style={tw`text-xs font-semibold text-gray-700`} numberOfLines={1}>{profile.department || 'N/A'}</Text>
+                                        </View>
+                                        <View style={tw`flex-1`}>
+                                            <Text style={tw`text-[9px] text-gray-400 uppercase font-bold`}>Mobile Number</Text>
+                                            <Text style={tw`text-xs font-semibold text-gray-700`}>{profile.phone || 'N/A'}</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Footer Section with QR Code & Admin Signature */}
+                            <View style={tw`bg-white px-6 pb-4 pt-2 flex-row justify-between items-center mt-auto border-t border-gray-100`}>
+                                <View style={tw`w-14 h-14 bg-white p-1 rounded-lg border border-gray-200 items-center justify-center overflow-hidden`}>
+                                    <Image
+                                        source={{ uri: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`Employee ID: ${employee.id}\nName: ${employee.name}\nRole: ${profile.title || 'Employee'}\nDept: ${profile.department || 'N/A'}`)}` }}
+                                        style={tw`w-full h-full`}
+                                        resizeMode="contain"
+                                    />
+                                </View>
+
+                                <View style={tw`items-end justify-end`}>
+                                    {!!adminSignatureUrl && (
+                                        <Image
+                                            source={{ uri: adminSignatureUrl }}
+                                            style={tw`w-24 h-8`}
+                                            resizeMode="contain"
+                                        />
+                                    )}
+                                    <Text style={tw`text-[11px] italic text-gray-400 leading-tight mt-0.5`}>
+                                        Authorized Sig.
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Print / Export Button */}
+                        <TouchableOpacity
+                            onPress={exportIDCardPDF}
+                            style={tw`mt-5 flex-row items-center gap-2 px-6 py-2.5 bg-white rounded-full shadow-lg self-center`}
+                        >
+                            <Printer size={18} color="#1f2937" />
+                            <Text style={tw`text-xs font-bold text-gray-800`}>Print / Share ID Card</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Role Picker Modal */}
+            <Modal visible={showRolePicker} transparent animationType="fade" onRequestClose={() => setShowRolePicker(false)}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setShowRolePicker(false)} style={tw`flex-1 bg-black/60 justify-end`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                        <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                            <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>Select System Role</Text>
+                            <TouchableOpacity onPress={() => setShowRolePicker(false)}>
+                                <X size={20} color={isDark ? '#fff' : '#000'} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={tw`max-h-80`}>
+                            {roles.map((r: any) => (
+                                <TouchableOpacity
+                                    key={r.id}
+                                    onPress={() => {
+                                        setFormRoleId(r.id);
+                                        setShowRolePicker(false);
+                                    }}
+                                    style={tw`py-3 px-4 rounded-xl mb-1.5 flex-row justify-between items-center ${String(formRoleId) === String(r.id) ? 'bg-[#8b5cf6]/10' : 'bg-gray-50 dark:bg-white/5'}`}
+                                >
+                                    <Text style={tw`text-xs font-bold ${String(formRoleId) === String(r.id) ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'}`}>{r.name}</Text>
+                                    {String(formRoleId) === String(r.id) && <Check size={16} color="#8b5cf6" />}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Designation Picker Modal */}
+            <Modal visible={showDesignationPicker} transparent animationType="fade" onRequestClose={() => setShowDesignationPicker(false)}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setShowDesignationPicker(false)} style={tw`flex-1 bg-black/60 justify-end`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                        <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                            <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>Select Designation</Text>
+                            <TouchableOpacity onPress={() => setShowDesignationPicker(false)}>
+                                <X size={20} color={isDark ? '#fff' : '#000'} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={tw`max-h-80`}>
+                            {designations.map((d: any) => (
+                                <TouchableOpacity
+                                    key={d.id}
+                                    onPress={() => {
+                                        setFormDesignationId(d.id);
+                                        setShowDesignationPicker(false);
+                                    }}
+                                    style={tw`py-3 px-4 rounded-xl mb-1.5 flex-row justify-between items-center ${String(formDesignationId) === String(d.id) ? 'bg-[#8b5cf6]/10' : 'bg-gray-50 dark:bg-white/5'}`}
+                                >
+                                    <Text style={tw`text-xs font-bold ${String(formDesignationId) === String(d.id) ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'}`}>{d.name}</Text>
+                                    {String(formDesignationId) === String(d.id) && <Check size={16} color="#8b5cf6" />}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Department Picker Modal */}
+            <Modal visible={showDepartmentPicker} transparent animationType="fade" onRequestClose={() => setShowDepartmentPicker(false)}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setShowDepartmentPicker(false)} style={tw`flex-1 bg-black/60 justify-end`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                        <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                            <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>Select Department</Text>
+                            <TouchableOpacity onPress={() => setShowDepartmentPicker(false)}>
+                                <X size={20} color={isDark ? '#fff' : '#000'} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={tw`max-h-80`}>
+                            {departments.map((dept: any) => (
+                                <TouchableOpacity
+                                    key={dept.id}
+                                    onPress={() => {
+                                        setFormDepartmentId(dept.id);
+                                        setShowDepartmentPicker(false);
+                                    }}
+                                    style={tw`py-3 px-4 rounded-xl mb-1.5 flex-row justify-between items-center ${String(formDepartmentId) === String(dept.id) ? 'bg-[#8b5cf6]/10' : 'bg-gray-50 dark:bg-white/5'}`}
+                                >
+                                    <Text style={tw`text-xs font-bold ${String(formDepartmentId) === String(dept.id) ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'}`}>{dept.name}</Text>
+                                    {String(formDepartmentId) === String(dept.id) && <Check size={16} color="#8b5cf6" />}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Blood Group Picker Modal */}
+            <Modal visible={showBloodGroupPicker} transparent animationType="fade" onRequestClose={() => setShowBloodGroupPicker(false)}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setShowBloodGroupPicker(false)} style={tw`flex-1 bg-black/60 justify-end`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                        <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                            <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>Select Blood Group</Text>
+                            <TouchableOpacity onPress={() => setShowBloodGroupPicker(false)}>
+                                <X size={20} color={isDark ? '#fff' : '#000'} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={tw`max-h-80`}>
+                            {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bg: string) => (
+                                <TouchableOpacity
+                                    key={bg}
+                                    onPress={() => {
+                                        setFormBloodGroup(bg);
+                                        setShowBloodGroupPicker(false);
+                                    }}
+                                    style={tw`py-3 px-4 rounded-xl mb-1.5 flex-row justify-between items-center ${formBloodGroup === bg ? 'bg-[#8b5cf6]/10' : 'bg-gray-50 dark:bg-white/5'}`}
+                                >
+                                    <Text style={tw`text-xs font-bold ${formBloodGroup === bg ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'}`}>{bg}</Text>
+                                    {formBloodGroup === bg && <Check size={16} color="#8b5cf6" />}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Salary Component Add Picker Modal */}
+            <Modal visible={componentPickerType !== null} transparent animationType="fade" onRequestClose={() => setComponentPickerType(null)}>
+                <TouchableOpacity activeOpacity={1} onPress={() => setComponentPickerType(null)} style={tw`flex-1 bg-black/60 justify-end`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                        <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                            <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>
+                                Add {componentPickerType === 'EARNING' ? 'Earnings' : 'Deductions'} Component
+                            </Text>
+                            <TouchableOpacity onPress={() => setComponentPickerType(null)}>
+                                <X size={20} color={isDark ? '#fff' : '#000'} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={tw`max-h-80`}>
+                            {salaryComponents
+                                .filter((c: any) => c.type === componentPickerType)
+                                .filter((c: any) => !selectedSalaryComponents.some((item: any) => String(item.id) === String(c.id)))
+                                .map((c: any) => (
+                                    <TouchableOpacity
+                                        key={c.id}
+                                        onPress={() => {
+                                            setSelectedSalaryComponents(prev => [...prev, c]);
+                                            setComponentPickerType(null);
+                                        }}
+                                        style={tw`py-3.5 px-4 bg-gray-50 dark:bg-white/5 rounded-xl mb-2 flex-row justify-between items-center`}
+                                    >
+                                        <View>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{c.name}</Text>
+                                            <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
+                                                {c.calculationType === 'FLAT' ? 'Fixed Amount' : `${c.value}% of Basic`}
+                                            </Text>
+                                        </View>
+                                        <View style={tw`px-2.5 py-1 rounded-full ${componentPickerType === 'EARNING' ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+                                            <Text style={tw`text-[9px] font-bold ${componentPickerType === 'EARNING' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                                                + ADD
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                ))}
+
+                            {salaryComponents
+                                .filter((c: any) => c.type === componentPickerType)
+                                .filter((c: any) => !selectedSalaryComponents.some((item: any) => String(item.id) === String(c.id))).length === 0 && (
+                                <Text style={tw`text-xs text-gray-400 text-center py-6 italic`}>
+                                    No available {componentPickerType?.toLowerCase()} components to add.
+                                </Text>
+                            )}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
             </Modal>
 
             </View>

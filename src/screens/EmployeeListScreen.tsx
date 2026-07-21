@@ -5,9 +5,13 @@ import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import { useAuth } from '../context/AuthContext';
 import tw from 'twrnc';
+import { useToast } from '../context/ToastContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function EmployeeListScreen({ navigation }: any) {
     const { user } = useAuth();
+    const { showToast } = useToast();
+    const insets = useSafeAreaInsets();
     const isAdmin = user?.role === 'HR_ADMIN';
 
     const [loading, setLoading] = useState(true);
@@ -26,7 +30,7 @@ export default function EmployeeListScreen({ navigation }: any) {
             setEmployees(res.data);
         } catch (error) {
             console.error('Error fetching employees:', error);
-            Alert.alert('Error', 'Failed to load employees');
+            showToast('Failed to load employees', 'error');
         } finally {
             setLoading(false);
         }
@@ -61,7 +65,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                 title: 'Employees List Export',
             });
         } catch (error: any) {
-            Alert.alert("Error", error.message);
+            showToast(error.message || 'Failed to export CSV', 'error');
         }
     };
 
@@ -83,7 +87,7 @@ export default function EmployeeListScreen({ navigation }: any) {
         return (
             <View 
                 style={[
-                    tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border-y border-r border-gray-150 dark:border-white/5 shadow-md border-l-4`,
+                    tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border-t border-b border-r border-gray-100 dark:border-white/5 shadow-md border-l-4`,
                     profile.status === 'Inactive' ? tw`border-l-rose-500` : tw`border-l-green-500`
                 ]}
             >
@@ -153,8 +157,8 @@ export default function EmployeeListScreen({ navigation }: any) {
                         onPress={() => navigation.navigate('EmployeeProfile', { id: item.id })}
                         style={tw`flex-row items-center gap-1`}
                     >
-                        <Text style={tw`text-xs text-purple-650 dark:text-[#c4b5fd] font-bold`}>View Profile</Text>
-                        <Text style={tw`text-xs text-purple-650 dark:text-[#c4b5fd] font-bold`}>→</Text>
+                        <Text style={tw`text-xs text-purple-600 dark:text-[#c4b5fd] font-bold`}>View Profile</Text>
+                        <Text style={tw`text-xs text-purple-600 dark:text-[#c4b5fd] font-bold`}>→</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -175,7 +179,7 @@ export default function EmployeeListScreen({ navigation }: any) {
             <TouchableOpacity 
                 onPress={() => navigation.navigate('EmployeeProfile', { id: item.id })}
                 style={[
-                    tw`bg-white dark:bg-[#4c1d95] p-3 rounded-2xl mb-3 border-y border-r border-gray-150 dark:border-white/5 shadow-sm flex-row items-center justify-between border-l-4`,
+                    tw`bg-white dark:bg-[#4c1d95] p-3 rounded-2xl mb-3 border-t border-b border-r border-gray-100 dark:border-white/5 shadow-sm flex-row items-center justify-between border-l-4`,
                     profile.status === 'Inactive' ? tw`border-l-rose-500` : tw`border-l-green-500`
                 ]}
             >
@@ -234,7 +238,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                     <View style={tw`flex-row gap-2`}>
                         <TouchableOpacity
                             onPress={handleExportCSV}
-                            style={tw`p-2.5 bg-white dark:bg-[#4c1d95] border border-gray-150 dark:border-white/5 rounded-2xl shadow-sm`}
+                            style={tw`p-2.5 bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-white/5 rounded-2xl shadow-sm`}
                         >
                             <FileText size={18} color="#64748b" />
                         </TouchableOpacity>
@@ -252,7 +256,7 @@ export default function EmployeeListScreen({ navigation }: any) {
 
                 {/* Search Bar and View Mode Toggle */}
                 <View style={tw`flex-row gap-2 mb-4`}>
-                    <View style={tw`flex-1 flex-row items-center bg-white dark:bg-[#4c1d95] border border-gray-150 dark:border-white/5 rounded-2xl px-3 py-1 shadow-sm`}>
+                    <View style={tw`flex-1 flex-row items-center bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-white/5 rounded-2xl px-3 py-1 shadow-sm`}>
                         <Search size={18} color="#94a3b8" style={tw`mr-2`} />
                         <TextInput
                             style={tw`flex-1 text-sm text-gray-800 dark:text-white h-10`}
@@ -267,7 +271,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                     </View>
 
                     {/* Grid/List Toggle */}
-                    <View style={tw`flex-row bg-white dark:bg-[#4c1d95] border border-gray-150 dark:border-white/5 rounded-2xl p-1 shadow-sm items-center gap-1`}>
+                    <View style={tw`flex-row bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-white/5 rounded-2xl p-1 shadow-sm items-center gap-1`}>
                         <TouchableOpacity
                             onPress={() => setViewMode('grid')}
                             style={tw`p-1.5 rounded-xl ${viewMode === 'grid' ? 'bg-[#8b5cf6]' : 'bg-transparent'}`}
@@ -285,7 +289,7 @@ export default function EmployeeListScreen({ navigation }: any) {
 
                 {/* Quick Filters */}
                 {showFilters && (
-                    <View style={tw`bg-white dark:bg-[#4c1d95] border border-gray-150 dark:border-white/5 p-3 rounded-2xl mb-4 shadow-sm flex-row gap-2`}>
+                    <View style={tw`bg-white dark:bg-[#4c1d95] border border-gray-100 dark:border-white/5 p-3 rounded-2xl mb-4 shadow-sm flex-row gap-2`}>
                         {['All', 'Active', 'Inactive'].map((status) => (
                             <TouchableOpacity
                                 key={status}
@@ -432,7 +436,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                 onRequestClose={() => setEmployeeToDelete(null)}
             >
                 <View style={tw`flex-1 justify-center items-center bg-black/70 px-6`}>
-                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-150 dark:border-white/10 text-center relative overflow-hidden`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-100 dark:border-white/10 relative overflow-hidden`}>
                         {/* Top red stripe */}
                         <View style={tw`absolute top-0 left-0 right-0 h-1.5 bg-red-500`} />
 
@@ -469,11 +473,11 @@ export default function EmployeeListScreen({ navigation }: any) {
                                     setEmployeeToDelete(null);
                                     try {
                                         await api.delete(`/employee/${id}`);
-                                        Alert.alert("Success", `${name} deleted successfully!`);
+                                        showToast(`${name} deleted successfully!`, 'success');
                                         fetchEmployees();
                                     } catch (error: any) {
                                         console.error('Delete error:', error);
-                                        Alert.alert("Error", error.response?.data?.message || 'Failed to delete employee');
+                                        showToast(error.response?.data?.message || 'Failed to delete employee', 'error');
                                     }
                                 }}
                                 style={tw`flex-1 py-3.5 bg-red-500 rounded-2xl items-center justify-center shadow-lg shadow-red-500/20`}
