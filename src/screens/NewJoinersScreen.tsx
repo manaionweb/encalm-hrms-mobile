@@ -4,8 +4,10 @@ import { Search, Filter, Calendar, Mail, ArrowLeft, UserCheck } from 'lucide-rea
 import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import tw from 'twrnc';
+import { useToast } from '../context/ToastContext';
 
 export default function NewJoinersScreen({ navigation }: any) {
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [newJoiners, setNewJoiners] = useState<any[]>([]);
     const [searchText, setSearchText] = useState('');
@@ -29,7 +31,7 @@ export default function NewJoinersScreen({ navigation }: any) {
             setNewJoiners(joinersThisMonth);
         } catch (error) {
             console.error('Error fetching new joiners:', error);
-            Alert.alert('Error', 'Failed to load new joiners data');
+            showToast('Failed to load new joiners data', 'error');
         } finally {
             setLoading(false);
         }
@@ -169,7 +171,7 @@ export default function NewJoinersScreen({ navigation }: any) {
                         </Text>
                     </View>
                 ) : filteredJoiners.length === 0 ? (
-                    <View style={tw`flex-1 justify-center items-center py-20 bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-[#8b5cf6]/30 shadow-inner mt-4 h-64`}>
+                    <View style={tw`flex-1 justify-center items-center py-20 bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-[#8b5cf6]/30 shadow-sm mt-4 h-64`}>
                         <Calendar size={48} color="#cbd5e1" style={tw`mb-4 opacity-50`} />
                         <Text style={tw`text-lg font-bold text-gray-800 dark:text-white`}>No Employees Found</Text>
                         <Text style={tw`text-gray-500 dark:text-gray-400 mt-2 text-xs text-center px-4`}>

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { Clock, Calendar, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, MapPin, Coffee, X } from 'lucide-react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Animated } from 'react-native';
+import { PinchGestureHandler, State } from 'react-native-gesture-handler';
+import { Clock, Calendar, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, ChevronDown, MapPin, Coffee, X } from 'lucide-react-native';
 import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import tw from 'twrnc';
@@ -23,7 +24,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
         holiday: 0
     });
     const [attendanceHistory, setAttendanceHistory] = useState<any[]>([]);
-    
+
     // Web alignment data states
     const [holidays, setHolidays] = useState<any[]>([]);
     const [leaveHistory, setLeaveHistory] = useState<any[]>([]);
@@ -34,6 +35,8 @@ export default function AttendanceScreen({ route, navigation }: any) {
     // Regularization State
     const [regularizeDate, setRegularizeDate] = useState<string | null>(null);
     const [reason, setReason] = useState('');
+    const [customReason, setCustomReason] = useState('');
+    const [showReasonDropdown, setShowReasonDropdown] = useState(false);
     const [inInputText, setInInputText] = useState('09:00 AM');
     const [outInputText, setOutInputText] = useState('06:00 PM');
     const [submittingRequest, setSubmittingRequest] = useState(false);
@@ -41,6 +44,56 @@ export default function AttendanceScreen({ route, navigation }: any) {
     // Rejected Details Modals
     const [rejectedRequestToShow, setRejectedRequestToShow] = useState<any>(null);
     const [rejectedLeaveToShow, setRejectedLeaveToShow] = useState<any>(null);
+
+
+    const pinchScale = useRef(new Animated.Value(1)).current;
+    const baseScale = useRef(new Animated.Value(1)).current;
+    const scale = Animated.multiply(baseScale, pinchScale);
+    const [focalOrigin, setFocalOrigin] = useState<string>('50% 50%');
+    const [isZoomed, setIsZoomed] = useState(false);
+
+    const onPinchEvent = useRef(
+        Animated.event(
+            [{ nativeEvent: { scale: pinchScale } }],
+            {
+                useNativeDriver: Platform.OS !== 'web',
+                listener: (event: any) => {
+                    const fx = event.nativeEvent?.focalX;
+                    const fy = event.nativeEvent?.focalY;
+                    if (fx !== undefined && fy !== undefined) {
+                        setFocalOrigin(`${Math.round(fx)}px ${Math.round(fy)}px`);
+                    }
+                }
+            }
+        )
+    ).current;
+
+    const onPinchStateChange = (event: any) => {
+        const fx = event.nativeEvent?.focalX;
+        const fy = event.nativeEvent?.focalY;
+        if (fx !== undefined && fy !== undefined) {
+            setFocalOrigin(`${Math.round(fx)}px ${Math.round(fy)}px`);
+        }
+
+        if (event.nativeEvent.oldState === State.ACTIVE) {
+            let lastScale = event.nativeEvent.scale || 1;
+            let currentVal = (baseScale as any)._value || 1;
+            let newScale = Math.min(3, Math.max(1, currentVal * lastScale));
+
+            baseScale.setValue(newScale);
+            pinchScale.setValue(1);
+            setIsZoomed(newScale > 1.05);
+        }
+    };
+
+    const resetZoom = () => {
+        Animated.parallel([
+            Animated.spring(baseScale, { toValue: 1, useNativeDriver: Platform.OS !== 'web' }),
+            Animated.spring(pinchScale, { toValue: 1, useNativeDriver: Platform.OS !== 'web' }),
+        ]).start();
+        setFocalOrigin('50% 50%');
+        setIsZoomed(false);
+    };
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -150,8 +203,9 @@ export default function AttendanceScreen({ route, navigation }: any) {
     };
 
     const submitRegularization = async () => {
-        if (!reason.trim()) {
-            showToast("Please provide a reason for regularization.", 'error');
+        const finalReason = reason === 'Other' ? customReason.trim() : reason.trim();
+        if (!finalReason) {
+            showToast("Please select or specify a reason for regularization.", 'error');
             return;
         }
 
@@ -161,13 +215,15 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 date: regularizeDate,
                 inTime: inInputText,
                 outTime: outInputText,
-                reason: reason.trim(),
+                reason: finalReason,
             };
 
             await api.post('/attendance/regularize', payload);
             showToast("Regularization request submitted!", 'success');
             setRegularizeDate(null);
             setReason('');
+            setCustomReason('');
+            setShowReasonDropdown(false);
             setInInputText('09:00 AM');
             setOutInputText('06:00 PM');
             fetchHistoryAndRequests();
@@ -361,7 +417,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 displayStatus = 'Pending';
             }
 
-            let statusLabel = isBeforeJoining || (isFuture && !isWeekend) ? '-' : (holiday ? 'Holiday' : displayStatus);
+            let statusLabel = isBeforeJoining ? '-' : holiday ? 'Holiday' : (isFuture && !isWeekend) ? '-' : displayStatus;
 
             if (!isBeforeJoining && !holiday) {
                 if (hasPendingRequest) {
@@ -441,16 +497,16 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                     }
                                 ]}
                             />
-                            
+
                             <TouchableOpacity
                                 onPress={handlePunch}
                                 disabled={isHolidayToday || isOnLeaveToday}
                                 style={[
                                     tw`w-32 h-32 rounded-full border-4 items-center justify-center shadow-xl`,
                                     isHolidayToday ? tw`bg-[#faf5ff] dark:bg-[#8b5cf6]/10` :
-                                    isOnLeaveToday ? tw`bg-[#fff1f2] dark:bg-[#ef4444]/10` :
-                                    isPunchedIn ? tw`bg-[#fef2f2] dark:bg-[#ef4444]/10` :
-                                    tw`bg-[#f0fdf4] dark:bg-[#22c55e]/10`,
+                                        isOnLeaveToday ? tw`bg-[#fff1f2] dark:bg-[#ef4444]/10` :
+                                            isPunchedIn ? tw`bg-[#fef2f2] dark:bg-[#ef4444]/10` :
+                                                tw`bg-[#f0fdf4] dark:bg-[#22c55e]/10`,
                                     {
                                         borderColor: isHolidayToday
                                             ? '#8b5cf6'
@@ -473,23 +529,23 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                         <MapPin size={28} color="#22c55e" />
                                     )}
                                 </View>
-                                
+
                                 <Text style={[
                                     tw`text-sm font-black uppercase tracking-wider`,
                                     isHolidayToday ? tw`text-[#8b5cf6] dark:text-[#a78bfa]` :
-                                    isOnLeaveToday ? tw`text-[#ef4444] dark:text-[#fca5a5]` :
-                                    isPunchedIn ? tw`text-[#ef4444] dark:text-[#fca5a5]` :
-                                    tw`text-[#22c55e] dark:text-[#86efac]`
+                                        isOnLeaveToday ? tw`text-[#ef4444] dark:text-[#fca5a5]` :
+                                            isPunchedIn ? tw`text-[#ef4444] dark:text-[#fca5a5]` :
+                                                tw`text-[#22c55e] dark:text-[#86efac]`
                                 ]}>
                                     {isHolidayToday ? 'Holiday' : isOnLeaveToday ? 'On Leave' : isPunchedIn ? 'Punch Out' : 'Punch In'}
                                 </Text>
-                                
+
                                 <Text style={[
                                     tw`text-[8.5px] mt-0.5 font-bold text-center px-4`,
                                     isHolidayToday ? tw`text-[#8b5cf6]/75 dark:text-[#a78bfa]/75` :
-                                    isOnLeaveToday ? tw`text-[#ef4444]/75 dark:text-[#fca5a5]/75` :
-                                    isPunchedIn ? tw`text-[#ef4444]/75 dark:text-[#fca5a5]/75` :
-                                    tw`text-[#22c55e]/75 dark:text-[#86efac]/75`
+                                        isOnLeaveToday ? tw`text-[#ef4444]/75 dark:text-[#fca5a5]/75` :
+                                            isPunchedIn ? tw`text-[#ef4444]/75 dark:text-[#fca5a5]/75` :
+                                                tw`text-[#22c55e]/75 dark:text-[#86efac]/75`
                                 ]}>
                                     {isHolidayToday ? 'Relax & Enjoy!' : isOnLeaveToday ? 'Enjoy your leave!' : isPunchedIn ? 'Enjoy your evening!' : 'Delhi Office (GPS)'}
                                 </Text>
@@ -568,125 +624,131 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 </View>
 
                 {/* Monthly Log Grid Calendar */}
-                <View style={tw`bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm p-4`}>
-                    <Text style={tw`font-bold text-gray-900 dark:text-white text-sm mb-4`}>Monthly Log</Text>
+                <PinchGestureHandler onGestureEvent={onPinchEvent} onHandlerStateChange={onPinchStateChange}>
+                    <Animated.View style={[tw`bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-white/5 shadow-sm p-4`, { transformOrigin: focalOrigin as any, transform: [{ scale }] }]}>
+                        <View style={tw`flex-row justify-between items-center mb-4`}>
+                            <Text style={tw`font-bold text-gray-900 dark:text-white text-sm`}>Monthly Log</Text>
+                            {isZoomed && (
+                                <TouchableOpacity
+                                    onPress={resetZoom}
+                                    style={tw`px-2.5 py-1 bg-[#8b5cf6]/10 dark:bg-white/10 rounded-xl border border-[#8b5cf6]/20 active:scale-95`}
+                                >
+                                    <Text style={tw`text-[10px] font-bold text-[#8b5cf6] dark:text-[#c4b5fd]`}>
+                                        Reset Zoom
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
 
-                    {loading ? (
-                        <ActivityIndicator size="small" color="#8b5cf6" style={tw`py-10`} />
-                    ) : (
-                        <View style={tw`w-full`}>
-                            {/* Calendar Headers */}
-                            <View style={tw`flex-row w-full border-b border-gray-100 dark:border-white/5 pb-2 mb-2`}>
-                                {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
-                                    <View key={day} style={tw`flex-1 items-center`}>
-                                        <Text style={tw`text-[9px] font-bold text-gray-400 dark:text-gray-500`}>{day}</Text>
-                                    </View>
-                                ))}
-                            </View>
+                        {loading ? (
+                            <ActivityIndicator size="small" color="#8b5cf6" style={tw`py-10`} />
+                        ) : (
+                            <View style={tw`w-full`}>
+                                {/* Calendar Headers */}
+                                <View style={tw`flex-row w-full border-b border-gray-100 dark:border-white/5 pb-2 mb-2`}>
+                                    {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map((day) => (
+                                        <View key={day} style={tw`flex-1 items-center`}>
+                                            <Text style={tw`text-[9px] font-bold text-gray-400 dark:text-gray-500`}>{day}</Text>
+                                        </View>
+                                    ))}
+                                </View>
 
-                            {/* Calendar Cells Grid */}
-                            <View style={tw`flex-row flex-wrap w-full`}>
-                                {getCalendarDays().map((dayObj, index) => {
-                                    if (dayObj.isEmpty) {
-                                        return (
-                                            <View
-                                                key={dayObj.key}
-                                                style={tw`w-[14.28%] h-24 bg-gray-50/20 dark:bg-white/2 border border-gray-50 dark:border-white/2 rounded-lg`}
-                                            />
-                                        );
-                                    }
+                                {/* Calendar Cells Grid */}
+                                <View style={tw`flex-row flex-wrap w-full`}>
+                                    {getCalendarDays().map((dayObj, index) => {
+                                        if (dayObj.isEmpty) {
+                                            return (
+                                                <View
+                                                    key={dayObj.key}
+                                                    style={tw`w-[14.28%] h-24 bg-gray-50/20 dark:bg-white/2 border border-gray-50 dark:border-white/2 rounded-lg`}
+                                                />
+                                            );
+                                        }
 
-                                    const {
-                                        day,
-                                        dateStr,
-                                        log,
-                                        holiday,
-                                        isWeekend,
-                                        isBeforeJoining,
-                                        isFuture,
-                                        isToday,
-                                        leave,
-                                        statusLabel,
-                                        hasPendingRequest,
-                                        hasRejectedRequest
-                                    } = dayObj;
+                                        const {
+                                            day,
+                                            dateStr,
+                                            log,
+                                            holiday,
+                                            isWeekend,
+                                            isBeforeJoining,
+                                            isFuture,
+                                            isToday,
+                                            leave,
+                                            statusLabel,
+                                            hasPendingRequest,
+                                            hasRejectedRequest
+                                        } = dayObj;
 
-                                    // Resolve Background Colors & Borders based on status
-                                    let cellBg = 'bg-white dark:bg-[#4c1d95]';
-                                    let borderStyle = 'border-gray-100 dark:border-white/5';
-                                    let statusColor = 'text-gray-400 dark:text-gray-500';
+                                        // Resolve Background Colors & Borders based on status
+                                        let cellBg = 'bg-white dark:bg-[#4c1d95]';
+                                        let borderStyle = 'border-gray-100 dark:border-white/5';
+                                        let statusColor = 'text-gray-400 dark:text-gray-500';
 
-                                    if (holiday) {
-                                        cellBg = 'bg-purple-50 dark:bg-purple-950/20';
-                                        borderStyle = 'border-purple-200 dark:border-purple-500/20';
-                                        statusColor = 'text-purple-600 dark:text-purple-400';
-                                    } else if (hasPendingRequest || (leave && leave.status === 'PENDING')) {
-                                        cellBg = 'bg-amber-50 dark:bg-amber-950/10';
-                                        borderStyle = 'border-dashed border-amber-300 dark:border-amber-500/20';
-                                        statusColor = 'text-amber-600 dark:text-amber-400';
-                                    } else if (hasRejectedRequest || (leave && leave.status === 'REJECTED')) {
-                                        cellBg = 'bg-rose-50 dark:bg-rose-950/10';
-                                        borderStyle = 'border-dashed border-rose-300 dark:border-rose-500/20';
-                                        statusColor = 'text-rose-600 dark:text-rose-400';
-                                    } else if (leave && leave.status === 'APPROVED') {
-                                        cellBg = 'bg-blue-50 dark:bg-blue-950/20';
-                                        borderStyle = 'border-blue-200 dark:border-blue-500/20';
-                                        statusColor = 'text-blue-600 dark:text-blue-400';
-                                    } else if (log) {
-                                        if (log.status === 'Present') {
-                                            statusColor = 'text-green-600 dark:text-green-400';
-                                        } else if (log.status === 'Late') {
-                                            statusColor = 'text-orange-600 dark:text-orange-400';
-                                        } else if (log.status === 'Absent') {
+                                        if (holiday) {
+                                            cellBg = 'bg-purple-50 dark:bg-purple-950/20';
+                                            borderStyle = 'border-purple-200 dark:border-purple-500/20';
+                                            statusColor = 'text-purple-600 dark:text-purple-400';
+                                        } else if (hasPendingRequest || (leave && leave.status === 'PENDING')) {
+                                            cellBg = 'bg-amber-50 dark:bg-amber-950/10';
+                                            borderStyle = 'border-dashed border-amber-300 dark:border-amber-500/20';
+                                            statusColor = 'text-amber-600 dark:text-amber-400';
+                                        } else if (hasRejectedRequest || (leave && leave.status === 'REJECTED')) {
+                                            cellBg = 'bg-rose-50 dark:bg-rose-950/10';
+                                            borderStyle = 'border-dashed border-rose-300 dark:border-rose-500/20';
+                                            statusColor = 'text-rose-600 dark:text-rose-400';
+                                        } else if (leave && leave.status === 'APPROVED') {
+                                            cellBg = 'bg-blue-50 dark:bg-blue-950/20';
+                                            borderStyle = 'border-blue-200 dark:border-blue-500/20';
+                                            statusColor = 'text-blue-600 dark:text-blue-400';
+                                        } else if (log) {
+                                            if (log.status === 'Present') {
+                                                statusColor = 'text-green-600 dark:text-green-400';
+                                            } else if (log.status === 'Late') {
+                                                statusColor = 'text-orange-600 dark:text-orange-400';
+                                            } else if (log.status === 'Absent') {
+                                                statusColor = 'text-red-600 dark:text-red-400';
+                                            }
+                                        } else if (isWeekend || isBeforeJoining || isFuture) {
+                                            cellBg = 'bg-gray-50/50 dark:bg-gray-900/10';
+                                            statusColor = 'text-gray-400 dark:text-gray-500';
+                                        } else {
+                                            // Absent by default
+                                            cellBg = 'bg-red-50/50 dark:bg-red-950/10';
                                             statusColor = 'text-red-600 dark:text-red-400';
                                         }
-                                    } else if (isWeekend || isBeforeJoining || isFuture) {
-                                        cellBg = 'bg-gray-50/50 dark:bg-gray-900/10';
-                                        statusColor = 'text-gray-400 dark:text-gray-500';
-                                    } else {
-                                        // Absent by default
-                                        cellBg = 'bg-red-50/50 dark:bg-red-950/10';
-                                        statusColor = 'text-red-600 dark:text-red-400';
-                                    }
 
-                                    const canRegularize = !isToday && !isFuture && !isBeforeJoining && !hasPendingRequest && !hasRejectedRequest && !leave && (statusLabel === 'Absent' || statusLabel === 'Late');
-                                    const request = regularizationRequests.find(r => r.date === dateStr);
-                                    const isClickable = isSelf && (canRegularize || hasRejectedRequest || (leave && leave.status === 'REJECTED'));
+                                        const canRegularize = !isToday && !isFuture && !isBeforeJoining && !hasPendingRequest && !hasRejectedRequest && !leave && (statusLabel === 'Absent' || statusLabel === 'Late');
+                                        const request = regularizationRequests.find(r => r.date === dateStr);
+                                        const isClickable = isSelf && (canRegularize || hasRejectedRequest || (leave && leave.status === 'REJECTED'));
 
-                                    return (
-                                        <TouchableOpacity
-                                            key={dateStr}
-                                            onPress={() => {
-                                                if (hasRejectedRequest) {
-                                                    setRejectedRequestToShow(request);
-                                                } else if (leave && leave.status === 'REJECTED') {
-                                                    setRejectedLeaveToShow(leave);
-                                                } else if (canRegularize && isSelf) {
-                                                    setRegularizeDate(dateStr || null);
-                                                    setInInputText(log?.inTime ? formatTime(log.inTime) : '09:00 AM');
-                                                    setOutInputText(log?.outTime ? formatTime(log.outTime) : '06:00 PM');
-                                                    setReason('');
-                                                }
-                                            }}
-                                            disabled={!isClickable}
-                                            style={[
-                                                tw`w-[14.28%] h-24 p-1 border rounded-lg justify-between ${cellBg} ${borderStyle}`,
-                                                isToday && tw`border-2 border-purple-500`
-                                            ]}
-                                        >
-                                            {/* Day number in the header row */}
-                                            <View style={tw`flex-row w-full`}>
-                                                <Text style={[tw`text-[9px] font-bold`, isToday ? tw`text-purple-600` : tw`text-gray-800 dark:text-white`]}>
-                                                    {day}
-                                                </Text>
-                                            </View>
- 
-                                            {/* Center Status Badge (drawn on its own line below the day to prevent horizontal overflow clipping) */}
-                                            {statusLabel !== '-' && (
-                                                <View style={tw`w-full items-center mt-0.5`}>
-                                                    {renderStatusBadge(statusLabel)}
+                                        return (
+                                            <TouchableOpacity
+                                                key={dateStr}
+                                                onPress={() => {
+                                                    if (hasRejectedRequest) {
+                                                        setRejectedRequestToShow(request);
+                                                    } else if (leave && leave.status === 'REJECTED') {
+                                                        setRejectedLeaveToShow(leave);
+                                                    } else if (canRegularize && isSelf) {
+                                                        setRegularizeDate(dateStr || null);
+                                                        setInInputText(log?.inTime ? formatTime(log.inTime) : '09:00 AM');
+                                                        setOutInputText(log?.outTime ? formatTime(log.outTime) : '06:00 PM');
+                                                        setReason('');
+                                                    }
+                                                }}
+                                                disabled={!isClickable}
+                                                style={[
+                                                    tw`w-[14.28%] h-24 p-1 border rounded-lg justify-between ${cellBg} ${borderStyle}`,
+                                                    isToday && tw`border-2 border-purple-500`
+                                                ]}
+                                            >
+                                                {/* Day number in the header row */}
+                                                <View style={tw`flex-row w-full`}>
+                                                    <Text style={[tw`text-[9px] font-bold`, isToday ? tw`text-purple-600` : tw`text-gray-800 dark:text-white`]}>
+                                                        {day}
+                                                    </Text>
                                                 </View>
-                                            )}
 
                                             {/* Middle Details (Holiday Name or Leave Type Name) */}
                                             <View style={tw`w-full items-center`}>
@@ -698,26 +760,49 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                                     </View>
                                                 )}
 
-                                                {!holiday && leave && !isBeforeJoining && (statusLabel === 'Absent' || isFuture) && (
-                                                    <View
-                                                        style={[
-                                                            tw`px-0.5 py-0.2 rounded w-full items-center mt-0.5`,
-                                                            leave.status === 'APPROVED' ? tw`bg-blue-100 dark:bg-blue-900/30` :
-                                                            leave.status === 'PENDING' ? tw`bg-amber-100 dark:bg-amber-900/30` :
-                                                            tw`bg-rose-100 dark:bg-rose-900/30`
-                                                        ]}
-                                                    >
-                                                        <Text
-                                                            numberOfLines={1}
+                                                {/* Middle Details (Holiday Name or Leave Type Name) */}
+                                                <View style={tw`w-full items-center`}>
+                                                    {holiday && (
+                                                        <View style={tw`bg-purple-100 dark:bg-purple-900/30 px-0.5 py-0.2 rounded w-full items-center mt-0.5`}>
+                                                            <Text numberOfLines={1} style={[tw`text-[5px] font-bold text-purple-700 dark:text-purple-300`, { lineHeight: 6.5 }]}>
+                                                                {holiday.name}
+                                                            </Text>
+                                                        </View>
+                                                    )}
+
+                                                    {!holiday && leave && !isBeforeJoining && (statusLabel === 'Absent' || isFuture) && (
+                                                        <View
                                                             style={[
-                                                                tw`text-[5px] font-bold`,
-                                                                leave.status === 'APPROVED' ? tw`text-blue-700 dark:text-blue-300` :
-                                                                leave.status === 'PENDING' ? tw`text-amber-700 dark:text-amber-300` :
-                                                                tw`text-rose-700 dark:text-rose-300`,
-                                                                { lineHeight: 6.5 }
+                                                                tw`px-0.5 py-0.2 rounded w-full items-center mt-0.5`,
+                                                                leave.status === 'APPROVED' ? tw`bg-blue-100 dark:bg-blue-900/30` :
+                                                                    leave.status === 'PENDING' ? tw`bg-amber-100 dark:bg-amber-900/30` :
+                                                                        tw`bg-rose-100 dark:bg-rose-900/30`
                                                             ]}
                                                         >
-                                                            {leave.leaveType?.name || 'Leave'}
+                                                            <Text
+                                                                numberOfLines={1}
+                                                                style={[
+                                                                    tw`text-[5px] font-bold`,
+                                                                    leave.status === 'APPROVED' ? tw`text-blue-700 dark:text-blue-300` :
+                                                                        leave.status === 'PENDING' ? tw`text-amber-700 dark:text-amber-300` :
+                                                                            tw`text-rose-700 dark:text-rose-300`,
+                                                                    { lineHeight: 6.5 }
+                                                                ]}
+                                                            >
+                                                                {leave.leaveType?.name || 'Leave'}
+                                                            </Text>
+                                                        </View>
+                                                    )}
+                                                </View>
+
+                                                {/* In/Out timings if log exists */}
+                                                {log && (log.inTime || log.outTime) ? (
+                                                    <View style={tw`w-full border-t border-gray-100 dark:border-white/5 pt-0.5 mt-0.5 items-center`}>
+                                                        <Text style={[tw`text-[5.5px] font-semibold text-green-600 dark:text-green-400`, { lineHeight: 7 }]}>
+                                                            {log.inTime ? formatTime(log.inTime) : '--'}
+                                                        </Text>
+                                                        <Text style={[tw`text-[5.5px] font-semibold text-red-500 dark:text-red-400 mt-0.5`, { lineHeight: 7 }]}>
+                                                            {log.outTime ? formatTime(log.outTime) : '--'}
                                                         </Text>
                                                     </View>
                                                 )}
@@ -738,79 +823,190 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                     );
                                 })}
                             </View>
-                        </View>
-                    )}
-                </View>
+                        )}
+                    </Animated.View>
+                </PinchGestureHandler>
 
             </ScrollView>
 
             {/* Regularization Modal */}
             <Modal
                 visible={!!regularizeDate}
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
-                onRequestClose={() => setRegularizeDate(null)}
+                onRequestClose={() => {
+                    setRegularizeDate(null);
+                    setShowReasonDropdown(false);
+                }}
             >
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={tw`flex-1 justify-end bg-black/60`}>
+                <TouchableWithoutFeedback onPress={() => {
+                    Keyboard.dismiss();
+                    setShowReasonDropdown(false);
+                }}>
+                    <View style={tw`flex-1 justify-center items-center bg-black/70 px-4`}>
                         <KeyboardAvoidingView
                             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                            style={tw`w-full`}
+                            style={tw`w-full max-w-md`}
                         >
-                            <View style={tw`bg-white dark:bg-[#4c1d95] p-6 rounded-t-3xl border-t border-gray-200 dark:border-[#8b5cf6]/30 max-h-[85%]`}>
-                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                                    <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>Attendance Correction ({regularizeDate})</Text>
+                            <View style={tw`bg-[#311768] dark:bg-[#251052] rounded-[2.5rem] p-6 w-full border border-[#6d28d9]/40 shadow-2xl relative overflow-hidden`}>
+                                {/* Header */}
+                                <View style={tw`flex-row justify-between items-center mb-5`}>
+                                    <Text style={tw`text-xl font-bold text-white tracking-wide`}>Attendance Correction</Text>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setRegularizeDate(null);
+                                            setShowReasonDropdown(false);
+                                        }}
+                                        style={tw`p-1.5 bg-white/10 rounded-full`}
+                                    >
+                                        <X size={18} color="#ffffff" />
+                                    </TouchableOpacity>
+                                </View>
 
+                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={tw`pb-2`}>
+                                    {/* REQUESTED DATE */}
                                     <View style={tw`mb-4`}>
-                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock In Time (e.g. 09:00 AM)</Text>
-                                        <TextInput
-                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                            value={inInputText}
-                                            onChangeText={setInInputText}
-                                        />
+                                        <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>REQUESTED DATE</Text>
+                                        <View style={tw`p-3.5 bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl justify-center`}>
+                                            <Text style={tw`font-bold text-sm text-white`}>
+                                                {(() => {
+                                                    if (!regularizeDate) return '';
+                                                    const [y, m, d] = regularizeDate.split('-').map(Number);
+                                                    const localDate = new Date(y, m - 1, d);
+                                                    return localDate.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                                                })()}
+                                            </Text>
+                                        </View>
                                     </View>
 
-                                    <View style={tw`mb-4`}>
-                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock Out Time (e.g. 06:00 PM)</Text>
-                                        <TextInput
-                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                            value={outInputText}
-                                            onChangeText={setOutInputText}
-                                        />
+                                    {/* REASON FOR REGULARIZE DROPDOWN */}
+                                    <View style={tw`mb-4 relative z-50`}>
+                                        <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>REASON FOR REGULARIZE</Text>
+                                        <TouchableOpacity
+                                            onPress={() => setShowReasonDropdown(!showReasonDropdown)}
+                                            activeOpacity={0.8}
+                                            style={tw`p-3.5 bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl flex-row justify-between items-center`}
+                                        >
+                                            <Text style={tw`font-semibold text-sm ${reason ? 'text-white' : 'text-purple-300/60'}`}>
+                                                {reason ? (reason === 'Other' ? 'Other (Write Custom Reason)' : reason) : 'Select a reason...'}
+                                            </Text>
+                                            <ChevronDown size={18} color="#a78bfa" />
+                                        </TouchableOpacity>
+
+                                        {showReasonDropdown && (
+                                            <View style={tw`mt-1.5 bg-[#230d4b] border border-[#7c3aed]/50 rounded-2xl overflow-hidden shadow-2xl`}>
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setReason('');
+                                                        setShowReasonDropdown(false);
+                                                    }}
+                                                    style={tw`p-3 border-b border-[#6d28d9]/20`}
+                                                >
+                                                    <Text style={tw`text-xs font-semibold text-purple-300/60`}>Select a reason...</Text>
+                                                </TouchableOpacity>
+                                                {[
+                                                    "Forgot to Punch In",
+                                                    "Forgot to Punch Out",
+                                                    "Device/Bio-metric Issue",
+                                                    "Official Duty / Client Visit",
+                                                    "Other"
+                                                ].map((opt) => (
+                                                    <TouchableOpacity
+                                                        key={opt}
+                                                        onPress={() => {
+                                                            setReason(opt);
+                                                            setShowReasonDropdown(false);
+                                                        }}
+                                                        style={tw`p-3 border-b border-[#6d28d9]/20 ${reason === opt ? 'bg-[#7c3aed]/30' : ''}`}
+                                                    >
+                                                        <Text style={tw`text-xs font-bold text-white`}>
+                                                            {opt === 'Other' ? 'Other (Write Custom Reason)' : opt}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        )}
                                     </View>
 
-                                    <View style={tw`mb-6`}>
-                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Reason for correction *</Text>
-                                        <TextInput
-                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                            placeholder="Forgot to punch / Client site work..."
-                                            placeholderTextColor="#cbd5e1"
-                                            value={reason}
-                                            onChangeText={setReason}
-                                        />
+                                    {/* Custom Reason TextArea if Other is selected */}
+                                    {reason === 'Other' && (
+                                        <View style={tw`mb-4`}>
+                                            <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>SPECIFY REASON</Text>
+                                            <TextInput
+                                                style={tw`w-full p-3.5 bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl text-white text-xs font-semibold h-20`}
+                                                placeholder="Briefly describe your reason..."
+                                                placeholderTextColor="#a78bfa/50"
+                                                multiline
+                                                textAlignVertical="top"
+                                                value={customReason}
+                                                onChangeText={setCustomReason}
+                                            />
+                                        </View>
+                                    )}
+
+                                    {/* PROPOSED IN / OUT TIME */}
+                                    <View style={tw`flex-row gap-3 mb-6`}>
+                                        <View style={tw`flex-1`}>
+                                            <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>PROPOSED IN TIME</Text>
+                                            <View style={tw`flex-row items-center bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl px-3 py-2.5`}>
+                                                <Clock size={16} color="#a78bfa" style={tw`mr-2`} />
+                                                <TextInput
+                                                    style={tw`flex-1 text-xs font-semibold text-white p-0 h-6`}
+                                                    value={inInputText}
+                                                    onChangeText={setInInputText}
+                                                    placeholder="09:00 AM"
+                                                    placeholderTextColor="#a78bfa/50"
+                                                />
+                                            </View>
+                                            <Text style={tw`text-[10px] mt-1 font-semibold text-purple-300/80`}>
+                                                ✓ Set: {inInputText || '09:00 AM'}
+                                            </Text>
+                                        </View>
+
+                                        <View style={tw`flex-1`}>
+                                            <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>PROPOSED OUT TIME</Text>
+                                            <View style={tw`flex-row items-center bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl px-3 py-2.5`}>
+                                                <Clock size={16} color="#a78bfa" style={tw`mr-2`} />
+                                                <TextInput
+                                                    style={tw`flex-1 text-xs font-semibold text-white p-0 h-6`}
+                                                    value={outInputText}
+                                                    onChangeText={setOutInputText}
+                                                    placeholder="06:00 PM"
+                                                    placeholderTextColor="#a78bfa/50"
+                                                />
+                                            </View>
+                                            <Text style={tw`text-[10px] mt-1 font-semibold text-purple-300/80`}>
+                                                ✓ Set: {outInputText || '06:00 PM'}
+                                            </Text>
+                                        </View>
                                     </View>
 
-                                    <View style={tw`flex-row gap-4 mb-4`}>
+                                    {/* Action Buttons: CANCEL and SUBMIT */}
+                                    <View style={tw`flex-row gap-3 pt-2 mb-2`}>
                                         <TouchableOpacity
                                             onPress={() => {
                                                 setRegularizeDate(null);
                                                 setReason('');
+                                                setCustomReason('');
                                                 setInInputText('09:00 AM');
                                                 setOutInputText('06:00 PM');
+                                                setShowReasonDropdown(false);
                                             }}
-                                            style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
+                                            style={tw`flex-1 py-3.5 bg-[#230d4b] border border-[#6d28d9]/40 rounded-2xl items-center shadow-sm`}
                                         >
-                                            <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
+                                            <Text style={tw`text-white font-bold text-xs uppercase tracking-wider`}>CANCEL</Text>
                                         </TouchableOpacity>
 
                                         <TouchableOpacity
                                             onPress={submitRegularization}
                                             disabled={submittingRequest}
-                                            style={tw`flex-1 py-3.5 bg-[#8b5cf6] rounded-xl items-center`}
+                                            style={tw`flex-1 py-3.5 bg-[#7c3aed] rounded-2xl items-center shadow-lg shadow-purple-900/50`}
                                         >
-                                            <Text style={tw`text-white font-bold`}>
-                                                {submittingRequest ? 'Submitting...' : 'Submit'}
-                                            </Text>
+                                            {submittingRequest ? (
+                                                <ActivityIndicator size="small" color="#ffffff" />
+                                            ) : (
+                                                <Text style={tw`text-white font-bold text-xs uppercase tracking-wider`}>SUBMIT</Text>
+                                            )}
                                         </TouchableOpacity>
                                     </View>
                                 </ScrollView>
@@ -830,7 +1026,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 <View style={tw`flex-1 justify-center items-center bg-black/60 px-4`}>
                     <View style={tw`bg-white dark:bg-[#1c1a45] rounded-[2.5rem] p-6 w-full max-w-md border border-gray-200 dark:border-white/10 shadow-2xl relative overflow-hidden`}>
                         <View style={[tw`absolute top-0 left-0 right-0 h-2`, { backgroundColor: '#f43f5e' }]} />
-                        
+
                         <View style={tw`flex-row justify-between items-center mb-6 mt-2`}>
                             <View style={tw`flex-row items-center gap-2.5`}>
                                 <View style={tw`p-2 bg-rose-50 dark:bg-rose-500/10 rounded-xl`}>
@@ -921,7 +1117,7 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 <View style={tw`flex-1 justify-center items-center bg-black/60 px-4`}>
                     <View style={tw`bg-white dark:bg-[#1c1a45] rounded-[2.5rem] p-6 w-full max-w-md border border-gray-200 dark:border-white/10 shadow-2xl relative overflow-hidden`}>
                         <View style={[tw`absolute top-0 left-0 right-0 h-2`, { backgroundColor: '#f43f5e' }]} />
-                        
+
                         <View style={tw`flex-row justify-between items-center mb-6 mt-2`}>
                             <View style={tw`flex-row items-center gap-2.5`}>
                                 <View style={tw`p-2 bg-rose-50 dark:bg-rose-500/10 rounded-xl`}>

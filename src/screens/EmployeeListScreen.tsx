@@ -5,9 +5,13 @@ import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import { useAuth } from '../context/AuthContext';
 import tw from 'twrnc';
+import { useToast } from '../context/ToastContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function EmployeeListScreen({ navigation }: any) {
     const { user } = useAuth();
+    const { showToast } = useToast();
+    const insets = useSafeAreaInsets();
     const isAdmin = user?.role === 'HR_ADMIN';
 
     const [loading, setLoading] = useState(true);
@@ -26,7 +30,7 @@ export default function EmployeeListScreen({ navigation }: any) {
             setEmployees(res.data);
         } catch (error) {
             console.error('Error fetching employees:', error);
-            Alert.alert('Error', 'Failed to load employees');
+            showToast('Failed to load employees', 'error');
         } finally {
             setLoading(false);
         }
@@ -61,7 +65,7 @@ export default function EmployeeListScreen({ navigation }: any) {
                 title: 'Employees List Export',
             });
         } catch (error: any) {
-            Alert.alert("Error", error.message);
+            showToast(error.message || 'Failed to export CSV', 'error');
         }
     };
 
@@ -153,8 +157,8 @@ export default function EmployeeListScreen({ navigation }: any) {
                         onPress={() => navigation.navigate('EmployeeProfile', { id: item.id })}
                         style={tw`flex-row items-center gap-1`}
                     >
-                        <Text style={tw`text-xs text-purple-650 dark:text-[#c4b5fd] font-bold`}>View Profile</Text>
-                        <Text style={tw`text-xs text-purple-650 dark:text-[#c4b5fd] font-bold`}>→</Text>
+                        <Text style={tw`text-xs text-purple-600 dark:text-[#c4b5fd] font-bold`}>View Profile</Text>
+                        <Text style={tw`text-xs text-purple-600 dark:text-[#c4b5fd] font-bold`}>→</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -469,11 +473,11 @@ export default function EmployeeListScreen({ navigation }: any) {
                                     setEmployeeToDelete(null);
                                     try {
                                         await api.delete(`/employee/${id}`);
-                                        Alert.alert("Success", `${name} deleted successfully!`);
+                                        showToast(`${name} deleted successfully!`, 'success');
                                         fetchEmployees();
                                     } catch (error: any) {
                                         console.error('Delete error:', error);
-                                        Alert.alert("Error", error.response?.data?.message || 'Failed to delete employee');
+                                        showToast(error.response?.data?.message || 'Failed to delete employee', 'error');
                                     }
                                 }}
                                 style={tw`flex-1 py-3.5 bg-red-500 rounded-2xl items-center justify-center shadow-lg shadow-red-500/20`}

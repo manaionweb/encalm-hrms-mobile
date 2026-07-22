@@ -7,9 +7,12 @@ import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import tw from 'twrnc';
 
+import { useToast } from '../context/ToastContext';
+
 type MainTab = 'ORG' | 'PAYROLL' | 'SHIFTS' | 'ACCESS' | 'CUSTOM';
 
 export default function MastersScreen({ navigation }: any) {
+    const { showToast } = useToast();
     const [activeMainTab, setActiveMainTab] = useState<MainTab>('ORG');
     const [activeSubTab, setActiveSubTab] = useState<string>('Company');
     const [loading, setLoading] = useState(false);
@@ -193,9 +196,9 @@ export default function MastersScreen({ navigation }: any) {
                 primaryColor,
                 secondaryColor
             });
-            Alert.alert('Success', 'Legal entity details updated successfully.');
+            showToast('Legal entity details updated successfully.', 'success');
         } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.message || 'Failed to update company settings');
+            showToast(e.response?.data?.message || 'Failed to update company settings', 'error');
         } finally {
             setSavingCompany(false);
         }
@@ -233,13 +236,13 @@ export default function MastersScreen({ navigation }: any) {
             });
         } catch (error) {
             console.error('Failed to pick signature document:', error);
-            Alert.alert('Error', 'Failed to pick image file.');
+            showToast('Failed to pick image file.', 'error');
         }
     };
 
     const handleSaveSignature = async () => {
         if (!signatoryName.trim()) {
-            Alert.alert('Required', 'Please enter the authorized signatory name.');
+            showToast('Please enter the authorized signatory name.', 'error');
             return;
         }
 
@@ -263,11 +266,11 @@ export default function MastersScreen({ navigation }: any) {
                 }
             });
 
-            Alert.alert('Success', 'Authorized signature updated successfully.');
+            showToast('Authorized signature updated successfully.', 'success');
             fetchSignatureSettings();
         } catch (e: any) {
             console.error('Error saving signature settings:', e);
-            Alert.alert('Error', e.response?.data?.message || 'Failed to save authorized signature settings.');
+            showToast(e.response?.data?.message || 'Failed to save authorized signature settings.', 'error');
         } finally {
             setSavingSignature(false);
         }
@@ -287,9 +290,9 @@ export default function MastersScreen({ navigation }: any) {
                             await api.delete('/company-setting/signature');
                             setServerSignatureImage(null);
                             setSelectedSignatureFile(null);
-                            Alert.alert('Deleted', 'Authorized signature deleted successfully.');
+                            showToast('Authorized signature deleted successfully.', 'success');
                         } catch (e) {
-                            Alert.alert('Error', 'Failed to delete signature.');
+                            showToast('Failed to delete signature.', 'error');
                         }
                     }
                 }
@@ -343,9 +346,9 @@ export default function MastersScreen({ navigation }: any) {
                 esicEmployeeRate: Number(esicEmployeeRate) || 0,
                 esicEmployerRate: Number(esicEmployerRate) || 0,
             });
-            Alert.alert('Success', 'Statutory compliance configuration updated successfully.');
+            showToast('Statutory compliance configuration updated successfully.', 'success');
         } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.message || 'Failed to update compliance settings.');
+            showToast(e.response?.data?.message || 'Failed to update compliance settings.', 'error');
         } finally {
             setSavingStatutory(false);
         }
@@ -378,9 +381,9 @@ export default function MastersScreen({ navigation }: any) {
                 lateMarkDeduction,
                 otEnabled,
             });
-            Alert.alert('Success', 'Attendance policy rules updated successfully.');
+            showToast('Attendance policy rules updated successfully.', 'success');
         } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.message || 'Failed to save attendance policy settings.');
+            showToast(e.response?.data?.message || 'Failed to save attendance policy settings.', 'error');
         } finally {
             setSavingPolicy(false);
         }
@@ -418,9 +421,9 @@ export default function MastersScreen({ navigation }: any) {
                 applyEarnedLeave,
             };
             await AsyncStorage.setItem('sandwich_rules', JSON.stringify(rules));
-            Alert.alert('Success', 'Sandwich rules saved successfully.');
+            showToast('Sandwich rules saved successfully.', 'success');
         } catch (e) {
-            Alert.alert('Error', 'Failed to save sandwich rules.');
+            showToast('Failed to save sandwich rules.', 'error');
         } finally {
             setSavingSandwich(false);
         }
@@ -539,10 +542,10 @@ export default function MastersScreen({ navigation }: any) {
                     onPress: async () => {
                         try {
                             await api.delete(`/masters/roles/${roleId}`);
-                            Alert.alert('Deleted', 'Role deleted successfully.');
+                            showToast('Role deleted successfully.', 'success');
                             fetchListData('/masters/roles');
                         } catch (e) {
-                            Alert.alert('Error', 'Failed to delete role.');
+                            showToast('Failed to delete role.', 'error');
                         }
                     }
                 }
@@ -568,13 +571,13 @@ export default function MastersScreen({ navigation }: any) {
 
     const handleAddSubmit = async () => {
         if (!addName.trim()) {
-            Alert.alert('Required', 'Please fill in the required name.');
+            showToast('Please fill in the required name.', 'error');
             return;
         }
 
         if (activeMainTab === 'ORG' && activeSubTab === 'Locations') {
             if (!addAddress.trim() || !addCity.trim() || !addState.trim() || !addCountry.trim() || !addPincode.trim()) {
-                Alert.alert('Required', 'Please fill in all location fields (Address, City, State, Country, and Pincode).');
+                showToast('Please fill in all location fields (Address, City, State, Country, and Pincode).', 'error');
                 return;
             }
         }
@@ -593,10 +596,10 @@ export default function MastersScreen({ navigation }: any) {
 
                 if (editingRole) {
                     await api.put(`/masters/roles/${editingRole.id}`, payload);
-                    Alert.alert('Success', 'Role updated successfully.');
+                    showToast('Role updated successfully.', 'success');
                 } else {
                     await api.post('/masters/roles', payload);
-                    Alert.alert('Success', 'Role created successfully.');
+                    showToast('Role created successfully.', 'success');
                 }
                 setShowAddModal(false);
                 resetAddForm();
@@ -678,7 +681,7 @@ export default function MastersScreen({ navigation }: any) {
 
             if (endpoint) {
                 await api.post(endpoint, payload);
-                Alert.alert('Success', 'Record created successfully.');
+                showToast('Record created successfully.', 'success');
                 setShowAddModal(false);
                 resetAddForm();
                 
@@ -698,7 +701,7 @@ export default function MastersScreen({ navigation }: any) {
                 }
             }
         } catch (e: any) {
-            Alert.alert('Error', e.response?.data?.error || e.response?.data?.message || 'Failed to create record.');
+            showToast(e.response?.data?.error || e.response?.data?.message || 'Failed to create record.', 'error');
         } finally {
             setSubmittingAdd(false);
         }
@@ -2096,10 +2099,10 @@ export default function MastersScreen({ navigation }: any) {
                                     setFieldToDelete(null);
                                     try {
                                         await api.delete(`/custom-fields/masters/${id}`);
-                                        Alert.alert('Deleted', 'Custom field deleted successfully.');
+                                        showToast('Custom field deleted successfully.', 'success');
                                         fetchCustomFieldsList();
                                     } catch (e) {
-                                        Alert.alert('Error', 'Failed to delete custom field.');
+                                        showToast('Failed to delete custom field.', 'error');
                                     }
                                 }}
                                 style={tw`flex-1 py-3.5 bg-red-500 rounded-2xl items-center justify-center shadow-lg shadow-red-500/20`}

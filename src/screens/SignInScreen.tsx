@@ -3,11 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, Alert, Keyb
 import { Eye, EyeOff } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import tw from 'twrnc';
 
 export default function SignInScreen({ navigation }: any) {
     const { setTheme } = useTheme();
     const { login, error: authError } = useAuth();
+    const { showToast } = useToast();
 
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
@@ -16,7 +18,7 @@ export default function SignInScreen({ navigation }: any) {
 
     const handleLogin = async () => {
         if (!email.trim() || !password.trim()) {
-            Alert.alert("Error", "Please fill in all fields");
+            showToast("Please fill in all fields", 'error');
             return;
         }
 
@@ -27,7 +29,7 @@ export default function SignInScreen({ navigation }: any) {
             // Root navigator will switch to protected screens upon user authenticated status change.
         } catch (err: any) {
             console.error("Login failed", err);
-            Alert.alert("Login Failed", authError || err.message || "Invalid credentials");
+            showToast(authError || err.message || "Invalid credentials", 'error');
         } finally {
             setLoading(false);
         }
