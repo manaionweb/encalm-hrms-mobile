@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Initialize from Async Storage to persist login across sessions
+    // Always start on Login Screen when app opens
     useEffect(() => {
         // Register auth failure callback to reset context state when session expires
         setAuthFailureCallback(() => {
@@ -39,12 +39,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const checkSession = async () => {
             try {
-                const storedUser = await AsyncStorage.getItem('encalm_user');
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
-                }
+                // Clear any stored user session on startup so app always opens login page first
+                await AsyncStorage.removeItem('encalm_user');
+                await AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('refreshToken');
+                await AsyncStorage.removeItem('tenantId');
+                setUser(null);
             } catch (e) {
-                console.error("Error checking session", e);
+                console.error("Error clearing session on startup", e);
             } finally {
                 setIsLoading(false);
             }

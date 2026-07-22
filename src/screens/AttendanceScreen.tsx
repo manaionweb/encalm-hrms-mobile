@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Animated } from 'react-native';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
-import { Clock, Calendar, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, MapPin, Coffee, X } from 'lucide-react-native';
+import { Clock, Calendar, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, ChevronDown, MapPin, Coffee, X } from 'lucide-react-native';
 import api from '../utils/api';
 import CustomHeader from '../components/CustomHeader';
 import tw from 'twrnc';
@@ -35,6 +35,8 @@ export default function AttendanceScreen({ route, navigation }: any) {
     // Regularization State
     const [regularizeDate, setRegularizeDate] = useState<string | null>(null);
     const [reason, setReason] = useState('');
+    const [customReason, setCustomReason] = useState('');
+    const [showReasonDropdown, setShowReasonDropdown] = useState(false);
     const [inInputText, setInInputText] = useState('09:00 AM');
     const [outInputText, setOutInputText] = useState('06:00 PM');
     const [submittingRequest, setSubmittingRequest] = useState(false);
@@ -201,8 +203,9 @@ export default function AttendanceScreen({ route, navigation }: any) {
     };
 
     const submitRegularization = async () => {
-        if (!reason.trim()) {
-            showToast("Please provide a reason for regularization.", 'error');
+        const finalReason = reason === 'Other' ? customReason.trim() : reason.trim();
+        if (!finalReason) {
+            showToast("Please select or specify a reason for regularization.", 'error');
             return;
         }
 
@@ -212,13 +215,15 @@ export default function AttendanceScreen({ route, navigation }: any) {
                 date: regularizeDate,
                 inTime: inInputText,
                 outTime: outInputText,
-                reason: reason.trim(),
+                reason: finalReason,
             };
 
             await api.post('/attendance/regularize', payload);
             showToast("Regularization request submitted!", 'success');
             setRegularizeDate(null);
             setReason('');
+            setCustomReason('');
+            setShowReasonDropdown(false);
             setInInputText('09:00 AM');
             setOutInputText('06:00 PM');
             fetchHistoryAndRequests();
@@ -812,70 +817,181 @@ export default function AttendanceScreen({ route, navigation }: any) {
             {/* Regularization Modal */}
             <Modal
                 visible={!!regularizeDate}
-                animationType="slide"
+                animationType="fade"
                 transparent={true}
-                onRequestClose={() => setRegularizeDate(null)}
+                onRequestClose={() => {
+                    setRegularizeDate(null);
+                    setShowReasonDropdown(false);
+                }}
             >
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={tw`flex-1 justify-end bg-black/60`}>
+                <TouchableWithoutFeedback onPress={() => {
+                    Keyboard.dismiss();
+                    setShowReasonDropdown(false);
+                }}>
+                    <View style={tw`flex-1 justify-center items-center bg-black/70 px-4`}>
                         <KeyboardAvoidingView
                             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                            style={tw`w-full`}
+                            style={tw`w-full max-w-md`}
                         >
-                            <View style={tw`bg-white dark:bg-[#4c1d95] p-6 rounded-t-3xl border-t border-gray-200 dark:border-[#8b5cf6]/30 max-h-[85%]`}>
-                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                                    <Text style={tw`text-lg font-bold text-gray-900 dark:text-white mb-4`}>Attendance Correction ({regularizeDate})</Text>
+                            <View style={tw`bg-[#311768] dark:bg-[#251052] rounded-[2.5rem] p-6 w-full border border-[#6d28d9]/40 shadow-2xl relative overflow-hidden`}>
+                                {/* Header */}
+                                <View style={tw`flex-row justify-between items-center mb-5`}>
+                                    <Text style={tw`text-xl font-bold text-white tracking-wide`}>Attendance Correction</Text>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setRegularizeDate(null);
+                                            setShowReasonDropdown(false);
+                                        }}
+                                        style={tw`p-1.5 bg-white/10 rounded-full`}
+                                    >
+                                        <X size={18} color="#ffffff" />
+                                    </TouchableOpacity>
+                                </View>
 
+                                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={tw`pb-2`}>
+                                    {/* REQUESTED DATE */}
                                     <View style={tw`mb-4`}>
-                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock In Time (e.g. 09:00 AM)</Text>
-                                        <TextInput
-                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                            value={inInputText}
-                                            onChangeText={setInInputText}
-                                        />
+                                        <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>REQUESTED DATE</Text>
+                                        <View style={tw`p-3.5 bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl justify-center`}>
+                                            <Text style={tw`font-bold text-sm text-white`}>
+                                                {(() => {
+                                                    if (!regularizeDate) return '';
+                                                    const [y, m, d] = regularizeDate.split('-').map(Number);
+                                                    const localDate = new Date(y, m - 1, d);
+                                                    return localDate.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                                                })()}
+                                            </Text>
+                                        </View>
                                     </View>
 
-                                    <View style={tw`mb-4`}>
-                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Clock Out Time (e.g. 06:00 PM)</Text>
-                                        <TextInput
-                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                            value={outInputText}
-                                            onChangeText={setOutInputText}
-                                        />
+                                    {/* REASON FOR REGULARIZE DROPDOWN */}
+                                    <View style={tw`mb-4 relative z-50`}>
+                                        <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>REASON FOR REGULARIZE</Text>
+                                        <TouchableOpacity
+                                            onPress={() => setShowReasonDropdown(!showReasonDropdown)}
+                                            activeOpacity={0.8}
+                                            style={tw`p-3.5 bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl flex-row justify-between items-center`}
+                                        >
+                                            <Text style={tw`font-semibold text-sm ${reason ? 'text-white' : 'text-purple-300/60'}`}>
+                                                {reason ? (reason === 'Other' ? 'Other (Write Custom Reason)' : reason) : 'Select a reason...'}
+                                            </Text>
+                                            <ChevronDown size={18} color="#a78bfa" />
+                                        </TouchableOpacity>
+
+                                        {showReasonDropdown && (
+                                            <View style={tw`mt-1.5 bg-[#230d4b] border border-[#7c3aed]/50 rounded-2xl overflow-hidden shadow-2xl`}>
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setReason('');
+                                                        setShowReasonDropdown(false);
+                                                    }}
+                                                    style={tw`p-3 border-b border-[#6d28d9]/20`}
+                                                >
+                                                    <Text style={tw`text-xs font-semibold text-purple-300/60`}>Select a reason...</Text>
+                                                </TouchableOpacity>
+                                                {[
+                                                    "Forgot to Punch In",
+                                                    "Forgot to Punch Out",
+                                                    "Device/Bio-metric Issue",
+                                                    "Official Duty / Client Visit",
+                                                    "Other"
+                                                ].map((opt) => (
+                                                    <TouchableOpacity
+                                                        key={opt}
+                                                        onPress={() => {
+                                                            setReason(opt);
+                                                            setShowReasonDropdown(false);
+                                                        }}
+                                                        style={tw`p-3 border-b border-[#6d28d9]/20 ${reason === opt ? 'bg-[#7c3aed]/30' : ''}`}
+                                                    >
+                                                        <Text style={tw`text-xs font-bold text-white`}>
+                                                            {opt === 'Other' ? 'Other (Write Custom Reason)' : opt}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        )}
                                     </View>
 
-                                    <View style={tw`mb-6`}>
-                                        <Text style={tw`text-xs font-bold text-gray-400 mb-1.5`}>Reason for correction *</Text>
-                                        <TextInput
-                                            style={tw`w-full px-4 py-2.5 bg-[#f5f3ff] dark:bg-[#1c1a45] border border-gray-300 dark:border-white/10 rounded-xl text-gray-800 dark:text-white`}
-                                            placeholder="Forgot to punch / Client site work..."
-                                            placeholderTextColor="#cbd5e1"
-                                            value={reason}
-                                            onChangeText={setReason}
-                                        />
+                                    {/* Custom Reason TextArea if Other is selected */}
+                                    {reason === 'Other' && (
+                                        <View style={tw`mb-4`}>
+                                            <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>SPECIFY REASON</Text>
+                                            <TextInput
+                                                style={tw`w-full p-3.5 bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl text-white text-xs font-semibold h-20`}
+                                                placeholder="Briefly describe your reason..."
+                                                placeholderTextColor="#a78bfa/50"
+                                                multiline
+                                                textAlignVertical="top"
+                                                value={customReason}
+                                                onChangeText={setCustomReason}
+                                            />
+                                        </View>
+                                    )}
+
+                                    {/* PROPOSED IN / OUT TIME */}
+                                    <View style={tw`flex-row gap-3 mb-6`}>
+                                        <View style={tw`flex-1`}>
+                                            <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>PROPOSED IN TIME</Text>
+                                            <View style={tw`flex-row items-center bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl px-3 py-2.5`}>
+                                                <Clock size={16} color="#a78bfa" style={tw`mr-2`} />
+                                                <TextInput
+                                                    style={tw`flex-1 text-xs font-semibold text-white p-0 h-6`}
+                                                    value={inInputText}
+                                                    onChangeText={setInInputText}
+                                                    placeholder="09:00 AM"
+                                                    placeholderTextColor="#a78bfa/50"
+                                                />
+                                            </View>
+                                            <Text style={tw`text-[10px] mt-1 font-semibold text-purple-300/80`}>
+                                                ✓ Set: {inInputText || '09:00 AM'}
+                                            </Text>
+                                        </View>
+
+                                        <View style={tw`flex-1`}>
+                                            <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-1.5`}>PROPOSED OUT TIME</Text>
+                                            <View style={tw`flex-row items-center bg-[#230d4b] border border-[#6d28d9]/30 rounded-2xl px-3 py-2.5`}>
+                                                <Clock size={16} color="#a78bfa" style={tw`mr-2`} />
+                                                <TextInput
+                                                    style={tw`flex-1 text-xs font-semibold text-white p-0 h-6`}
+                                                    value={outInputText}
+                                                    onChangeText={setOutInputText}
+                                                    placeholder="06:00 PM"
+                                                    placeholderTextColor="#a78bfa/50"
+                                                />
+                                            </View>
+                                            <Text style={tw`text-[10px] mt-1 font-semibold text-purple-300/80`}>
+                                                ✓ Set: {outInputText || '06:00 PM'}
+                                            </Text>
+                                        </View>
                                     </View>
 
-                                    <View style={tw`flex-row gap-4 mb-4`}>
+                                    {/* Action Buttons: CANCEL and SUBMIT */}
+                                    <View style={tw`flex-row gap-3 pt-2 mb-2`}>
                                         <TouchableOpacity
                                             onPress={() => {
                                                 setRegularizeDate(null);
                                                 setReason('');
+                                                setCustomReason('');
                                                 setInInputText('09:00 AM');
                                                 setOutInputText('06:00 PM');
+                                                setShowReasonDropdown(false);
                                             }}
-                                            style={tw`flex-1 py-3.5 bg-gray-100 dark:bg-[#1c1a45] rounded-xl items-center`}
+                                            style={tw`flex-1 py-3.5 bg-[#230d4b] border border-[#6d28d9]/40 rounded-2xl items-center shadow-sm`}
                                         >
-                                            <Text style={tw`text-gray-600 dark:text-gray-300 font-bold`}>Cancel</Text>
+                                            <Text style={tw`text-white font-bold text-xs uppercase tracking-wider`}>CANCEL</Text>
                                         </TouchableOpacity>
 
                                         <TouchableOpacity
                                             onPress={submitRegularization}
                                             disabled={submittingRequest}
-                                            style={tw`flex-1 py-3.5 bg-[#8b5cf6] rounded-xl items-center`}
+                                            style={tw`flex-1 py-3.5 bg-[#7c3aed] rounded-2xl items-center shadow-lg shadow-purple-900/50`}
                                         >
-                                            <Text style={tw`text-white font-bold`}>
-                                                {submittingRequest ? 'Submitting...' : 'Submit'}
-                                            </Text>
+                                            {submittingRequest ? (
+                                                <ActivityIndicator size="small" color="#ffffff" />
+                                            ) : (
+                                                <Text style={tw`text-white font-bold text-xs uppercase tracking-wider`}>SUBMIT</Text>
+                                            )}
                                         </TouchableOpacity>
                                     </View>
                                 </ScrollView>
