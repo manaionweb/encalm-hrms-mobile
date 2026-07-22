@@ -79,7 +79,7 @@ export default function NewJoinersScreen({ navigation }: any) {
                     </View>
                 </View>
 
-                <View style={tw`space-y-2 mb-4`}>
+                <View style={tw`gap-y-2 mb-4`}>
                     <View style={tw`flex-row items-center gap-2 text-sm`}>
                         <Calendar size={14} color="#22c55e" />
                         <Text style={tw`text-gray-600 dark:text-gray-400 text-xs font-semibold`}>
