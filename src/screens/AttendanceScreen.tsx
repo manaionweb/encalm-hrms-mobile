@@ -750,13 +750,10 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                                     </Text>
                                                 </View>
 
-                                            {/* Middle Details (Holiday Name or Leave Type Name) */}
-                                            <View style={tw`w-full items-center`}>
-                                                {!!holiday && (
-                                                    <View style={tw`bg-purple-100 dark:bg-purple-900/30 px-0.5 py-0.2 rounded w-full items-center mt-0.5`}>
-                                                        <Text numberOfLines={1} style={[tw`text-[5px] font-bold text-purple-700 dark:text-purple-300`, { lineHeight: 6.5 }]}>
-                                                            {holiday.name}
-                                                        </Text>
+                                                {/* Center Status Badge */}
+                                                {statusLabel !== '-' && (
+                                                    <View style={tw`w-full items-center mt-0.5`}>
+                                                        {renderStatusBadge(statusLabel)}
                                                     </View>
                                                 )}
 
@@ -805,25 +802,13 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                                             {log.outTime ? formatTime(log.outTime) : '--'}
                                                         </Text>
                                                     </View>
-                                                )}
-                                            </View>
-
-                                            {/* In/Out timings if log exists */}
-                                            {log && (log.inTime || log.outTime) ? (
-                                                <View style={tw`w-full border-t border-gray-200 dark:border-white/5 pt-0.5 mt-0.5 items-center`}>
-                                                    <Text style={[tw`text-[5.5px] font-semibold text-green-600 dark:text-green-400`, { lineHeight: 7 }]}>
-                                                        {log.inTime ? formatTime(log.inTime) : '--'}
-                                                    </Text>
-                                                    <Text style={[tw`text-[5.5px] font-semibold text-red-500 dark:text-red-400 mt-0.5`, { lineHeight: 7 }]}>
-                                                        {log.outTime ? formatTime(log.outTime) : '--'}
-                                                    </Text>
-                                                </View>
-                                            ) : null}
-                                        </TouchableOpacity>
+                                                ) : null}
+                                            </TouchableOpacity>
                                     );
                                 })}
                             </View>
-                        )}
+                        </View>
+                    )}
                     </Animated.View>
                 </PinchGestureHandler>
 
