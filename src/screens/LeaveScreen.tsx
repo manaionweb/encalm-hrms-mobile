@@ -1,10 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import { Calendar, Plus, Check, X, ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { Calendar, Plus, Check, X, ChevronLeft, ChevronRight, Search } from 'lucide-react-native';
 
 const formatDate = (dateString: string) => {
     if (!dateString) return '';
     return dateString.includes('T') ? dateString.split('T')[0] : dateString;
+};
+
+const formatLeaveDates = (startStr: string, endStr: string) => {
+    if (!startStr) return '';
+    const cleanStart = startStr.split('T')[0];
+    const cleanEnd = endStr ? endStr.split('T')[0] : cleanStart;
+
+    const formatDatePart = (s: string) => {
+        const parts = s.split('-');
+        if (parts.length === 3) {
+            const year = parts[0];
+            const month = parseInt(parts[1], 10);
+            const day = parseInt(parts[2], 10);
+            return `${day}/${month}/${year}`;
+        }
+        return s;
+    };
+    return `${formatDatePart(cleanStart)} - ${formatDatePart(cleanEnd)}`;
 };
 
 const formatHistoryDate = (dateStr: string) => {
@@ -60,6 +78,10 @@ export default function LeaveScreen({ navigation }: any) {
         useState<'MY_LEAVE' | 'APPROVALS'>(
             route.params?.activeTab ?? 'MY_LEAVE'
         );
+
+    // Approvals Search & Filter
+    const [approvalSearch, setApprovalSearch] = useState('');
+    const [approvalStatusFilter, setApprovalStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
 
     // Form Apply Leave
     const [showApplyModal, setShowApplyModal] = useState(false);
@@ -432,42 +454,47 @@ export default function LeaveScreen({ navigation }: any) {
 
                             {/* Leaves History */}
                             <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-3`}>My Leave History</Text>
-                            <View style={tw`bg-white dark:bg-[#4c1d95] rounded-3xl border border-gray-100 dark:border-white/5 p-5 shadow-sm`}>
+                            <View style={tw`bg-white dark:bg-[#311768] rounded-3xl border border-gray-100 dark:border-[#6d28d9]/40 p-4 shadow-lg`}>
                                 {leaveHistory.length === 0 ? (
                                     <Text style={tw`text-center py-6 text-gray-400`}>No leave requests recorded.</Text>
                                 ) : (
-                                    leaveHistory.map((leave) => {
-                                        const leaveStatus = String(leave.status).toUpperCase();
-                                        const isApproved = leaveStatus === 'APPROVED';
-                                        const isRejected = leaveStatus === 'REJECTED';
+                                    <ScrollView style={tw`max-h-72`} nestedScrollEnabled={true} showsVerticalScrollIndicator={true}>
+                                        {leaveHistory.map((leave) => {
+                                            const leaveStatus = String(leave.status).toUpperCase();
+                                            const isApproved = leaveStatus === 'APPROVED';
+                                            const isRejected = leaveStatus === 'REJECTED';
 
-                                        const dotColor = isApproved ? 'bg-green-500' : isRejected ? 'bg-red-500' : 'bg-orange-500';
-                                        const badgeBg = isApproved ? 'bg-green-100' :
-                                            isRejected ? 'bg-red-100' :
-                                                'bg-orange-100';
-                                        const badgeTextColor = isApproved ? 'text-green-700' :
-                                            isRejected ? 'text-red-700' :
-                                                'text-orange-700';
+                                            const dotColor = isApproved ? 'bg-emerald-400' : isRejected ? 'bg-rose-400' : 'bg-amber-400';
+                                            const badgeBg = isApproved ? 'bg-emerald-500/20 border border-emerald-500/30' :
+                                                isRejected ? 'bg-rose-500/20 border border-rose-500/30' :
+                                                'bg-amber-500/20 border border-amber-500/30';
+                                            const badgeTextColor = isApproved ? 'text-emerald-400' :
+                                                isRejected ? 'text-rose-400' :
+                                                'text-amber-400';
 
-                                        return (
-                                            <View key={leave.id} style={tw`py-3.5 border-b border-gray-50 dark:border-white/5 last:border-0 flex-row items-start gap-3`}>
-                                                <View style={tw`w-2 h-2 rounded-full mt-1.5 ${dotColor}`} />
-                                                <View style={tw`flex-1 mr-2`}>
-                                                    <Text style={tw`text-xs font-bold text-gray-900 dark:text-white`}>
-                                                        {leave.leaveType?.code || 'CL'} - {leave.reason || 'Personal leave'}
-                                                    </Text>
-                                                    <Text style={tw`text-[10px] text-gray-400 dark:text-gray-500 mt-1`}>
-                                                        {formatHistoryDate(leave.startDate)} - {formatHistoryDate(leave.endDate)}
-                                                    </Text>
+                                            return (
+                                                <View key={leave.id} style={tw`py-3.5 border-b border-gray-100 dark:border-[#6d28d9]/20 last:border-0 flex-row items-center justify-between gap-3 px-1`}>
+                                                    <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                                        <View style={tw`w-2.5 h-2.5 rounded-full ${dotColor}`} />
+                                                        <View style={tw`flex-1`}>
+                                                            <Text style={tw`text-xs font-bold text-gray-900 dark:text-white`}>
+                                                                {leave.leaveType?.code || 'CL'} - {leave.reason || 'Personal leave'}
+                                                            </Text>
+                                                            <Text style={tw`text-[10px] text-gray-400 dark:text-purple-200/70 mt-0.5 font-medium`}>
+                                                                {formatHistoryDate(leave.startDate)} - {formatHistoryDate(leave.endDate)}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+
+                                                    <View style={tw`px-3 py-1 rounded-full ${badgeBg} justify-center items-center`}>
+                                                        <Text style={tw`text-[9px] font-black uppercase tracking-wider ${badgeTextColor}`}>
+                                                            {leaveStatus}
+                                                        </Text>
+                                                    </View>
                                                 </View>
-                                                <View style={tw`px-2.5 py-0.5 rounded-full ${badgeBg} justify-center`}>
-                                                    <Text style={tw`text-[9px] font-black uppercase ${badgeTextColor}`}>
-                                                        {leaveStatus}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        );
-                                    })
+                                            );
+                                        })}
+                                    </ScrollView>
                                 )}
                             </View>
 
@@ -512,51 +539,183 @@ export default function LeaveScreen({ navigation }: any) {
                     ) : (
                         /* Approvals view for HR Admin / Manager */
                         <View>
-                            <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-3`}>Pending Leave Approvals</Text>
-                            {allLeaves.filter(l => l.status === 'PENDING').length === 0 ? (
-                                <Text style={tw`text-center py-10 text-gray-400`}>No pending leave approvals.</Text>
-                            ) : (
-                                allLeaves
-                                    .filter((leave) => leave.status === "PENDING")
-                                    .map((leave) => {
-                                        const name = leave.user?.name || `Employee #${leave.userId}`;
+                            {/* Page Header section */}
+                            <View style={tw`flex-row justify-between items-center mb-4`}>
+                                <View style={tw`flex-1`}>
+                                    <Text style={tw`text-2xl font-bold text-gray-900 dark:text-white`}>
+                                        Leave Approvals
+                                    </Text>
+                                    <Text style={tw`text-[10px] text-gray-500 dark:text-gray-400 mt-0.5`}>
+                                        Review and manage employee leave requests.
+                                    </Text>
+                                </View>
+                            </View>
+
+                            {/* Search & Filter Bar matching Web App (Image 1) */}
+                            <View style={tw`mb-4`}>
+                                <View style={tw`flex-row items-center bg-white dark:bg-[#311768] border border-gray-100 dark:border-[#6d28d9]/40 rounded-2xl px-3 py-1 mb-3 shadow-sm`}>
+                                    <Search size={18} color="#a78bfa" style={tw`mr-2`} />
+                                    <TextInput
+                                        style={tw`flex-1 text-sm text-gray-800 dark:text-white h-10 font-semibold`}
+                                        placeholder="Search employee or leave type..."
+                                        placeholderTextColor="#a78bfa/50"
+                                        value={approvalSearch}
+                                        onChangeText={setApprovalSearch}
+                                    />
+                                </View>
+
+                                {/* Status Pills: All Status, Pending, Approved, Rejected */}
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={tw`gap-2 pb-1`}>
+                                    {[
+                                        { key: 'ALL', label: 'All Status' },
+                                        { key: 'PENDING', label: 'Pending' },
+                                        { key: 'APPROVED', label: 'Approved' },
+                                        { key: 'REJECTED', label: 'Rejected' },
+                                    ].map((tab) => {
+                                        const isActive = approvalStatusFilter === tab.key;
                                         return (
-                                            <View
-                                                key={leave.id}
-                                                style={tw`bg-white dark:bg-[#4c1d95] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-sm`}
+                                            <TouchableOpacity
+                                                key={tab.key}
+                                                onPress={() => setApprovalStatusFilter(tab.key as any)}
+                                                style={tw`px-4 py-2 rounded-2xl border ${isActive ? 'bg-[#7c3aed] border-[#7c3aed]' : 'bg-white dark:bg-[#230d4b] border-gray-200 dark:border-[#6d28d9]/30'}`}
                                             >
-                                                <Text style={tw`font-bold text-sm text-gray-900 dark:text-white`}>{name}</Text>
-                                                <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
-                                                    Type: {leave.leaveType?.code} • Date: {formatDate(leave.startDate)} to {formatDate(leave.endDate)}
+                                                <Text style={tw`text-xs font-bold ${isActive ? 'text-white' : 'text-gray-600 dark:text-purple-200/70'}`}>
+                                                    {tab.label}
                                                 </Text>
-                                                <Text style={tw`text-xs text-gray-500 italic my-3`}>
-                                                    "{leave.reason}"
-                                                </Text>
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </ScrollView>
+                            </View>
 
-                                                <View style={tw`flex-row gap-3`}>
-                                                    <TouchableOpacity
-                                                        onPress={() => handleApprove(leave.id)}
-                                                        style={tw`flex-1 py-2 bg-green-50 dark:bg-green-950/20 border border-transparent dark:border-green-800/30 rounded-xl items-center flex-row justify-center gap-1`}
-                                                    >
-                                                        <Check size={16} color="#10b981" />
-                                                        <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>Approve</Text>
-                                                    </TouchableOpacity>
+                            {(() => {
+                                const filteredApprovals = allLeaves.filter((leave) => {
+                                    const status = String(leave.status).toUpperCase();
+                                    if (approvalStatusFilter !== 'ALL' && status !== approvalStatusFilter) {
+                                        return false;
+                                    }
+                                    const name = leave.user?.name || '';
+                                    const reason = leave.reason || '';
+                                    const code = leave.leaveType?.code || '';
+                                    const searchLower = approvalSearch.toLowerCase();
+                                    return (
+                                        name.toLowerCase().includes(searchLower) ||
+                                        reason.toLowerCase().includes(searchLower) ||
+                                        code.toLowerCase().includes(searchLower)
+                                    );
+                                });
 
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            setRejectingId(leave.id);
-                                                            setRejectComment('');
-                                                        }}
-                                                        style={tw`flex-1 py-2 bg-rose-50 dark:bg-rose-950/20 border border-transparent dark:border-rose-800/30 rounded-xl items-center flex-row justify-center gap-1`}
-                                                    >
-                                                        <X size={16} color="#f43f5e" />
-                                                        <Text style={tw`text-xs font-bold text-rose-500 dark:text-rose-400`}>Reject</Text>
-                                                    </TouchableOpacity>
+                                if (filteredApprovals.length === 0) {
+                                    return (
+                                        <View style={tw`bg-white dark:bg-[#311768] rounded-3xl p-8 items-center justify-center border border-gray-100 dark:border-[#6d28d9]/40 mt-2`}>
+                                            <Calendar size={48} color="#cbd5e1" style={tw`mb-4 opacity-50`} />
+                                            <Text style={tw`text-base font-bold text-gray-700 dark:text-white`}>No Leave Requests Found</Text>
+                                            <Text style={tw`text-xs text-gray-400 mt-1 text-center`}>Try selecting a different filter or search term.</Text>
+                                        </View>
+                                    );
+                                }
+
+                                return filteredApprovals.map((leave, index) => {
+                                    const name = leave.user?.name || `Employee #${leave.userId}`;
+                                    const title = leave.user?.employeeProfile?.title || 'Employee';
+                                    const department = leave.user?.employeeProfile?.department || 'General';
+                                    const initials = name ? name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : '?';
+                                    const colors = ['bg-blue-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
+                                    const avatarBg = colors[index % colors.length];
+
+                                    const leaveStatus = String(leave.status).toUpperCase();
+                                    const isApproved = leaveStatus === 'APPROVED';
+                                    const isRejected = leaveStatus === 'REJECTED';
+                                    const isPending = leaveStatus === 'PENDING';
+
+                                    return (
+                                        <View
+                                            key={leave.id}
+                                            style={tw`bg-white dark:bg-[#311768] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#6d28d9]/40 shadow-lg`}
+                                        >
+                                            {/* Header: Avatar, Name, Title, Leave Type Badge */}
+                                            <View style={tw`flex-row justify-between items-center mb-3`}>
+                                                <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                                    <View style={tw`w-10 h-10 rounded-2xl ${avatarBg} items-center justify-center shadow-md`}>
+                                                        <Text style={tw`text-white font-bold text-sm`}>{initials}</Text>
+                                                    </View>
+                                                    <View style={tw`flex-1`}>
+                                                        <Text style={tw`font-bold text-sm text-gray-900 dark:text-white`}>{name}</Text>
+                                                        <Text style={tw`text-[10px] text-gray-400 dark:text-purple-200/70 font-bold uppercase tracking-wider`}>
+                                                            {title} • {department}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+
+                                                {/* Leave Type Pill (CL, SL, EL) */}
+                                                <View style={tw`px-3 py-1 rounded-xl bg-blue-500/20 border border-blue-500/30`}>
+                                                    <Text style={tw`text-xs font-black text-blue-400 uppercase tracking-wider`}>
+                                                        {leave.leaveType?.code || 'CL'}
+                                                    </Text>
                                                 </View>
                                             </View>
-                                        );
-                                    })
-                            )}
+
+                                            {/* Middle: Dates, Status Badge, Action Buttons */}
+                                            <View style={tw`flex-row justify-between items-center bg-gray-50 dark:bg-[#230d4b] p-3 rounded-2xl mb-3 border border-gray-100 dark:border-[#6d28d9]/20`}>
+                                                <View style={tw`flex-1 pr-2`}>
+                                                    <Text style={tw`text-[10px] font-bold text-purple-200/70 uppercase tracking-wider mb-0.5`}>DATES</Text>
+                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                        {formatLeaveDates(leave.startDate, leave.endDate)}
+                                                    </Text>
+                                                </View>
+
+                                                <View style={tw`flex-row items-center gap-2.5`}>
+                                                    {/* Status Pill */}
+                                                    <View style={[
+                                                        tw`px-2.5 py-1 rounded-full border`,
+                                                        isApproved ? tw`bg-emerald-500/20 border-emerald-500/30` :
+                                                        isRejected ? tw`bg-rose-500/20 border-rose-500/30` :
+                                                        tw`bg-amber-500/20 border-amber-500/30`
+                                                    ]}>
+                                                        <Text style={[
+                                                            tw`text-[10px] font-black uppercase tracking-wider`,
+                                                            isApproved ? tw`text-emerald-400` :
+                                                            isRejected ? tw`text-rose-400` :
+                                                            tw`text-amber-400`
+                                                        ]}>
+                                                            {leaveStatus}
+                                                        </Text>
+                                                    </View>
+
+                                                    {/* White Square Icon Buttons matching Web App (Image 1) */}
+                                                    {isPending && (
+                                                        <View style={tw`flex-row gap-2`}>
+                                                            <TouchableOpacity
+                                                                onPress={() => handleApprove(leave.id)}
+                                                                activeOpacity={0.8}
+                                                                style={tw`w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-md active:scale-95`}
+                                                            >
+                                                                <Check size={18} color="#16a34a" strokeWidth={2.5} />
+                                                            </TouchableOpacity>
+
+                                                            <TouchableOpacity
+                                                                onPress={() => {
+                                                                    setRejectingId(leave.id);
+                                                                    setRejectComment('');
+                                                                }}
+                                                                activeOpacity={0.8}
+                                                                style={tw`w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-md active:scale-95`}
+                                                            >
+                                                                <X size={18} color="#dc2626" strokeWidth={2.5} />
+                                                            </TouchableOpacity>
+                                                        </View>
+                                                    )}
+                                                </View>
+                                            </View>
+
+                                            {/* Reason */}
+                                            <Text style={tw`text-xs text-gray-600 dark:text-purple-200/80 italic px-1`}>
+                                                "{leave.reason}"
+                                            </Text>
+                                        </View>
+                                    );
+                                });
+                            })()}
                         </View>
                     )}
                 </ScrollView>

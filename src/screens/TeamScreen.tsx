@@ -246,46 +246,57 @@ export default function TeamScreen({ navigation }: any) {
             
             <CustomHeader navigation={navigation} title="Teams" />
 
-            {isAdmin && (
-                <View style={tw`px-4 pt-4`}>
+            {/* Page Header & Create Team Button matching Web App */}
+            <View style={tw`px-4 pt-5 pb-2 flex-row justify-between items-center`}>
+                <View style={tw`flex-1 mr-3`}>
+                    <Text style={tw`text-2xl font-bold text-gray-900 dark:text-white`}>
+                        Team Management
+                    </Text>
+                    <Text style={tw`text-[10px] text-gray-500 dark:text-purple-200/70 mt-0.5 font-medium`}>
+                        Organize your workforce into functional units.
+                    </Text>
+                </View>
+
+                {isAdmin && (
                     <TouchableOpacity
                         onPress={() => setShowCreateModal(true)}
-                        style={tw`flex-row items-center justify-center gap-2 p-4 bg-white dark:bg-[#4c1d95] border border-dashed border-[#8b5cf6] dark:border-white/10 rounded-3xl shadow-sm`}
+                        activeOpacity={0.7}
+                        style={tw`flex-row items-center gap-1.5 px-4 py-2.5 bg-[#8b5cf6] rounded-2xl shadow-lg shadow-[#8b5cf6]/30 border border-[#8b5cf6] active:scale-95`}
                     >
-                        <Plus size={18} color="#8b5cf6" />
-                        <Text style={tw`text-[#7c3aed] dark:text-[#c4b5fd] font-bold text-xs`}>Create New Team</Text>
+                        <Plus size={16} color="#ffffff" strokeWidth={2.5} />
+                        <Text style={tw`text-white font-bold text-xs tracking-wide`}>Create Team</Text>
                     </TouchableOpacity>
-                </View>
-            )}
+                )}
+            </View>
 
             {loading ? (
-                <View style={tw`flex-1 justify-center`}>
+                <View style={tw`flex-1 justify-center items-center`}>
                     <ActivityIndicator size="large" color="#8b5cf6" />
                 </View>
             ) : teams.length === 0 ? (
                 <View style={tw`flex-1 items-center justify-center p-6`}>
-                    <Users size={48} color="#cbd5e1" style={tw`mb-4`} />
+                    <Users size={48} color="#cbd5e1" style={tw`mb-4 opacity-50`} />
                     <Text style={tw`text-base font-bold text-gray-700 dark:text-white`}>No Teams Found</Text>
                     <Text style={tw`text-xs text-gray-400 mt-1`}>Add a new team to manage departments.</Text>
                 </View>
             ) : (
-                <ScrollView style={tw`flex-grow p-4`} contentContainerStyle={tw`pb-12`}>
+                <ScrollView style={tw`flex-1 px-4 pt-2`} contentContainerStyle={tw`pb-12`}>
                     {teams.map((team) => {
                         const managerInit = (team.manager?.name || 'U').charAt(0);
                         return (
                             <View 
                                 key={team.id}
-                                style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-white/5 shadow-md`}
+                                style={tw`bg-white dark:bg-[#311768] p-5 rounded-3xl mb-4 border border-gray-100 dark:border-[#6d28d9]/40 shadow-lg`}
                             >
                                 {/* Top Section: Suitcase Icon + Title/Description + 3-dots */}
                                 <View style={tw`flex-row justify-between items-start mb-4`}>
                                     <View style={tw`flex-row items-center flex-1 mr-2`}>
-                                        <View style={tw`w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center mr-3 shadow-sm`}>
+                                        <View style={tw`w-12 h-12 rounded-2xl bg-blue-500/15 flex items-center justify-center mr-3 shadow-sm`}>
                                             <Briefcase size={20} color="#3b82f6" />
                                         </View>
                                         <View style={tw`flex-1`}>
                                             <Text style={tw`font-bold text-gray-900 dark:text-white text-base`}>{team.name}</Text>
-                                            <Text style={tw`text-xs text-gray-500 dark:text-gray-300 font-medium mt-0.5`}>
+                                            <Text style={tw`text-xs text-gray-500 dark:text-purple-200/70 font-medium mt-0.5`}>
                                                 {team.description || 'No description provided.'}
                                             </Text>
                                         </View>
@@ -296,20 +307,21 @@ export default function TeamScreen({ navigation }: any) {
                                                 setActiveTeam(team);
                                                 setShowOptionsSheet(true);
                                             }}
-                                            style={tw`p-1.5 bg-gray-50 dark:bg-white/5 rounded-xl`}
+                                            activeOpacity={0.7}
+                                            style={tw`p-2 bg-gray-50 dark:bg-[#230d4b] rounded-xl border border-gray-100 dark:border-[#6d28d9]/20`}
                                         >
-                                            <MoreVertical size={18} color="#94a3b8" />
+                                            <MoreVertical size={18} color="#a78bfa" />
                                         </TouchableOpacity>
                                     )}
                                 </View>
 
                                 {/* Middle Section: Manager Card Box */}
-                                <View style={tw`p-3 bg-gray-50 dark:bg-white/5 rounded-2xl flex-row items-center gap-3 border border-gray-100 dark:border-white/5`}>
-                                    <View style={tw`w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center`}>
+                                <View style={tw`p-3 bg-gray-50 dark:bg-[#230d4b] rounded-2xl flex-row items-center gap-3 border border-gray-100 dark:border-[#6d28d9]/20`}>
+                                    <View style={tw`w-8 h-8 rounded-lg bg-[#8b5cf6] flex items-center justify-center`}>
                                         <Text style={tw`text-white font-bold text-sm`}>{managerInit}</Text>
                                     </View>
                                     <View style={tw`flex-1`}>
-                                        <Text style={tw`text-[9px] font-black text-gray-400 dark:text-gray-300 tracking-wider uppercase`}>MANAGER</Text>
+                                        <Text style={tw`text-[9px] font-black text-gray-400 dark:text-purple-300/70 tracking-wider uppercase`}>MANAGER</Text>
                                         <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
                                             {team.manager?.name || 'Unassigned'}
                                         </Text>
@@ -317,10 +329,10 @@ export default function TeamScreen({ navigation }: any) {
                                 </View>
                                 
                                 {/* Bottom Section: Members Count + View Members button */}
-                                <View style={tw`flex-row justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-white/5`}>
+                                <View style={tw`flex-row justify-between items-center mt-4 pt-3 border-t border-gray-100 dark:border-[#6d28d9]/20`}>
                                     <View style={tw`flex-row items-center gap-1.5`}>
-                                        <Users size={14} color="#64748b" />
-                                        <Text style={tw`text-xs text-gray-500 dark:text-gray-300 font-medium`}>
+                                        <Users size={14} color="#a78bfa" />
+                                        <Text style={tw`text-xs text-gray-500 dark:text-purple-200/70 font-medium`}>
                                             {team.members?.length || 0} Members
                                         </Text>
                                     </View>
@@ -329,8 +341,9 @@ export default function TeamScreen({ navigation }: any) {
                                             setActiveTeam(team);
                                             setShowRosterModal(true);
                                         }}
+                                        activeOpacity={0.7}
                                     >
-                                        <Text style={tw`text-xs text-purple-600 dark:text-[#c4b5fd] font-black`}>
+                                        <Text style={tw`text-xs text-purple-600 dark:text-[#a78bfa] font-black`}>
                                             View Members
                                         </Text>
                                     </TouchableOpacity>
