@@ -1300,7 +1300,6 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         setTempPayslipYear(lastMonth.getFullYear());
         setShowMonthDropdown(false);
         setShowYearDropdown(false);
-        setPayslipError('');
         setShowPayslipModal(true);
     };
 
@@ -1760,7 +1759,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                             {/* View Profile Picture Button */}
                                             {Boolean(profilePictureUrl) && (
                                                 <TouchableOpacity
-                                                    onPress={() => handleViewDocument(profilePictureUrl)}
+                                                    onPress={() => handleViewDocument(profilePictureUrl!)}
                                                     style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
                                                 >
                                                     <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />

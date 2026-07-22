@@ -617,8 +617,8 @@ export default function LeaveScreen({ navigation }: any) {
 
                                 return filteredApprovals.map((leave, index) => {
                                     const name = leave.user?.name || `Employee #${leave.userId}`;
-                                    const title = leave.user?.employeeProfile?.title || 'Employee';
-                                    const department = leave.user?.employeeProfile?.department || 'General';
+                                    const title = (leave.user as any)?.employeeProfile?.title || 'Employee';
+                                    const department = (leave.user as any)?.employeeProfile?.department || 'General';
                                     const initials = name ? name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : '?';
                                     const colors = ['bg-blue-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
                                     const avatarBg = colors[index % colors.length];

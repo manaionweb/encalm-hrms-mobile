@@ -127,14 +127,14 @@ export default function RegularizationsScreen({ navigation }: any) {
                 >
                     {filteredRequests.map((req, index) => {
                         const name = req.user?.name || `Employee #${req.userId}`;
-                        const title = req.user?.employeeProfile?.title || 'Employee';
-                        const department = req.user?.employeeProfile?.department || 'IT';
+                        const title = (req.user as any)?.employeeProfile?.title || 'Employee';
+                        const department = (req.user as any)?.employeeProfile?.department || 'IT';
                         const initials = name ? name.split(' ').map((n: string) => n[0]).join('').substring(0, 2) : '?';
                         const colors = ['bg-blue-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-teal-500'];
                         const avatarBg = colors[index % colors.length];
 
-                        const proposedInFormatted = formatTime12h(req.proposedIn || req.inTime);
-                        const proposedOutFormatted = formatTime12h(req.proposedOut || req.outTime);
+                        const proposedInFormatted = formatTime12h((req as any).proposedIn || (req as any).inTime);
+                        const proposedOutFormatted = formatTime12h((req as any).proposedOut || (req as any).outTime);
 
                         return (
                             <View
