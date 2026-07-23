@@ -74,8 +74,12 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
     // Custom Delete Modal States
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [docToFieldId, setDocToFieldId] = useState<number | null>(null);
-    const [docToFieldName, setDocToFieldName] = useState('');
+    const [deleteTarget, setDeleteTarget] = useState<{
+        type: 'PROFILE_PICTURE' | 'STANDARD_DOC' | 'CUSTOM_FIELD';
+        id?: number;
+        name: string;
+        fieldId?: number;
+    } | null>(null);
 
     // Payslip States
     const [showPayslipModal, setShowPayslipModal] = useState(false);
@@ -179,7 +183,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     const handleUploadProfilePicture = async () => {
         try {
             const res = await DocumentPicker.getDocumentAsync({
-                type: 'image/*',
+                type: ['image/*'],
                 copyToCacheDirectory: true,
             });
 
@@ -187,15 +191,25 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 return;
             }
 
-            const asset = res.assets[0];
+            const asset: any = res.assets[0];
             setLoading(true);
 
             const formData = new FormData();
-            formData.append('profilePicture', {
-                uri: asset.uri,
-                name: asset.name || 'profile.jpg',
-                type: asset.mimeType || 'image/jpeg',
-            } as any);
+            if (Platform.OS === 'web') {
+                if (asset.file) {
+                    formData.append('profilePicture', asset.file);
+                } else if (asset.uri) {
+                    const blobRes = await fetch(asset.uri);
+                    const blob = await blobRes.blob();
+                    formData.append('profilePicture', blob, asset.name || 'profile.jpg');
+                }
+            } else {
+                formData.append('profilePicture', {
+                    uri: asset.uri,
+                    name: asset.name || 'profile.jpg',
+                    type: asset.mimeType || 'image/jpeg',
+                } as any);
+            }
 
             const endpoint = id ? `/employee/${id}/profile-picture` : '/employee/me/profile-picture';
             await api.put(endpoint, formData, {
@@ -213,18 +227,9 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         }
     };
 
-    const handleDeleteProfilePicture = async () => {
-        try {
-            setLoading(true);
-            const endpoint = id ? `/employee/${id}/profile-picture` : '/employee/me/profile-picture';
-            await api.delete(endpoint);
-            showToast('Profile picture deleted successfully!', 'success');
-            fetchEmployeeData();
-        } catch (error: any) {
-            console.error('Failed to delete profile picture:', error);
-            showToast(error.response?.data?.message || 'Failed to delete profile picture', 'error');
-            setLoading(false);
-        }
+    const handleDeleteProfilePicture = () => {
+        setDeleteTarget({ type: 'PROFILE_PICTURE', name: 'Profile Picture' });
+        setShowDeleteModal(true);
     };
 
     useEffect(() => {
@@ -327,7 +332,10 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
             // Save custom fields
             const customFieldsPayload = Object.keys(formCustomFields).reduce((acc: any, key) => {
-                acc[key] = formCustomFields[Number(key)];
+                const val = formCustomFields[key] ?? formCustomFields[Number(key)];
+                if (val !== undefined) {
+                    acc[key] = val;
+                }
                 return acc;
             }, {});
             const customFieldsEndpoint = id ? `/custom-fields/employee/${id}` : '/custom-fields/employee/me';
@@ -354,17 +362,27 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 return;
             }
 
-            const asset = res.assets[0];
+            const asset: any = res.assets[0];
             const employeeId = id || 'me';
 
             setLoading(true);
 
             const formData = new FormData();
-            formData.append('file', {
-                uri: asset.uri,
-                name: asset.name || 'document.pdf',
-                type: asset.mimeType || 'application/pdf',
-            } as any);
+            if (Platform.OS === 'web') {
+                if (asset.file) {
+                    formData.append('file', asset.file);
+                } else if (asset.uri) {
+                    const blobRes = await fetch(asset.uri);
+                    const blob = await blobRes.blob();
+                    formData.append('file', blob, asset.name || 'document.pdf');
+                }
+            } else {
+                formData.append('file', {
+                    uri: asset.uri,
+                    name: asset.name || 'document.pdf',
+                    type: asset.mimeType || 'application/pdf',
+                } as any);
+            }
 
             await api.post(`/custom-fields/employee/${employeeId}/field/${fieldId}/upload`, formData, {
                 headers: {
@@ -390,16 +408,26 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
             if (res.canceled || !res.assets || res.assets.length === 0) return;
 
-            const asset = res.assets[0];
+            const asset: any = res.assets[0];
             const employeeId = id || employee?.id || 'me';
 
             setLoading(true);
             const formData = new FormData();
-            formData.append('file', {
-                uri: asset.uri,
-                name: asset.name || `${docKey}.pdf`,
-                type: asset.mimeType || 'application/pdf',
-            } as any);
+            if (Platform.OS === 'web') {
+                if (asset.file) {
+                    formData.append('file', asset.file);
+                } else if (asset.uri) {
+                    const blobRes = await fetch(asset.uri);
+                    const blob = await blobRes.blob();
+                    formData.append('file', blob, asset.name || `${docKey}.pdf`);
+                }
+            } else {
+                formData.append('file', {
+                    uri: asset.uri,
+                    name: asset.name || `${docKey}.pdf`,
+                    type: asset.mimeType || 'application/pdf',
+                } as any);
+            }
             formData.append('name', docName);
 
             await api.post(`/employee/${employeeId}/documents`, formData, {
@@ -417,60 +445,83 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         }
     };
 
-    const handleDeleteStandardDocument = async (docId: number, docName: string) => {
-        try {
-            setLoading(true);
-            const employeeId = id || employee?.id || 'me';
-            await api.delete(`/employee/${employeeId}/documents/${docId}`);
-            showToast(`${docName} deleted successfully!`, 'success');
-            fetchEmployeeData();
-        } catch (error: any) {
-            console.error('Failed to delete document:', error);
-            showToast(error.response?.data?.message || `Failed to delete ${docName}`, 'error');
-            setLoading(false);
-        }
-    };
-
-    const handleDeleteDocument = (fieldId: number, fieldName: string) => {
-        setDocToFieldId(fieldId);
-        setDocToFieldName(fieldName);
+    const handleDeleteStandardDocument = (docId: number, docName: string) => {
+        setDeleteTarget({ type: 'STANDARD_DOC', id: docId, name: docName });
         setShowDeleteModal(true);
     };
 
-    const confirmDeleteDocument = async () => {
-        if (docToFieldId === null) return;
+    const handleDeleteDocument = (fieldId: number, fieldName: string) => {
+        setDeleteTarget({ type: 'CUSTOM_FIELD', fieldId, name: fieldName });
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
             setShowDeleteModal(false);
             setLoading(true);
-            const employeeId = id || 'me';
-            await api.delete(`/custom-fields/employee/${employeeId}/field/${docToFieldId}/document`);
-            showToast('Document deleted successfully!', 'success');
+            const employeeId = id || employee?.id || 'me';
+
+            if (deleteTarget.type === 'PROFILE_PICTURE') {
+                const endpoint = id ? `/employee/${id}/profile-picture` : '/employee/me/profile-picture';
+                await api.delete(endpoint);
+                showToast('Profile picture deleted successfully!', 'success');
+            } else if (deleteTarget.type === 'STANDARD_DOC' && deleteTarget.id) {
+                await api.delete(`/employee/${employeeId}/documents/${deleteTarget.id}`);
+                showToast(`${deleteTarget.name} deleted successfully!`, 'success');
+            } else if (deleteTarget.type === 'CUSTOM_FIELD' && deleteTarget.fieldId !== undefined) {
+                await api.delete(`/custom-fields/employee/${employeeId}/field/${deleteTarget.fieldId}/document`);
+                showToast(`${deleteTarget.name} deleted successfully!`, 'success');
+            }
+
             fetchEmployeeData();
         } catch (error: any) {
-            console.error('Failed to delete document:', error);
-            showToast(error.response?.data?.message || 'Failed to delete document', 'error');
+            console.error('Failed to delete:', error);
+            showToast(error.response?.data?.message || `Failed to delete ${deleteTarget?.name || 'item'}`, 'error');
             setLoading(false);
         } finally {
-            setDocToFieldId(null);
-            setDocToFieldName('');
+            setDeleteTarget(null);
         }
     };
 
     const handleViewDocument = async (documentUrl: string) => {
         try {
-            const hostUrl = api.defaults.baseURL?.replace('/api', '') || '';
-            const fullUrl = documentUrl.startsWith('http') ? documentUrl : `${hostUrl}${documentUrl}`;
-            const encodedUrl = encodeURI(fullUrl);
-            await Linking.openURL(encodedUrl);
-        } catch (error) {
-            console.error('Failed to open URL:', error);
-            const hostUrl = api.defaults.baseURL?.replace('/api', '') || '';
-            const fullUrl = documentUrl.startsWith('http') ? documentUrl : `${hostUrl}${documentUrl}`;
-            try {
-                await Sharing.shareAsync(encodeURI(fullUrl));
-            } catch (shareErr) {
-                showToast('Failed to view or share document', 'error');
+            if (!documentUrl) {
+                showToast('Document URL is missing', 'error');
+                return;
             }
+
+            // Normalize Windows backslashes to forward slashes and trim whitespace
+            let cleanPath = String(documentUrl).replace(/\\/g, '/').trim();
+
+            if (!cleanPath.startsWith('http://') && !cleanPath.startsWith('https://')) {
+                // Strip leading slashes
+                cleanPath = cleanPath.replace(/^\/+/, '');
+
+                // Ensure path includes uploads/ prefix if relative
+                if (!cleanPath.startsWith('uploads/')) {
+                    cleanPath = `uploads/${cleanPath}`;
+                }
+
+                const hostUrl = api.defaults.baseURL ? api.defaults.baseURL.replace(/\/api\/?$/, '') : 'http://localhost:3001';
+                cleanPath = `${hostUrl}/${cleanPath}`;
+            }
+
+            const encodedUrl = encodeURI(cleanPath);
+
+            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                window.open(encodedUrl, '_blank');
+            } else {
+                const canOpen = await Linking.canOpenURL(encodedUrl);
+                if (canOpen) {
+                    await Linking.openURL(encodedUrl);
+                } else {
+                    await Sharing.shareAsync(encodedUrl);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to open document URL:', error);
+            showToast('Failed to open document', 'error');
         }
     };
 
@@ -1319,17 +1370,41 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         );
     }
 
-    const profile = employee.employeeProfile || {};
+    const profile = employee?.employeeProfile || {};
     const rawProfilePicture =
         profile.avatar ||
         profile.profilePicture ||
         profile.profilePictureUrl ||
-        employee.avatar ||
-        employee.profilePicture ||
-        employee.profilePictureUrl ||
+        employee?.avatar ||
+        employee?.profilePicture ||
+        employee?.profilePictureUrl ||
         null;
     const profilePictureUrl = buildProfilePictureUrl(rawProfilePicture);
-    const initials = employee.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2);
+    const initials = typeof employee?.name === 'string' && employee.name.trim()
+        ? employee.name.trim().split(/\s+/).map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()
+        : 'EP';
+
+    const safeToISODate = (val: any): string => {
+        if (!val) return '';
+        try {
+            const d = new Date(val);
+            if (isNaN(d.getTime())) return '';
+            return d.toISOString().split('T')[0];
+        } catch {
+            return '';
+        }
+    };
+
+    const safeLocaleDate = (val: any, options?: Intl.DateTimeFormatOptions): string => {
+        if (!val) return 'N/A';
+        try {
+            const d = new Date(val);
+            if (isNaN(d.getTime())) return 'N/A';
+            return d.toLocaleDateString('en-IN', options);
+        } catch {
+            return 'N/A';
+        }
+    };
 
     const adminSignatureUrl = companySignature
         ? companySignature.startsWith('http')
@@ -1501,8 +1576,8 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                     <View>
                                         {renderEditableDetailRow('Phone', profile.phone, formPhone, setFormPhone, 'e.g. 1119299291', 'number-pad')}
                                         {renderEditableDetailRow('Email', employee.email, formEmail, setFormEmail, 'Enter email address', 'email-address')}
-                                        {renderEditableDetailRow('Date of Birth (YYYY-MM-DD)', profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : '', formDob, setFormDob, 'YYYY-MM-DD')}
-                                        {renderEditableDetailRow('Date of Joining (YYYY-MM-DD)', profile.joiningDate ? new Date(profile.joiningDate).toISOString().split('T')[0] : '', formJoiningDate, setFormJoiningDate, 'YYYY-MM-DD')}
+                                        {renderEditableDetailRow('Date of Birth (YYYY-MM-DD)', safeToISODate(profile.dob), formDob, setFormDob, 'YYYY-MM-DD')}
+                                        {renderEditableDetailRow('Date of Joining (YYYY-MM-DD)', safeToISODate(profile.joiningDate), formJoiningDate, setFormJoiningDate, 'YYYY-MM-DD')}
 
                                         {/* System Role Selector */}
                                         <TouchableOpacity
@@ -1584,8 +1659,8 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                     <View>
                                         {renderDetailRow('Phone', profile.phone)}
                                         {renderDetailRow('Email', employee.email)}
-                                        {renderDetailRow('Date of Birth', profile.dob ? new Date(profile.dob).toLocaleDateString('en-IN') : '')}
-                                        {renderDetailRow('Date of Joining', profile.joiningDate ? new Date(profile.joiningDate).toLocaleDateString('en-IN') : '')}
+                                        {renderDetailRow('Date of Birth', safeLocaleDate(profile.dob))}
+                                        {renderDetailRow('Date of Joining', safeLocaleDate(profile.joiningDate))}
                                         {renderDetailRow('System Role', employee.role && typeof employee.role === 'object' ? employee.role.name : employee.role)}
                                         {renderDetailRow('Designation', profile.title)}
                                         {renderDetailRow('Department', profile.department)}
@@ -1609,27 +1684,120 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                     <View style={tw`mt-6 pt-4 border-t border-gray-100 dark:border-white/5`}>
                                         <Text style={tw`text-xs font-black text-gray-400 dark:text-purple-300 uppercase tracking-widest mb-3`}>Additional Details</Text>
                                         {personalFields.map(ca => {
+                                            const fType = (ca.field?.type || 'TEXT').toUpperCase();
+                                            const fieldVal = formCustomFields[ca.fieldId] ?? formCustomFields[String(ca.fieldId)] ?? ca.value ?? '';
+
                                             if (isEditing) {
+                                                // 1. Radio Buttons (e.g. SEX with options 'Mail, female')
+                                                if (fType === 'RADIO' || fType === 'RADIO_BUTTON') {
+                                                    const rawOpts = ca.field?.options || 'Yes, No';
+                                                    const cleanOpts = rawOpts.replace(/^Radio\s*button\s*\(/i, '').replace(/\)$/, '');
+                                                    const options = cleanOpts.split(',').map((o: string) => o.trim()).filter(Boolean);
+
+                                                    return (
+                                                        <View key={ca.id} style={tw`py-2.5 border-b border-gray-50 dark:border-slate-700/20`}>
+                                                            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-2`}>{ca.field.name}</Text>
+                                                            <View style={tw`flex-row flex-wrap gap-4 py-1`}>
+                                                                {options.map((opt: string) => {
+                                                                    const isSelected = fieldVal === opt;
+                                                                    return (
+                                                                        <TouchableOpacity
+                                                                            key={opt}
+                                                                            onPress={() => {
+                                                                                setFormCustomFields(prev => ({
+                                                                                    ...prev,
+                                                                                    [ca.fieldId]: opt,
+                                                                                    [String(ca.fieldId)]: opt
+                                                                                }));
+                                                                            }}
+                                                                            style={tw`flex-row items-center gap-2`}
+                                                                        >
+                                                                            <View style={tw`w-4 h-4 rounded-full border-2 ${isSelected ? 'border-[#8b5cf6] items-center justify-center' : 'border-gray-400 dark:border-white/30'}`}>
+                                                                                {isSelected && <View style={tw`w-2.5 h-2.5 rounded-full bg-[#8b5cf6]`} />}
+                                                                            </View>
+                                                                            <Text style={tw`text-xs font-bold ${isSelected ? 'text-[#8b5cf6] dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                                                                                {opt}
+                                                                            </Text>
+                                                                        </TouchableOpacity>
+                                                                    );
+                                                                })}
+                                                            </View>
+                                                        </View>
+                                                    );
+                                                }
+
+                                                // 2. File / PDF / Image Custom Attachment
+                                                if (['FILE', 'PDF', 'IMAGE', 'FILE_UPLOAD', 'PDF_DOCUMENT'].includes(fType)) {
+                                                    const hasFile = Boolean(ca.documentUrl);
+                                                    return (
+                                                        <View key={ca.id} style={tw`py-2.5 border-b border-gray-50 dark:border-slate-700/20`}>
+                                                            <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-1.5`}>{ca.field.name}</Text>
+                                                            <View style={tw`flex-row items-center justify-between bg-[#f5f3ff] dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2`}>
+                                                                <Text style={tw`text-xs text-gray-500 dark:text-gray-400 flex-1 mr-2`} numberOfLines={1}>
+                                                                    {hasFile ? (ca.documentName || 'Document uploaded') : 'No file uploaded'}
+                                                                </Text>
+                                                                <View style={tw`flex-row items-center gap-2`}>
+                                                                    {!hasFile ? (
+                                                                        <TouchableOpacity
+                                                                            onPress={() => handleUploadDocument(ca.fieldId)}
+                                                                            style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl`}
+                                                                        >
+                                                                            <Upload size={12} color="#fff" />
+                                                                            <Text style={tw`text-xs font-bold text-white`}>Upload</Text>
+                                                                        </TouchableOpacity>
+                                                                    ) : (
+                                                                        <>
+                                                                            <TouchableOpacity
+                                                                                onPress={() => handleViewDocument(ca.documentUrl!)}
+                                                                                style={tw`w-8 h-8 rounded-lg flex items-center justify-center bg-[#8b5cf6]/10`}
+                                                                            >
+                                                                                <Eye size={16} color="#8b5cf6" />
+                                                                            </TouchableOpacity>
+                                                                            <TouchableOpacity
+                                                                                onPress={() => handleDeleteDocument(ca.fieldId, ca.field.name)}
+                                                                                style={tw`w-8 h-8 rounded-lg flex items-center justify-center bg-red-500/10`}
+                                                                            >
+                                                                                <Trash2 size={16} color="#ef4444" />
+                                                                            </TouchableOpacity>
+                                                                        </>
+                                                                    )}
+                                                                </View>
+                                                            </View>
+                                                        </View>
+                                                    );
+                                                }
+
+                                                // 3. Text, Password, Email, Number
+                                                const isPassword = fType === 'PASSWORD';
+                                                const kbType = fType === 'NUMBER' ? 'number-pad' : fType === 'EMAIL' ? 'email-address' : 'default';
+
                                                 return (
                                                     <View key={ca.id} style={tw`py-2.5 border-b border-gray-50 dark:border-slate-700/20`}>
                                                         <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-200 uppercase mb-1.5`}>{ca.field.name}</Text>
                                                         <TextInput
                                                             style={tw`w-full px-3 py-2 bg-[#f5f3ff] dark:bg-[#111827] border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold h-9`}
-                                                            value={formCustomFields[ca.fieldId] || ''}
+                                                            value={fieldVal}
                                                             onChangeText={(text) => {
                                                                 setFormCustomFields(prev => ({
                                                                     ...prev,
-                                                                    [ca.fieldId]: text
+                                                                    [ca.fieldId]: text,
+                                                                    [String(ca.fieldId)]: text
                                                                 }));
                                                             }}
                                                             placeholder={`Enter ${ca.field.name}`}
                                                             placeholderTextColor="#94a3b8"
+                                                            secureTextEntry={isPassword}
+                                                            keyboardType={kbType}
                                                         />
                                                     </View>
                                                 );
                                             }
 
-                                            return renderDetailRow(ca.field?.name || 'Custom Field', ca.value || '');
+                                            // View Mode
+                                            if (fType === 'PASSWORD') {
+                                                return renderDetailRow(ca.field?.name || 'Custom Field', ca.value ? '••••••••' : 'N/A');
+                                            }
+                                            return renderDetailRow(ca.field?.name || 'Custom Field', ca.value || 'N/A');
                                         })}
                                     </View>
                                 )}
@@ -1846,24 +2014,24 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                 <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory Details</Text>
                                 {isEditing ? (
                                     <View>
-                                        {renderEditableDetailRow('UAN (Provident Fund)', profile.statutory?.uanNumber, formUan, setFormUan, '12-digit UAN', 'number-pad')}
-                                        {renderEditableDetailRow('ESIC Number', profile.statutory?.esicNumber, formEsic, setFormEsic, '10-digit ESIC Number', 'number-pad')}
-                                        {renderEditableDetailRow('PAN Number', profile.statutory?.panNumber, formPan, setFormPan, 'e.g. ABCDE1234F')}
-                                        {renderEditableDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, '12-digit Aadhaar', 'number-pad')}
+                                        {renderEditableDetailRow('UAN (Provident Fund)', profile.statutory?.uan || profile.statutory?.uanNumber, formUan, setFormUan, '12-digit UAN', 'number-pad')}
+                                        {renderEditableDetailRow('ESIC Number', profile.statutory?.esic || profile.statutory?.esicNumber, formEsic, setFormEsic, '10-digit ESIC Number', 'number-pad')}
+                                        {renderEditableDetailRow('PAN Number', profile.statutory?.pan || profile.statutory?.panNumber, formPan, setFormPan, 'e.g. ABCDE1234F')}
+                                        {renderEditableDetailRow('Aadhaar Number', profile.statutory?.aadhaar || profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, '12-digit Aadhaar', 'number-pad')}
 
                                         <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mt-6 mb-4`}>Bank Account</Text>
                                         {renderEditableDetailRow('Bank Name', profile.bank?.bankName, formBankName, setFormBankName, 'e.g. HDFC Bank')}
                                         {renderEditableDetailRow('Account Number', profile.bank?.accountNumber, formAccountNumber, setFormAccountNumber, '9 to 18 digits', 'number-pad')}
-                                        {renderEditableDetailRow('IFSC Code', profile.bank?.ifscCode, formIfscCode, setFormIfscCode, 'e.g. SBIN0123456')}
+                                        {renderEditableDetailRow('IFSC Code', profile.bank?.ifsc || profile.bank?.ifscCode, formIfscCode, setFormIfscCode, 'e.g. SBIN0123456')}
                                     </View>
                                 ) : (
                                     <View>
-                                        {renderDetailRow('PAN Card', profile.statutory?.panNumber)}
-                                        {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber)}
-                                        {renderDetailRow('UAN (PF)', profile.statutory?.uanNumber)}
-                                        {renderDetailRow('ESIC Number', profile.statutory?.esicNumber)}
+                                        {renderDetailRow('PAN Card', profile.statutory?.pan || profile.statutory?.panNumber)}
+                                        {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaar || profile.statutory?.aadhaarNumber)}
+                                        {renderDetailRow('UAN (PF)', profile.statutory?.uan || profile.statutory?.uanNumber)}
+                                        {renderDetailRow('ESIC Number', profile.statutory?.esic || profile.statutory?.esicNumber)}
                                         {renderDetailRow('Bank Name', profile.bank?.bankName)}
-                                        {renderDetailRow('IFSC Code', profile.bank?.ifscCode)}
+                                        {renderDetailRow('IFSC Code', profile.bank?.ifsc || profile.bank?.ifscCode)}
                                         {renderDetailRow('Account Number', profile.bank?.accountNumber)}
                                     </View>
                                 )}
@@ -1879,12 +2047,13 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                 return (basic * Number(comp.value || 0)) / 100;
                             };
 
-                            const activeSalaryComponents = isEditing
+                            const rawActiveComp = isEditing
                                 ? selectedSalaryComponents
                                 : (profile?.selectedSalaryComponents || profile?.salaryComponents || []);
+                            const activeSalaryComponents = Array.isArray(rawActiveComp) ? rawActiveComp : [];
 
-                            const earningsComponents = activeSalaryComponents.filter((c: any) => c.type === 'EARNING');
-                            const deductionComponents = activeSalaryComponents.filter((c: any) => c.type === 'DEDUCTION');
+                            const earningsComponents = activeSalaryComponents.filter((c: any) => c?.type === 'EARNING');
+                            const deductionComponents = activeSalaryComponents.filter((c: any) => c?.type === 'DEDUCTION');
 
                             const currentBasicAmount = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
                             const salaryOverviewEarnings = currentBasicAmount + earningsComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
@@ -2196,47 +2365,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
                 </ScrollView>
 
-                {/* Custom Delete Confirmation Modal matching webpage dialog exactly */}
-                <Modal
-                    visible={showDeleteModal}
-                    transparent={true}
-                    animationType="fade"
-                    onRequestClose={() => setShowDeleteModal(false)}
-                >
-                    <View style={tw`flex-1 justify-center items-center bg-black/60 p-6`}>
-                        <View style={tw`bg-[#121127] w-full max-w-[320px] rounded-3xl p-6 items-center border border-white/10 shadow-2xl`}>
 
-                            {/* Red Circle with Cross Icon */}
-                            <View style={tw`w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mb-4`}>
-                                <X size={24} color="#ef4444" />
-                            </View>
-
-                            {/* Title */}
-                            <Text style={tw`text-base font-bold text-white mb-2 text-center`}>Delete Document?</Text>
-
-                            {/* Message */}
-                            <Text style={tw`text-xs text-gray-400 text-center mb-6 leading-5`}>
-                                Are you sure you want to delete <Text style={tw`font-bold text-white`}>{docToFieldName}</Text>?{'\n'}This action cannot be undone.
-                            </Text>
-
-                            {/* Action Buttons */}
-                            <TouchableOpacity
-                                onPress={confirmDeleteDocument}
-                                style={tw`w-full py-3 bg-red-600 rounded-2xl mb-3 items-center`}
-                            >
-                                <Text style={tw`text-xs font-bold text-white`}>Yes, Delete</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => setShowDeleteModal(false)}
-                                style={tw`w-full py-3 bg-slate-800 rounded-2xl items-center`}
-                            >
-                                <Text style={tw`text-xs font-bold text-gray-300`}>Cancel</Text>
-                            </TouchableOpacity>
-
-                        </View>
-                    </View>
-                </Modal>
 
                 {/* Payslip Preview Modal matching webpage design and structure */}
                 <Modal
@@ -2835,6 +2964,61 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                     )}
                             </ScrollView>
                         </View>
+                    </TouchableOpacity>
+                </Modal>
+
+                {/* Delete Confirmation Modal */}
+                <Modal
+                    visible={showDeleteModal}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => {
+                        setShowDeleteModal(false);
+                        setDeleteTarget(null);
+                    }}
+                >
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={() => {
+                            setShowDeleteModal(false);
+                            setDeleteTarget(null);
+                        }}
+                        style={tw`flex-1 bg-black/60 justify-center items-center px-4`}
+                    >
+                        <TouchableOpacity
+                            activeOpacity={1}
+                            style={tw`bg-white dark:bg-[#0B0A1F] border border-gray-100 dark:border-white/10 rounded-3xl p-6 w-full max-w-sm shadow-xl`}
+                        >
+                            <View style={tw`w-12 h-12 rounded-full bg-red-500/10 items-center justify-center mb-4 self-center`}>
+                                <Trash2 size={24} color="#ef4444" />
+                            </View>
+
+                            <Text style={tw`text-base font-bold text-gray-900 dark:text-white text-center mb-2`}>
+                                Delete {deleteTarget?.name || 'Item'}?
+                            </Text>
+                            <Text style={tw`text-xs text-gray-500 dark:text-purple-200 text-center mb-6`}>
+                                Are you sure you want to delete {deleteTarget?.name || 'this item'}? This action cannot be undone.
+                            </Text>
+
+                            <View style={tw`flex-row gap-3`}>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        setShowDeleteModal(false);
+                                        setDeleteTarget(null);
+                                    }}
+                                    style={tw`flex-1 py-3 bg-gray-100 dark:bg-white/10 rounded-xl items-center`}
+                                >
+                                    <Text style={tw`text-xs font-bold text-gray-700 dark:text-gray-200`}>Cancel</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    onPress={confirmDelete}
+                                    style={tw`flex-1 py-3 bg-red-500 rounded-xl items-center shadow-lg shadow-red-500/20`}
+                                >
+                                    <Text style={tw`text-xs font-bold text-white`}>Yes, Delete</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableOpacity>
                     </TouchableOpacity>
                 </Modal>
 
