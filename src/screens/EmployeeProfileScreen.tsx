@@ -332,7 +332,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
             // Save custom fields
             const customFieldsPayload = Object.keys(formCustomFields).reduce((acc: any, key) => {
-                const val = formCustomFields[key] ?? formCustomFields[Number(key)];
+                const val = (formCustomFields as Record<string | number, string>)[key] ?? (formCustomFields as Record<string | number, string>)[Number(key)];
                 if (val !== undefined) {
                     acc[key] = val;
                 }
@@ -1685,7 +1685,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                         <Text style={tw`text-xs font-black text-gray-400 dark:text-purple-300 uppercase tracking-widest mb-3`}>Additional Details</Text>
                                         {personalFields.map(ca => {
                                             const fType = (ca.field?.type || 'TEXT').toUpperCase();
-                                            const fieldVal = formCustomFields[ca.fieldId] ?? formCustomFields[String(ca.fieldId)] ?? ca.value ?? '';
+                                            const fieldVal = (formCustomFields as Record<string | number, string>)[ca.fieldId] ?? (formCustomFields as Record<string | number, string>)[String(ca.fieldId)] ?? ca.value ?? '';
 
                                             if (isEditing) {
                                                 // 1. Radio Buttons (e.g. SEX with options 'Mail, female')
