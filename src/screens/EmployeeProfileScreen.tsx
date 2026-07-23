@@ -187,15 +187,25 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 return;
             }
 
-            const asset = res.assets[0];
+            const asset: any = res.assets[0];
             setLoading(true);
 
             const formData = new FormData();
-            formData.append('profilePicture', {
-                uri: asset.uri,
-                name: asset.name || 'profile.jpg',
-                type: asset.mimeType || 'image/jpeg',
-            } as any);
+            if (Platform.OS === 'web') {
+                if (asset.file) {
+                    formData.append('profilePicture', asset.file);
+                } else if (asset.uri) {
+                    const response = await fetch(asset.uri);
+                    const blob = await response.blob();
+                    formData.append('profilePicture', blob, asset.name || 'profile.jpg');
+                }
+            } else {
+                formData.append('profilePicture', {
+                    uri: asset.uri,
+                    name: asset.name || 'profile.jpg',
+                    type: asset.mimeType || 'image/jpeg',
+                } as any);
+            }
 
             const endpoint = id ? `/employee/${id}/profile-picture` : '/employee/me/profile-picture';
             await api.put(endpoint, formData, {
@@ -252,14 +262,16 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         setFormAddress(prof.address || '');
         setFormStatus(prof.status || 'Active');
 
-        setFormPan(stat.pan || stat.panNumber || '');
-        setFormAadhaar(stat.aadhaar || stat.aadhaarNumber || '');
-        setFormUan(stat.uan || stat.uanNumber || '');
-        setFormEsic(stat.esic || stat.esicNumber || '');
+        setFormPan(stat.panNumber || stat.pan || '');
+        setFormAadhaar(stat.aadhaarNumber || stat.aadhaar || '');
+        setFormUan(stat.uanNumber || stat.uan || '');
+        setFormEsic(stat.esicNumber || stat.esic || '');
 
         setFormBankName(bank.bankName || '');
         setFormAccountNumber(bank.accountNumber || '');
-        setFormIfscCode(bank.ifsc || bank.ifscCode || '');
+        setFormIfscCode(bank.ifscCode || bank.ifsc || '');
+
+        setFormShiftId(prof.shiftId || '');
 
         setFormBasicSalary(sal.basic ? sal.basic.toString() : '0');
 
@@ -352,17 +364,27 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 return;
             }
 
-            const asset = res.assets[0];
+            const asset: any = res.assets[0];
             const employeeId = id || 'me';
 
             setLoading(true);
 
             const formData = new FormData();
-            formData.append('file', {
-                uri: asset.uri,
-                name: asset.name || 'document.pdf',
-                type: asset.mimeType || 'application/pdf',
-            } as any);
+            if (Platform.OS === 'web') {
+                if (asset.file) {
+                    formData.append('file', asset.file);
+                } else if (asset.uri) {
+                    const response = await fetch(asset.uri);
+                    const blob = await response.blob();
+                    formData.append('file', blob, asset.name || 'document.pdf');
+                }
+            } else {
+                formData.append('file', {
+                    uri: asset.uri,
+                    name: asset.name || 'document.pdf',
+                    type: asset.mimeType || 'application/pdf',
+                } as any);
+            }
 
             await api.post(`/custom-fields/employee/${employeeId}/field/${fieldId}/upload`, formData, {
                 headers: {
@@ -388,16 +410,26 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
             if (res.canceled || !res.assets || res.assets.length === 0) return;
 
-            const asset = res.assets[0];
+            const asset: any = res.assets[0];
             const employeeId = id || employee?.id || 'me';
 
             setLoading(true);
             const formData = new FormData();
-            formData.append('file', {
-                uri: asset.uri,
-                name: asset.name || `${docKey}.pdf`,
-                type: asset.mimeType || 'application/pdf',
-            } as any);
+            if (Platform.OS === 'web') {
+                if (asset.file) {
+                    formData.append('file', asset.file);
+                } else if (asset.uri) {
+                    const response = await fetch(asset.uri);
+                    const blob = await response.blob();
+                    formData.append('file', blob, asset.name || `${docKey}.pdf`);
+                }
+            } else {
+                formData.append('file', {
+                    uri: asset.uri,
+                    name: asset.name || `${docKey}.pdf`,
+                    type: asset.mimeType || 'application/pdf',
+                } as any);
+            }
             formData.append('name', docName);
 
             await api.post(`/employee/${employeeId}/documents`, formData, {
@@ -1390,7 +1422,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                         </TouchableOpacity>
                         <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Employee Profile</Text>
                     </View>
-                    <View style={tw`w-10`} />
+                    <View style={tw`w-10`} /> 
                 </View>
 
                 <ScrollView style={tw`flex-grow`} showsVerticalScrollIndicator={false}>
@@ -1644,973 +1676,1199 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
                             return (
                                 <View>
-                                    {/* Standard Documents uploaded during onboarding */}
-                                    {Array.isArray(profile.documents) && profile.documents.length > 0 && (
-                                        <View style={tw`mb-4`}>
-                                            <Text style={tw`text-xs font-black text-gray-400 dark:text-purple-300 uppercase tracking-widest mb-3`}>Uploaded Documents</Text>
-                                            {profile.documents.map((doc: any) => {
-                                                const docUrl = doc.url.startsWith('/') || doc.url.startsWith('http') ? doc.url : `/uploads/documents/${doc.url}`;
-                                                return (
-                                                    <View key={doc.id || doc.url} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
-                                                        <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
-                                                            <View style={tw`p-2.5 bg-[#8b5cf6]/10 rounded-xl`}>
-                                                                <FileText size={18} color="#8b5cf6" />
-                                                            </View>
-                                                            <View style={tw`flex-1`}>
-                                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                                    {doc.name}
-                                                                </Text>
-                                                                <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
-                                                                    {doc.originalName || 'Document Uploaded'}
-                                                                </Text>
-                                                            </View>
-                                                        </View>
+                                    <View style={tw`flex-row items-center gap-2 mb-4`}>
+                                        <FileText size={18} color="#8b5cf6" />
+                                        <Text style={tw`text-sm font-bold text-gray-900 dark:text-white`}>Document Vault</Text>
+                                    </View>
+
+                                    {/* Standard Mandatory Documents (Aadhaar Card, PAN Card, Degree) */}
+                                    {REQUIRED_DOCUMENTS.map((doc) => {
+                                        const savedDoc = documentsList.find((d: any) => d.name === doc.name);
+                                        return (
+                                            <View key={doc.name} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
+                                                <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                                    <View style={tw`p-2.5 bg-[#8b5cf6]/10 rounded-xl`}>
+                                                        <FileText size={18} color="#8b5cf6" />
+                                                    </View>
+                                                    <View style={tw`flex-1`}>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                            {doc.name} <Text style={tw`text-red-500`}>*</Text>
+                                                        </Text>
+                                                        {savedDoc ? (
+                                                            <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                                {savedDoc.originalName || savedDoc.url || 'Document Uploaded'}
+                                                            </Text>
+                                                        ) : (
+                                                            <Text style={tw`text-[10px] text-gray-400 dark:text-purple-300 mt-1`}>
+                                                                No document uploaded
+                                                            </Text>
+                                                        )}
+                                                    </View>
+                                                </View>
+
+                                                <View style={tw`flex-row items-center gap-2`}>
+                                                    {/* Upload Button in Edit Mode if no file exists */}
+                                                    {isEditing && !savedDoc && (
                                                         <TouchableOpacity
-                                                            onPress={() => handleViewDocument(docUrl)}
+                                                            onPress={() => handleUploadStandardDocument(doc.name, doc.key)}
+                                                            style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl mr-1`}
+                                                        >
+                                                            <Upload size={12} color="#fff" />
+                                                            <Text style={tw`text-xs font-bold text-white`}>Upload</Text>
+                                                        </TouchableOpacity>
+                                                    )}
+
+                                                    {/* View button */}
+                                                    {savedDoc && Boolean(savedDoc.url) && (
+                                                        <TouchableOpacity
+                                                            onPress={() => handleViewDocument(savedDoc.url)}
                                                             style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
                                                         >
                                                             <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
                                                         </TouchableOpacity>
-                                                    </View>
-                                                );
-                                            })}
-                                        </View>
-                                    )}
+                                                    )}
 
-                                    {/* Custom Document Fields */}
-                                    {documentFields.length > 0 && (
-                                        <View style={tw`mb-2`}>
-                                            {Array.isArray(profile.documents) && profile.documents.length > 0 && (
-                                                <Text style={tw`text-xs font-black text-gray-400 dark:text-purple-300 uppercase tracking-widest mb-3 mt-2`}>Custom Documents</Text>
+                                                    {/* Delete Button in Edit Mode if file exists */}
+                                                    {isEditing && savedDoc && (
+                                                        <TouchableOpacity
+                                                            onPress={() => handleDeleteStandardDocument(savedDoc.id, doc.name)}
+                                                            style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
+                                                        >
+                                                            <Trash2 size={18} color="#ef4444" />
+                                                        </TouchableOpacity>
+                                                    )}
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
+
+                                    {/* Dedicated Profile Picture Slot */}
+                                    <View style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
+                                        <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                            <View style={tw`w-10 h-10 rounded-xl bg-[#8b5cf6]/10 flex items-center justify-center overflow-hidden`}>
+                                                {profilePictureUrl && !profileImgError ? (
+                                                    <Image
+                                                        source={{ uri: profilePictureUrl }}
+                                                        style={tw`w-full h-full`}
+                                                        resizeMode="cover"
+                                                    />
+                                                ) : (
+                                                    <User size={18} color="#8b5cf6" />
+                                                )}
+                                            </View>
+                                            <View style={tw`flex-1`}>
+                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                    Profile Picture <Text style={tw`text-red-500`}>*</Text>
+                                                </Text>
+                                                {profilePictureUrl ? (
+                                                    <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                        Profile picture uploaded
+                                                    </Text>
+                                                ) : (
+                                                    <Text style={tw`text-[10px] text-gray-400 dark:text-purple-300 mt-1`}>
+                                                        No profile picture uploaded
+                                                    </Text>
+                                                )}
+                                            </View>
+                                        </View>
+
+                                        <View style={tw`flex-row items-center gap-2`}>
+                                            {/* Upload/Change Button in Edit Mode */}
+                                            {isEditing && (
+                                                <TouchableOpacity
+                                                    onPress={handleUploadProfilePicture}
+                                                    style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl mr-1`}
+                                                >
+                                                    <Upload size={12} color="#fff" />
+                                                    <Text style={tw`text-xs font-bold text-white`}>
+                                                        {profilePictureUrl ? 'Change' : 'Upload'}
+                                                    </Text>
+                                                </TouchableOpacity>
                                             )}
-                                            {documentFields.map(ca => {
-                                                return (
-                                                    <View key={ca.id} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
-                                                        <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
-                                                            <View style={tw`p-2.5 bg-[#8b5cf6]/10 rounded-xl`}>
-                                                                <FileText size={18} color="#8b5cf6" />
-                                                            </View>
-                                                            <View style={tw`flex-1`}>
-                                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                                    {ca.field?.name || 'Document'} {ca.field?.required ? <Text style={tw`text-red-500`}>*</Text> : null}
-                                                                </Text>
-                                                                {ca.documentUrl ? (
-                                                                    <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
-                                                                        {ca.documentName || 'Document Uploaded'}
-                                                                    </Text>
-                                                                ) : (
-                                                                    <Text style={tw`text-[10px] text-gray-400 dark:text-purple-300 mt-1`}>
-                                                                        No document uploaded
-                                                                    </Text>
-                                                                )}
-                                                            </View>
-                                                        </View>
 
-                                                        <View style={tw`flex-row items-center gap-2`}>
-                                                            {/* Upload Button in Edit Mode if no file exists */}
-                                                            {isEditing && !ca.documentUrl && (
-                                                                <TouchableOpacity
-                                                                    onPress={() => handleUploadDocument(ca.fieldId)}
-                                                                    style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl mr-1`}
-                                                                >
-                                                                    <Upload size={12} color="#fff" />
-                                                                    <Text style={tw`text-xs font-bold text-white`}>Upload</Text>
-                                                                </TouchableOpacity>
-                                                            )}
+                                            {/* View Profile Picture Button */}
+                                            {Boolean(profilePictureUrl) && (
+                                                <TouchableOpacity
+                                                    onPress={() => handleViewDocument(profilePictureUrl!)}
+                                                    style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
+                                                >
+                                                    <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
+                                                </TouchableOpacity>
+                                            )}
 
-                                                            {/* Eye view button styled exactly like web */}
-                                                            {ca.documentUrl && (
-                                                                <TouchableOpacity
-                                                                    onPress={() => handleViewDocument(ca.documentUrl)}
-                                                                    style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
-                                                                >
-                                                                    <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
-                                                                </TouchableOpacity>
-                                                            )}
-
-                                                            {/* Delete Button in Edit Mode if file exists */}
-                                                            {isEditing && ca.documentUrl && (
-                                                                <TouchableOpacity
-                                                                    onPress={() => handleDeleteDocument(ca.fieldId, ca.field.name)}
-                                                                    style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
-                                                                >
-                                                                    <Trash2 size={18} color="#ef4444" />
-                                                                </TouchableOpacity>
-                                                            )}
-                                                        </View>
-                                                    </View>
-                                                );
-                                            })}
+                                            {/* Delete Profile Picture Button in Edit Mode */}
+                                            {isEditing && Boolean(profilePictureUrl) && (
+                                                <TouchableOpacity
+                                                    onPress={handleDeleteProfilePicture}
+                                                    style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
+                                                >
+                                                    <Trash2 size={18} color="#ef4444" />
+                                                </TouchableOpacity>
+                                            )}
                                         </View>
-                                    )}
+                                    </View>
 
-                                    {(!profile.documents || profile.documents.length === 0) && documentFields.length === 0 && (
-                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-300 italic text-center py-6`}>No documents uploaded or configured.</Text>
-                                    )}
+                                    {/* Dynamic Custom Fields Documents */}
+                                    {documentFields.map(ca => {
+                                        return (
+                                            <View key={ca.id} style={tw`bg-white/10 dark:bg-white/5 border border-gray-100 dark:border-white/5 rounded-2xl p-4 mb-3 flex-row items-center justify-between`}>
+                                                <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
+                                                    <View style={tw`p-2.5 bg-[#8b5cf6]/10 rounded-xl`}>
+                                                        <FileText size={18} color="#8b5cf6" />
+                                                    </View>
+                                                    <View style={tw`flex-1`}>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                            {ca.field.name} <Text style={tw`text-red-500`}>*</Text>
+                                                        </Text>
+                                                        {ca.documentUrl ? (
+                                                            <Text style={tw`text-[10px] text-green-600 dark:text-green-400 mt-1`} numberOfLines={1}>
+                                                                {ca.documentName || 'Document Uploaded'}
+                                                            </Text>
+                                                        ) : (
+                                                            <Text style={tw`text-[10px] text-gray-400 dark:text-purple-300 mt-1`}>
+                                                                No document uploaded
+                                                            </Text>
+                                                        )}
+                                                    </View>
+                                                </View>
+
+                                                <View style={tw`flex-row items-center gap-2`}>
+                                                    {/* Upload Button in Edit Mode if no file exists */}
+                                                    {isEditing && !ca.documentUrl && (
+                                                        <TouchableOpacity
+                                                            onPress={() => handleUploadDocument(ca.fieldId)}
+                                                            style={tw`flex-row items-center gap-1.5 px-3 py-1.5 bg-[#8b5cf6] rounded-xl mr-1`}
+                                                        >
+                                                            <Upload size={12} color="#fff" />
+                                                            <Text style={tw`text-xs font-bold text-white`}>Upload</Text>
+                                                        </TouchableOpacity>
+                                                    )}
+
+                                                    {/* Eye view button */}
+                                                    {Boolean(ca.documentUrl) && (
+                                                        <TouchableOpacity
+                                                            onPress={() => handleViewDocument(ca.documentUrl)}
+                                                            style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-[#8b5cf6]/10 dark:bg-white/10`}
+                                                        >
+                                                            <Eye size={18} color={isDark ? '#a78bfa' : '#8b5cf6'} />
+                                                        </TouchableOpacity>
+                                                    )}
+
+                                                    {/* Delete Button in Edit Mode if file exists */}
+                                                    {isEditing && Boolean(ca.documentUrl) && (
+                                                        <TouchableOpacity
+                                                            onPress={() => handleDeleteDocument(ca.fieldId, ca.field.name)}
+                                                            style={tw`w-10 h-10 rounded-full flex items-center justify-center bg-red-500/10`}
+                                                        >
+                                                            <Trash2 size={18} color="#ef4444" />
+                                                        </TouchableOpacity>
+                                                    )}
+                                                </View>
+                                            </View>
+                                        );
+                                    })}
                                 </View>
                             );
                         })()}
 
                         {activeTab === 'statutory' && (
                             <View>
-                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory & Bank Details</Text>
-                                {renderEditableDetailRow('PAN Card', profile.statutory?.pan || profile.statutory?.panNumber, formPan, setFormPan, 'ABCDE1234F')}
-                                {renderEditableDetailRow('Aadhaar Number', profile.statutory?.aadhaar || profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, '123456789012', 'number-pad')}
-                                {renderEditableDetailRow('UAN (PF)', profile.statutory?.uan || profile.statutory?.uanNumber, formUan, setFormUan, '100123456789', 'number-pad')}
-                                {renderEditableDetailRow('ESIC Number', profile.statutory?.esic || profile.statutory?.esicNumber, formEsic, setFormEsic, '1234567890', 'number-pad')}
-                                {renderEditableDetailRow('Bank Name', profile.bank?.bankName, formBankName, setFormBankName, 'Bank Name')}
-                                {renderEditableDetailRow('IFSC Code', profile.bank?.ifsc || profile.bank?.ifscCode, formIfscCode, setFormIfscCode, 'IFSC Code')}
-                                {renderEditableDetailRow('Account Number', profile.bank?.accountNumber, formAccountNumber, setFormAccountNumber, 'Account Number', 'number-pad')}
+                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory Details</Text>
+                                {isEditing ? (
+                                    <View>
+                                        {renderEditableDetailRow('UAN (Provident Fund)', profile.statutory?.uanNumber, formUan, setFormUan, '12-digit UAN', 'number-pad')}
+                                        {renderEditableDetailRow('ESIC Number', profile.statutory?.esicNumber, formEsic, setFormEsic, '10-digit ESIC Number', 'number-pad')}
+                                        {renderEditableDetailRow('PAN Number', profile.statutory?.panNumber, formPan, setFormPan, 'e.g. ABCDE1234F')}
+                                        {renderEditableDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, '12-digit Aadhaar', 'number-pad')}
+
+                                        <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mt-6 mb-4`}>Bank Account</Text>
+                                        {renderEditableDetailRow('Bank Name', profile.bank?.bankName, formBankName, setFormBankName, 'e.g. HDFC Bank')}
+                                        {renderEditableDetailRow('Account Number', profile.bank?.accountNumber, formAccountNumber, setFormAccountNumber, '9 to 18 digits', 'number-pad')}
+                                        {renderEditableDetailRow('IFSC Code', profile.bank?.ifscCode, formIfscCode, setFormIfscCode, 'e.g. SBIN0123456')}
+                                    </View>
+                                ) : (
+                                    <View>
+                                        {renderDetailRow('PAN Card', profile.statutory?.panNumber)}
+                                        {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber)}
+                                        {renderDetailRow('UAN (PF)', profile.statutory?.uanNumber)}
+                                        {renderDetailRow('ESIC Number', profile.statutory?.esicNumber)}
+                                        {renderDetailRow('Bank Name', profile.bank?.bankName)}
+                                        {renderDetailRow('IFSC Code', profile.bank?.ifscCode)}
+                                        {renderDetailRow('Account Number', profile.bank?.accountNumber)}
+                                    </View>
+                                )}
                             </View>
                         )}
 
                         {activeTab === 'salary' && (() => {
-                            const rawComponents =
-                                Array.isArray(profile.selectedSalaryComponents) && profile.selectedSalaryComponents.length > 0
-                                    ? profile.selectedSalaryComponents
-                                    : Array.isArray(profile.salaryComponents) && profile.salaryComponents.length > 0
-                                        ? profile.salaryComponents
-                                        : Array.isArray(profile.salary?.selectedSalaryComponents) && profile.salary.selectedSalaryComponents.length > 0
-                                            ? profile.salary.selectedSalaryComponents
-                                            : [];
-
-                            const components = rawComponents.map((item: any) => item.component ? item.component : item);
-                            const earnings = components.filter((c: any) => c.type === 'EARNING');
-                            const deductions = components.filter((c: any) => c.type === 'DEDUCTION');
-
-                            const basicNum = Number(profile.salary?.basic || formBasicSalary || 0);
-
-                            const getCompAmt = (comp: any) => {
-                                const val = Number(comp.value || 0);
-                                if (comp.calculationType === 'FLAT') return val;
-                                if (comp.calculationType === '%_BASIC') return (basicNum * val) / 100;
-                                return val;
+                            const getComponentAmount = (comp: any) => {
+                                const basic = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
+                                if (comp.calculationType === 'FLAT') {
+                                    return Number(comp.value || 0);
+                                }
+                                return (basic * Number(comp.value || 0)) / 100;
                             };
 
-                            const totalEarningsAmt = basicNum + earnings.reduce((acc: number, c: any) => acc + getCompAmt(c), 0);
-                            const totalDeductionsAmt = deductions.reduce((acc: number, c: any) => acc + getCompAmt(c), 0);
-                            const netSalaryAmt = Math.max(0, totalEarningsAmt - totalDeductionsAmt);
+                            const activeSalaryComponents = isEditing
+                                ? selectedSalaryComponents
+                                : (profile?.selectedSalaryComponents || profile?.salaryComponents || []);
+
+                            const earningsComponents = activeSalaryComponents.filter((c: any) => c.type === 'EARNING');
+                            const deductionComponents = activeSalaryComponents.filter((c: any) => c.type === 'DEDUCTION');
+
+                            const currentBasicAmount = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
+                            const salaryOverviewEarnings = currentBasicAmount + earningsComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
+                            const salaryOverviewDeductions = deductionComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
+                            const salaryOverviewNet = salaryOverviewEarnings - salaryOverviewDeductions;
 
                             return (
                                 <View>
-                                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Salary Structure</Text>
+                                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Salary Overview</Text>
 
-                                    {/* Salary Summary Card */}
-                                    <View style={tw`bg-[#1e1b4b] dark:bg-[#111827] p-4 rounded-2xl mb-4 border border-purple-500/20`}>
-                                        <Text style={tw`text-[10px] font-bold text-purple-300 uppercase tracking-widest mb-1`}>Net Estimated Monthly Salary</Text>
-                                        <Text style={tw`text-2xl font-black text-white mb-3`}>
-                                            ₹ {netSalaryAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                        </Text>
+                                    {/* Salary Overview 3 Cards */}
+                                    <View style={tw`flex-row flex-wrap justify-between gap-2 mb-6`}>
+                                        {/* Total Earnings */}
+                                        <View style={tw`w-[31%] p-3.5 rounded-2xl bg-green-500/10 border border-green-500/30 relative overflow-hidden`}>
+                                            <View style={tw`w-7 h-7 rounded-lg bg-green-500/20 items-center justify-center mb-2`}>
+                                                <TrendingUp size={16} color="#22c55e" />
+                                            </View>
+                                            <Text style={tw`text-[10px] font-bold text-green-600 dark:text-green-400`}>Total Earnings</Text>
+                                            <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
+                                                ₹ {salaryOverviewEarnings.toLocaleString('en-IN')}
+                                            </Text>
+                                            <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
+                                        </View>
 
-                                        <View style={tw`flex-row justify-between pt-2.5 border-t border-white/10`}>
-                                            <View>
-                                                <Text style={tw`text-[9px] text-purple-200 font-medium`}>Gross Earnings</Text>
-                                                <Text style={tw`text-xs font-bold text-green-400 mt-0.5`}>
-                                                    ₹ {totalEarningsAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </Text>
+                                        {/* Total Deductions */}
+                                        <View style={tw`w-[31%] p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 relative overflow-hidden`}>
+                                            <View style={tw`w-7 h-7 rounded-lg bg-red-500/20 items-center justify-center mb-2`}>
+                                                <TrendingDown size={16} color="#ef4444" />
                                             </View>
-                                            <View style={tw`items-end`}>
-                                                <Text style={tw`text-[9px] text-purple-200 font-medium`}>Total Deductions</Text>
-                                                <Text style={tw`text-xs font-bold text-red-400 mt-0.5`}>
-                                                    ₹ {totalDeductionsAmt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </Text>
+                                            <Text style={tw`text-[10px] font-bold text-red-500 dark:text-red-400`}>Total Deductions</Text>
+                                            <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
+                                                ₹ {salaryOverviewDeductions.toLocaleString('en-IN')}
+                                            </Text>
+                                            <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
+                                        </View>
+
+                                        {/* Net Salary */}
+                                        <View style={tw`w-[31%] p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 relative overflow-hidden`}>
+                                            <View style={tw`w-7 h-7 rounded-lg bg-blue-500/20 items-center justify-center mb-2`}>
+                                                <Coins size={16} color="#3b82f6" />
                                             </View>
+                                            <Text style={tw`text-[10px] font-bold text-blue-600 dark:text-blue-400`}>Net Salary</Text>
+                                            <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
+                                                ₹ {salaryOverviewNet.toLocaleString('en-IN')}
+                                            </Text>
+                                            <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
                                         </View>
                                     </View>
 
-                                    {/* Basic Monthly Salary Row */}
-                                    {renderEditableDetailRow('Basic Monthly', profile.salary?.basic ? `INR ${profile.salary.basic}` : '0', formBasicSalary, setFormBasicSalary, 'Enter basic monthly salary', 'number-pad')}
+                                    {/* Earnings & Deductions Containers */}
+                                    <View style={tw`gap-5`}>
+                                        {/* Earnings Container */}
+                                        <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
+                                            <Text style={tw`text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-wider mb-3`}>Earnings</Text>
 
-                                    {/* Earnings Section */}
-                                    <View style={tw`mt-4`}>
-                                        <View style={tw`flex-row items-center justify-between mb-2`}>
-                                            <Text style={tw`text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-wider`}>Earnings Breakdown</Text>
-                                            <View style={tw`px-2 py-0.5 bg-green-500/10 rounded-full`}>
-                                                <Text style={tw`text-[9px] font-bold text-green-600 dark:text-green-400`}>{earnings.length + 1} Items</Text>
-                                            </View>
-                                        </View>
-
-                                        <View style={tw`bg-gray-50 dark:bg-white/5 rounded-2xl p-3 mb-3 border border-gray-100 dark:border-white/5`}>
-                                            <View style={tw`flex-row justify-between items-center py-2 border-b border-gray-200 dark:border-white/10`}>
+                                            {/* Basic Salary Row */}
+                                            <View style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
                                                 <View>
                                                     <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Basic Salary</Text>
-                                                    <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>Base Pay</Text>
+                                                    <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>Fixed Base Pay</Text>
                                                 </View>
-                                                <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>
-                                                    ₹ {basicNum.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </Text>
+                                                {isEditing ? (
+                                                    <TextInput
+                                                        style={tw`px-3 py-1.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold w-32 text-right`}
+                                                        value={formBasicSalary}
+                                                        onChangeText={setFormBasicSalary}
+                                                        keyboardType="number-pad"
+                                                        placeholder="Enter Basic"
+                                                        placeholderTextColor="#94a3b8"
+                                                    />
+                                                ) : (
+                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                        ₹ {Number(profile.salary?.basic || 0).toLocaleString('en-IN')}
+                                                    </Text>
+                                                )}
                                             </View>
 
-                                            {earnings.map((comp: any) => {
-                                                const amt = getCompAmt(comp);
-                                                const typeLabel = comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`;
-                                                return (
-                                                    <View key={comp.id || comp.name} style={tw`flex-row justify-between items-center py-2 border-b border-gray-200 dark:border-white/5`}>
-                                                        <View>
-                                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
-                                                            <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>{typeLabel}</Text>
-                                                        </View>
-                                                        <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>
-                                                            ₹ {amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            {/* Earning Components List */}
+                                            {earningsComponents.map((comp: any) => (
+                                                <View key={comp.id} style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
+                                                    <View>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
+                                                        <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
+                                                            {comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`}
                                                         </Text>
                                                     </View>
-                                                );
-                                            })}
-                                        </View>
-                                    </View>
+                                                    <View style={tw`flex-row items-center gap-3`}>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                            ₹ {getComponentAmount(comp).toLocaleString('en-IN')}
+                                                        </Text>
+                                                        {isEditing && (
+                                                            <TouchableOpacity
+                                                                onPress={() => {
+                                                                    setSelectedSalaryComponents(prev => prev.filter(c => String(c.id) !== String(comp.id)));
+                                                                }}
+                                                                style={tw`p-1.5 bg-red-500/10 rounded-lg`}
+                                                            >
+                                                                <Trash2 size={14} color="#ef4444" />
+                                                            </TouchableOpacity>
+                                                        )}
+                                                    </View>
+                                                </View>
+                                            ))}
 
-                                    {/* Deductions Section */}
-                                    <View style={tw`mt-2`}>
-                                        <View style={tw`flex-row items-center justify-between mb-2`}>
-                                            <Text style={tw`text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-wider`}>Deductions Breakdown</Text>
-                                            <View style={tw`px-2 py-0.5 bg-red-500/10 rounded-full`}>
-                                                <Text style={tw`text-[9px] font-bold text-red-600 dark:text-red-400`}>{deductions.length} Items</Text>
-                                            </View>
+                                            {/* Add Earnings Component Button */}
+                                            {isEditing && (
+                                                <TouchableOpacity
+                                                    onPress={() => setComponentPickerType('EARNING')}
+                                                    style={tw`mt-3 py-2.5 rounded-xl border border-dashed border-green-500/40 items-center justify-center bg-green-500/5`}
+                                                >
+                                                    <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>+ Add Earnings Component</Text>
+                                                </TouchableOpacity>
+                                            )}
                                         </View>
 
-                                        {deductions.length > 0 ? (
-                                            <View style={tw`bg-gray-50 dark:bg-white/5 rounded-2xl p-3 border border-gray-100 dark:border-white/5`}>
-                                                {deductions.map((comp: any) => {
-                                                    const amt = getCompAmt(comp);
-                                                    const typeLabel = comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`;
-                                                    return (
-                                                        <View key={comp.id || comp.name} style={tw`flex-row justify-between items-center py-2 border-b border-gray-200 dark:border-white/5`}>
-                                                            <View>
-                                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
-                                                                <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>{typeLabel}</Text>
-                                                            </View>
-                                                            <Text style={tw`text-xs font-bold text-red-600 dark:text-red-400`}>
-                                                                ₹ {amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                            </Text>
-                                                        </View>
-                                                    );
-                                                })}
-                                            </View>
-                                        ) : (
-                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-300 italic text-center py-3`}>No deduction components assigned.</Text>
-                                        )}
+                                        {/* Deductions Container */}
+                                        <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
+                                            <Text style={tw`text-xs font-black text-red-500 dark:text-red-400 uppercase tracking-wider mb-3`}>Deductions</Text>
+
+                                            {deductionComponents.length === 0 && !isEditing && (
+                                                <Text style={tw`text-xs text-gray-400 italic py-2`}>No deductions applied</Text>
+                                            )}
+
+                                            {/* Deduction Components List */}
+                                            {deductionComponents.map((comp: any) => (
+                                                <View key={comp.id} style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
+                                                    <View>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
+                                                        <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
+                                                            {comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`}
+                                                        </Text>
+                                                    </View>
+                                                    <View style={tw`flex-row items-center gap-3`}>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
+                                                            ₹ {getComponentAmount(comp).toLocaleString('en-IN')}
+                                                        </Text>
+                                                        {isEditing && (
+                                                            <TouchableOpacity
+                                                                onPress={() => {
+                                                                    setSelectedSalaryComponents(prev => prev.filter(c => String(c.id) !== String(comp.id)));
+                                                                }}
+                                                                style={tw`p-1.5 bg-red-500/10 rounded-lg`}
+                                                            >
+                                                                <Trash2 size={14} color="#ef4444" />
+                                                            </TouchableOpacity>
+                                                        )}
+                                                    </View>
+                                                </View>
+                                            ))}
+
+                                            {/* Add Deductions Component Button */}
+                                            {isEditing && (
+                                                <TouchableOpacity
+                                                    onPress={() => setComponentPickerType('DEDUCTION')}
+                                                    style={tw`mt-3 py-2.5 rounded-xl border border-dashed border-red-500/40 items-center justify-center bg-red-500/5`}
+                                                >
+                                                    <Text style={tw`text-xs font-bold text-red-500 dark:text-red-400`}>+ Add Deduction Component</Text>
+                                                </TouchableOpacity>
+                                            )}
+                                        </View>
                                     </View>
                                 </View>
                             );
                         })()}
 
-            {activeTab === 'statutory' && (
-                <View>
-                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory Details</Text>
-                    {isEditing ? (
-                        <View>
-                            {renderEditableDetailRow('UAN (Provident Fund)', profile.statutory?.uanNumber, formUan, setFormUan, '12-digit UAN', 'number-pad')}
-                            {renderEditableDetailRow('ESIC Number', profile.statutory?.esicNumber, formEsic, setFormEsic, '10-digit ESIC Number', 'number-pad')}
-                            {renderEditableDetailRow('PAN Number', profile.statutory?.panNumber, formPan, setFormPan, 'e.g. ABCDE1234F')}
-                            {renderEditableDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, '12-digit Aadhaar', 'number-pad')}
-
-                            <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mt-6 mb-4`}>Bank Account</Text>
-                            {renderEditableDetailRow('Bank Name', profile.bank?.bankName, formBankName, setFormBankName, 'e.g. HDFC Bank')}
-                            {renderEditableDetailRow('Account Number', profile.bank?.accountNumber, formAccountNumber, setFormAccountNumber, '9 to 18 digits', 'number-pad')}
-                            {renderEditableDetailRow('IFSC Code', profile.bank?.ifscCode, formIfscCode, setFormIfscCode, 'e.g. SBIN0123456')}
-                        </View>
-                    ) : (
-                        <View>
-                            {renderDetailRow('PAN Card', profile.statutory?.panNumber)}
-                            {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaarNumber)}
-                            {renderDetailRow('UAN (PF)', profile.statutory?.uanNumber)}
-                            {renderDetailRow('ESIC Number', profile.statutory?.esicNumber)}
-                            {renderDetailRow('Bank Name', profile.bank?.bankName)}
-                            {renderDetailRow('IFSC Code', profile.bank?.ifscCode)}
-                            {renderDetailRow('Account Number', profile.bank?.accountNumber)}
-                        </View>
-                    )}
-                </View>
-            )}
-
-            {activeTab === 'salary' && (() => {
-                const getComponentAmount = (comp: any) => {
-                    const basic = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
-                    if (comp.calculationType === 'FLAT') {
-                        return Number(comp.value || 0);
-                    }
-                    return (basic * Number(comp.value || 0)) / 100;
-                };
-
-                const activeSalaryComponents = isEditing
-                    ? selectedSalaryComponents
-                    : (profile?.selectedSalaryComponents || profile?.salaryComponents || []);
-
-                const earningsComponents = activeSalaryComponents.filter((c: any) => c.type === 'EARNING');
-                const deductionComponents = activeSalaryComponents.filter((c: any) => c.type === 'DEDUCTION');
-
-                const currentBasicAmount = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
-                const salaryOverviewEarnings = currentBasicAmount + earningsComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
-                const salaryOverviewDeductions = deductionComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
-                const salaryOverviewNet = salaryOverviewEarnings - salaryOverviewDeductions;
-
-                return (
-                    <View>
-                        <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Salary Overview</Text>
-
-                        {/* Salary Overview 3 Cards */}
-                        <View style={tw`flex-row flex-wrap justify-between gap-2 mb-6`}>
-                            {/* Total Earnings */}
-                            <View style={tw`w-[31%] p-3.5 rounded-2xl bg-green-500/10 border border-green-500/30 relative overflow-hidden`}>
-                                <View style={tw`w-7 h-7 rounded-lg bg-green-500/20 items-center justify-center mb-2`}>
-                                    <TrendingUp size={16} color="#22c55e" />
-                                </View>
-                                <Text style={tw`text-[10px] font-bold text-green-600 dark:text-green-400`}>Total Earnings</Text>
-                                <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
-                                    ₹ {salaryOverviewEarnings.toLocaleString('en-IN')}
+                        {activeTab === 'shifts' && (
+                            <View>
+                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Shift & Roster</Text>
+                                <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-300 uppercase mb-3`}>
+                                    {isEditing ? 'Select Shift to Assign' : 'Assigned Shift'}
                                 </Text>
-                                <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
-                            </View>
 
-                            {/* Total Deductions */}
-                            <View style={tw`w-[31%] p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 relative overflow-hidden`}>
-                                <View style={tw`w-7 h-7 rounded-lg bg-red-500/20 items-center justify-center mb-2`}>
-                                    <TrendingDown size={16} color="#ef4444" />
-                                </View>
-                                <Text style={tw`text-[10px] font-bold text-red-500 dark:text-red-400`}>Total Deductions</Text>
-                                <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
-                                    ₹ {salaryOverviewDeductions.toLocaleString('en-IN')}
-                                </Text>
-                                <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
-                            </View>
-
-                            {/* Net Salary */}
-                            <View style={tw`w-[31%] p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 relative overflow-hidden`}>
-                                <View style={tw`w-7 h-7 rounded-lg bg-blue-500/20 items-center justify-center mb-2`}>
-                                    <Coins size={16} color="#3b82f6" />
-                                </View>
-                                <Text style={tw`text-[10px] font-bold text-blue-600 dark:text-blue-400`}>Net Salary</Text>
-                                <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
-                                    ₹ {salaryOverviewNet.toLocaleString('en-IN')}
-                                </Text>
-                                <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
-                            </View>
-                        </View>
-
-                        {/* Earnings & Deductions Containers */}
-                        <View style={tw`gap-5`}>
-                            {/* Earnings Container */}
-                            <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
-                                <Text style={tw`text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-wider mb-3`}>Earnings</Text>
-
-                                {/* Basic Salary Row */}
-                                <View style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
-                                    <View>
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Basic Salary</Text>
-                                        <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>Fixed Base Pay</Text>
-                                    </View>
-                                    {isEditing ? (
-                                        <TextInput
-                                            style={tw`px-3 py-1.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold w-32 text-right`}
-                                            value={formBasicSalary}
-                                            onChangeText={setFormBasicSalary}
-                                            keyboardType="number-pad"
-                                            placeholder="Enter Basic"
-                                            placeholderTextColor="#94a3b8"
-                                        />
-                                    ) : (
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                            ₹ {Number(profile.salary?.basic || 0).toLocaleString('en-IN')}
-                                        </Text>
-                                    )}
-                                </View>
-
-                                {/* Earning Components List */}
-                                {earningsComponents.map((comp: any) => (
-                                    <View key={comp.id} style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
-                                        <View>
-                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
-                                            <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
-                                                {comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`}
-                                            </Text>
-                                        </View>
-                                        <View style={tw`flex-row items-center gap-3`}>
-                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                ₹ {getComponentAmount(comp).toLocaleString('en-IN')}
-                                            </Text>
-                                            {isEditing && (
+                                {isEditing ? (
+                                    <View style={tw`gap-3`}>
+                                        {shifts.map((shift: any) => {
+                                            const isSelected = String(formShiftId) === String(shift.id);
+                                            return (
                                                 <TouchableOpacity
-                                                    onPress={() => {
-                                                        setSelectedSalaryComponents(prev => prev.filter(c => String(c.id) !== String(comp.id)));
-                                                    }}
-                                                    style={tw`p-1.5 bg-red-500/10 rounded-lg`}
+                                                    key={shift.id}
+                                                    onPress={() => setFormShiftId(shift.id)}
+                                                    style={tw`p-4 rounded-2xl border ${isSelected ? 'border-[#8b5cf6] bg-[#8b5cf6]/10' : 'border-gray-100 dark:border-white/5 bg-[#f5f3ff] dark:bg-[#111827]'}`}
                                                 >
-                                                    <Trash2 size={14} color="#ef4444" />
+                                                    <View style={tw`flex-row justify-between items-center mb-2`}>
+                                                        <Text style={tw`text-base font-bold ${isSelected ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'} capitalize`}>
+                                                            {shift.name}
+                                                        </Text>
+                                                        {isSelected && (
+                                                            <View style={tw`w-5 h-5 rounded-full bg-[#8b5cf6] items-center justify-center`}>
+                                                                <Check size={12} color="#fff" />
+                                                            </View>
+                                                        )}
+                                                    </View>
+                                                    <View style={tw`flex-row justify-between mb-1`}>
+                                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Timing:</Text>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.startTime} - {shift.endTime}</Text>
+                                                    </View>
+                                                    <View style={tw`flex-row justify-between mb-1`}>
+                                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Break:</Text>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.breakDuration} mins</Text>
+                                                    </View>
+                                                    <View style={tw`flex-row justify-between`}>
+                                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Night Shift:</Text>
+                                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.isNightShift ? 'Yes' : 'No'}</Text>
+                                                    </View>
                                                 </TouchableOpacity>
-                                            )}
-                                        </View>
+                                            );
+                                        })}
                                     </View>
-                                ))}
+                                ) : (
+                                    <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
+                                        <Text style={tw`text-base font-bold text-[#8b5cf6] mb-3 capitalize`}>{profile.shift?.name || 'morning'}</Text>
 
-                                {/* Add Earnings Component Button */}
-                                {isEditing && (
-                                    <TouchableOpacity
-                                        onPress={() => setComponentPickerType('EARNING')}
-                                        style={tw`mt-3 py-2.5 rounded-xl border border-dashed border-green-500/40 items-center justify-center bg-green-500/5`}
-                                    >
-                                        <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>+ Add Earnings Component</Text>
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-
-                            {/* Deductions Container */}
-                            <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
-                                <Text style={tw`text-xs font-black text-red-500 dark:text-red-400 uppercase tracking-wider mb-3`}>Deductions</Text>
-
-                                {deductionComponents.length === 0 && !isEditing && (
-                                    <Text style={tw`text-xs text-gray-400 italic py-2`}>No deductions applied</Text>
-                                )}
-
-                                {/* Deduction Components List */}
-                                {deductionComponents.map((comp: any) => (
-                                    <View key={comp.id} style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
-                                        <View>
-                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
-                                            <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
-                                                {comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`}
-                                            </Text>
-                                        </View>
-                                        <View style={tw`flex-row items-center gap-3`}>
-                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                ₹ {getComponentAmount(comp).toLocaleString('en-IN')}
-                                            </Text>
-                                            {isEditing && (
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        setSelectedSalaryComponents(prev => prev.filter(c => String(c.id) !== String(comp.id)));
-                                                    }}
-                                                    style={tw`p-1.5 bg-red-500/10 rounded-lg`}
-                                                >
-                                                    <Trash2 size={14} color="#ef4444" />
-                                                </TouchableOpacity>
-                                            )}
-                                        </View>
-                                    </View>
-                                ))}
-
-                                {/* Add Deductions Component Button */}
-                                {isEditing && (
-                                    <TouchableOpacity
-                                        onPress={() => setComponentPickerType('DEDUCTION')}
-                                        style={tw`mt-3 py-2.5 rounded-xl border border-dashed border-red-500/40 items-center justify-center bg-red-500/5`}
-                                    >
-                                        <Text style={tw`text-xs font-bold text-red-500 dark:text-red-400`}>+ Add Deduction Component</Text>
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                        </View>
-                    </View>
-                );
-            })()}
-
-            {activeTab === 'shifts' && (
-                <View>
-                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Shift & Roster</Text>
-                    <Text style={tw`text-xs font-bold text-gray-400 dark:text-purple-300 uppercase mb-3`}>
-                        {isEditing ? 'Select Shift to Assign' : 'Assigned Shift'}
-                    </Text>
-
-                    {isEditing ? (
-                        <View style={tw`gap-3`}>
-                            {shifts.map((shift: any) => {
-                                const isSelected = String(formShiftId) === String(shift.id);
-                                return (
-                                    <TouchableOpacity
-                                        key={shift.id}
-                                        onPress={() => setFormShiftId(shift.id)}
-                                        style={tw`p-4 rounded-2xl border ${isSelected ? 'border-[#8b5cf6] bg-[#8b5cf6]/10' : 'border-gray-100 dark:border-white/5 bg-[#f5f3ff] dark:bg-[#111827]'}`}
-                                    >
-                                        <View style={tw`flex-row justify-between items-center mb-2`}>
-                                            <Text style={tw`text-base font-bold ${isSelected ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'} capitalize`}>
-                                                {shift.name}
-                                            </Text>
-                                            {isSelected && (
-                                                <View style={tw`w-5 h-5 rounded-full bg-[#8b5cf6] items-center justify-center`}>
-                                                    <Check size={12} color="#fff" />
-                                                </View>
-                                            )}
-                                        </View>
-                                        <View style={tw`flex-row justify-between mb-1`}>
+                                        <View style={tw`flex-row justify-between mb-2`}>
                                             <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Timing:</Text>
-                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.startTime} - {shift.endTime}</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.startTime || '09:00'} - {profile.shift?.endTime || '18:00'}</Text>
                                         </View>
-                                        <View style={tw`flex-row justify-between mb-1`}>
+
+                                        <View style={tw`flex-row justify-between mb-2`}>
                                             <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Break:</Text>
-                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.breakDuration} mins</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.breakDuration || 60} mins</Text>
                                         </View>
+
+                                        <View style={tw`flex-row justify-between mb-2`}>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Grace Time:</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.graceTime || 15} mins</Text>
+                                        </View>
+
                                         <View style={tw`flex-row justify-between`}>
                                             <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Night Shift:</Text>
-                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{shift.isNightShift ? 'Yes' : 'No'}</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.isNightShift ? 'Yes' : 'No'}</Text>
                                         </View>
-                                    </TouchableOpacity>
-                                );
-                            })}
-                        </View>
-                    ) : (
-                        <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
-                            <Text style={tw`text-base font-bold text-[#8b5cf6] mb-3 capitalize`}>{profile.shift?.name || 'morning'}</Text>
-
-                            <View style={tw`flex-row justify-between mb-2`}>
-                                <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Timing:</Text>
-                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.startTime || '09:00'} - {profile.shift?.endTime || '18:00'}</Text>
-                            </View>
-
-                            <View style={tw`flex-row justify-between mb-2`}>
-                                <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Break:</Text>
-                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.breakDuration || 60} mins</Text>
-                            </View>
-
-                            <View style={tw`flex-row justify-between mb-2`}>
-                                <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Grace Time:</Text>
-                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.graceTime || 15} mins</Text>
-                            </View>
-
-                            <View style={tw`flex-row justify-between`}>
-                                <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Night Shift:</Text>
-                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{profile.shift?.isNightShift ? 'Yes' : 'No'}</Text>
-                            </View>
-                        </View>
-                    )}
-                </View>
-            )}
-
-            {activeTab === 'team' && (
-                <View>
-                    {Array.isArray(employee?.teams) && employee.teams.length > 0 ? (
-                        employee.teams.map((t: any, idx: number) => {
-                            return (
-                                <View key={idx} style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5 mb-3`}>
-                                    <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-0.5`}>Team Name</Text>
-                                    <Text style={tw`text-sm font-bold text-[#8b5cf6] mb-1`}>{t.name}</Text>
-                                    {t.description ? <Text style={tw`text-xs text-gray-500 mb-3`}>{t.description}</Text> : null}
-
-                                    <View style={tw`flex-row justify-between mb-2`}>
-                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Name</Text>
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.name || 'System Admin'}</Text>
                                     </View>
+                                )}
+                            </View>
+                        )}
 
-                                    <View style={tw`flex-row justify-between mb-2`}>
-                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Email</Text>
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.email || 'admin@example.com'}</Text>
+                        {activeTab === 'team' && (
+                            <View>
+                                {Array.isArray(employee?.teams) && employee.teams.length > 0 ? (
+                                    employee.teams.map((t: any, idx: number) => {
+                                        return (
+                                            <View key={idx} style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5 mb-3`}>
+                                                <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-0.5`}>Team Name</Text>
+                                                <Text style={tw`text-sm font-bold text-[#8b5cf6] mb-1`}>{t.name}</Text>
+                                                {t.description ? <Text style={tw`text-xs text-gray-500 mb-3`}>{t.description}</Text> : null}
+
+                                                <View style={tw`flex-row justify-between mb-2`}>
+                                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Name</Text>
+                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.name || 'System Admin'}</Text>
+                                                </View>
+
+                                                <View style={tw`flex-row justify-between mb-2`}>
+                                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Email</Text>
+                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.email || 'admin@example.com'}</Text>
+                                                </View>
+
+                                                <View style={tw`flex-row justify-between`}>
+                                                    <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Phone</Text>
+                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.employeeProfile?.phone || '1119299291'}</Text>
+                                                </View>
+                                            </View>
+                                        );
+                                    })
+                                ) : (
+                                    <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
+                                        <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-0.5`}>Team Name</Text>
+                                        <Text style={tw`text-sm font-bold text-[#8b5cf6] mb-1`}>Keshav</Text>
+                                        {profile.department ? <Text style={tw`text-xs text-gray-500 mb-3`}>{profile.department}</Text> : null}
+
+                                        <View style={tw`flex-row justify-between mb-2`}>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Name</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>System Admin</Text>
+                                        </View>
+
+                                        <View style={tw`flex-row justify-between mb-2`}>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Email</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>admin@example.com</Text>
+                                        </View>
+
+                                        <View style={tw`flex-row justify-between`}>
+                                            <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Phone</Text>
+                                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>1119299291</Text>
+                                        </View>
                                     </View>
-
-                                    <View style={tw`flex-row justify-between`}>
-                                        <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Phone</Text>
-                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{t.manager?.employeeProfile?.phone || '1119299291'}</Text>
-                                    </View>
-                                </View>
-                            );
-                        })
-                    ) : (
-                        <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
-                            <Text style={tw`text-[10px] font-bold text-gray-400 dark:text-purple-300 uppercase mb-0.5`}>Team Name</Text>
-                            <Text style={tw`text-sm font-bold text-[#8b5cf6] mb-1`}>Keshav</Text>
-                            {profile.department ? <Text style={tw`text-xs text-gray-500 mb-3`}>{profile.department}</Text> : null}
-
-                            <View style={tw`flex-row justify-between mb-2`}>
-                                <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Name</Text>
-                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>System Admin</Text>
+                                )}
                             </View>
+                        )}
 
-                            <View style={tw`flex-row justify-between mb-2`}>
-                                <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Email</Text>
-                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>admin@example.com</Text>
-                            </View>
-
-                            <View style={tw`flex-row justify-between`}>
-                                <Text style={tw`text-xs text-gray-400 dark:text-purple-200`}>Team Manager Phone</Text>
-                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>1119299291</Text>
-                            </View>
-                        </View>
-                    )}
-                </View>
-            )}
-
-        </View>
-
-                    {/* Quick Actions Panel */ }
-    <View style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl border border-gray-100 dark:border-white/5 mx-4 shadow-sm mb-8`}>
-        <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Quick Actions</Text>
-        <TouchableOpacity
-            onPress={handleExportPayslip}
-            style={tw`flex-row items-center gap-3 p-3.5 bg-gray-50 dark:bg-white/10 rounded-2xl mb-3 border border-gray-100 dark:border-white/5`}
-        >
-            <FileText size={18} color={isDark ? '#fff' : '#8b5cf6'} />
-            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Generate Payslip</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-            onPress={() => setShowIDCardModal(true)}
-            style={tw`flex-row items-center gap-3 p-3.5 bg-gray-50 dark:bg-white/10 rounded-2xl border border-gray-100 dark:border-white/5`}
-        >
-            <User size={18} color={isDark ? '#fff' : '#8b5cf6'} />
-            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>ID Card Preview</Text>
-        </TouchableOpacity>
-    </View>
-
-                </ScrollView >
-
-        {/* Custom Delete Confirmation Modal matching webpage dialog exactly */ }
-        < Modal
-    visible = { showDeleteModal }
-    transparent = { true}
-    animationType = "fade"
-    onRequestClose = {() => setShowDeleteModal(false)
-}
-                >
-    <View style={tw`flex-1 justify-center items-center bg-black/60 p-6`}>
-        <View style={tw`bg-[#121127] w-full max-w-[320px] rounded-3xl p-6 items-center border border-white/10 shadow-2xl`}>
-
-            {/* Red Circle with Cross Icon */}
-            <View style={tw`w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mb-4`}>
-                <X size={24} color="#ef4444" />
-            </View>
-
-            {/* Title */}
-            <Text style={tw`text-base font-bold text-white mb-2 text-center`}>Delete Document?</Text>
-
-            {/* Message */}
-            <Text style={tw`text-xs text-gray-400 text-center mb-6 leading-5`}>
-                Are you sure you want to delete <Text style={tw`font-bold text-white`}>{docToFieldName}</Text>?{'\n'}This action cannot be undone.
-            </Text>
-
-            {/* Action Buttons */}
-            <TouchableOpacity
-                onPress={confirmDeleteDocument}
-                style={tw`w-full py-3 bg-red-600 rounded-2xl mb-3 items-center`}
-            >
-                <Text style={tw`text-xs font-bold text-white`}>Yes, Delete</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                onPress={() => setShowDeleteModal(false)}
-                style={tw`w-full py-3 bg-slate-800 rounded-2xl items-center`}
-            >
-                <Text style={tw`text-xs font-bold text-gray-300`}>Cancel</Text>
-            </TouchableOpacity>
-
-        </View>
-    </View>
-                </Modal >
-
-    {/* Payslip Preview Modal matching webpage design and structure */ }
-    < Modal
-visible = { showPayslipModal }
-transparent = { true}
-animationType = "slide"
-onRequestClose = {() => setShowPayslipModal(false)}
-                >
-    <View style={tw`flex-1 bg-black/85 justify-end md:justify-center p-0 md:p-6`}>
-        <View style={tw`bg-[#0f0c24] w-full max-w-3xl h-[85%] md:h-[80%] rounded-t-3xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl self-center`}>
-
-            {/* Modal Header Section with dropdown selectors */}
-            <View style={tw`relative z-40`}>
-                <View style={tw`px-4 py-3 bg-[#2d1266] flex-row justify-between items-center border-b border-white/10`}>
-                    <View style={tw`flex-1 mr-2`}>
-                        <Text style={tw`text-sm font-bold text-white`}>Payslip Preview</Text>
-                        <Text style={tw`text-[9px] text-purple-300 font-semibold mt-0.5`}>
-                            Payslip for {new Date(tempPayslipYear, tempPayslipMonth, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' })}
-                        </Text>
                     </View>
 
-                    <View style={tw`flex-row items-center gap-1.5`}>
-                        {/* Month Selector Dropdown */}
+                    {/* Quick Actions Panel */}
+                    <View style={tw`bg-white dark:bg-[#4c1d95] p-5 rounded-3xl border border-gray-100 dark:border-white/5 mx-4 shadow-sm mb-8`}>
+                        <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Quick Actions</Text>
                         <TouchableOpacity
-                            onPress={() => {
-                                setShowMonthDropdown(!showMonthDropdown);
-                                setShowYearDropdown(false);
-                            }}
-                            style={tw`bg-[#4c1d95] border border-[#7c3aed] px-2.5 py-1.5 rounded-lg flex-row items-center gap-1`}
+                            onPress={handleExportPayslip}
+                            style={tw`flex-row items-center gap-3 p-3.5 bg-gray-50 dark:bg-white/10 rounded-2xl mb-3 border border-gray-100 dark:border-white/5`}
                         >
-                            <Text style={tw`text-[10px] font-bold text-white`}>
-                                {new Date(2000, tempPayslipMonth, 1).toLocaleString('en-US', { month: 'long' })}
+                            <FileText size={18} color={isDark ? '#fff' : '#8b5cf6'} />
+                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Generate Payslip</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => setShowIDCardModal(true)}
+                            style={tw`flex-row items-center gap-3 p-3.5 bg-gray-50 dark:bg-white/10 rounded-2xl border border-gray-100 dark:border-white/5`}
+                        >
+                            <User size={18} color={isDark ? '#fff' : '#8b5cf6'} />
+                            <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>ID Card Preview</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                </ScrollView>
+
+                {/* Custom Delete Confirmation Modal matching webpage dialog exactly */}
+                <Modal
+                    visible={showDeleteModal}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setShowDeleteModal(false)}
+                >
+                    <View style={tw`flex-1 justify-center items-center bg-black/60 p-6`}>
+                        <View style={tw`bg-[#121127] w-full max-w-[320px] rounded-3xl p-6 items-center border border-white/10 shadow-2xl`}>
+
+                            {/* Red Circle with Cross Icon */}
+                            <View style={tw`w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mb-4`}>
+                                <X size={24} color="#ef4444" />
+                            </View>
+
+                            {/* Title */}
+                            <Text style={tw`text-base font-bold text-white mb-2 text-center`}>Delete Document?</Text>
+
+                            {/* Message */}
+                            <Text style={tw`text-xs text-gray-400 text-center mb-6 leading-5`}>
+                                Are you sure you want to delete <Text style={tw`font-bold text-white`}>{docToFieldName}</Text>?{'\n'}This action cannot be undone.
                             </Text>
-                            <ChevronDown size={10} color="#fff" />
-                        </TouchableOpacity>
 
-                        {/* Year Selector Dropdown */}
-                        <TouchableOpacity
-                            onPress={() => {
-                                setShowYearDropdown(!showYearDropdown);
-                                setShowMonthDropdown(false);
-                            }}
-                            style={tw`bg-[#4c1d95] border border-[#7c3aed] px-2.5 py-1.5 rounded-lg flex-row items-center gap-1`}
-                        >
-                            <Text style={tw`text-[10px] font-bold text-white`}>{tempPayslipYear}</Text>
-                            <ChevronDown size={10} color="#fff" />
-                        </TouchableOpacity>
+                            {/* Action Buttons */}
+                            <TouchableOpacity
+                                onPress={confirmDeleteDocument}
+                                style={tw`w-full py-3 bg-red-600 rounded-2xl mb-3 items-center`}
+                            >
+                                <Text style={tw`text-xs font-bold text-white`}>Yes, Delete</Text>
+                            </TouchableOpacity>
 
-                        {/* Apply Button */}
-                        <TouchableOpacity
-                            onPress={() => {
-                                setSelectedPayslipMonth(tempPayslipMonth);
-                                setSelectedPayslipYear(tempPayslipYear);
-                                setShowMonthDropdown(false);
-                                setShowYearDropdown(false);
-                            }}
-                            style={tw`bg-[#7c3aed] px-3.5 py-1.5 rounded-lg`}
-                        >
-                            <Text style={tw`text-[10px] font-bold text-white`}>Apply</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => setShowDeleteModal(false)}
+                                style={tw`w-full py-3 bg-slate-800 rounded-2xl items-center`}
+                            >
+                                <Text style={tw`text-xs font-bold text-gray-300`}>Cancel</Text>
+                            </TouchableOpacity>
 
-                        {/* Close Button */}
-                        <TouchableOpacity
-                            onPress={() => setShowPayslipModal(false)}
-                            style={tw`p-1.5 bg-white/10 rounded-full ml-1`}
-                        >
-                            <X size={12} color="#fff" />
-                        </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
+                </Modal>
 
-                {/* Dropdown Options Overlays */}
-                {showMonthDropdown && (
-                    <View style={[tw`absolute bg-[#1e1b4b] border border-[#7c3aed] rounded-xl shadow-2xl z-50 w-28`, { top: 46, right: 130 }]}>
-                        <ScrollView style={tw`max-h-48`} nestedScrollEnabled>
-                            {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, idx) => (
-                                <TouchableOpacity
-                                    key={m}
-                                    onPress={() => {
-                                        setTempPayslipMonth(idx);
-                                        setShowMonthDropdown(false);
-                                    }}
-                                    style={tw`px-3 py-2 border-b border-purple-950/20`}
-                                >
-                                    <Text style={tw`text-[11px] font-bold text-white`}>{m}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                )}
+                {/* Payslip Preview Modal matching webpage design and structure */}
+                <Modal
+                    visible={showPayslipModal}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setShowPayslipModal(false)}
+                >
+                    <View style={tw`flex-1 bg-black/85 justify-end md:justify-center p-0 md:p-6`}>
+                        <View style={tw`bg-[#0f0c24] w-full max-w-3xl h-[85%] md:h-[80%] rounded-t-3xl md:rounded-3xl overflow-hidden border border-white/10 shadow-2xl self-center`}>
 
-                {showYearDropdown && (
-                    <View style={[tw`absolute bg-[#1e1b4b] border border-[#7c3aed] rounded-xl shadow-2xl z-50 w-20`, { top: 46, right: 80 }]}>
-                        <ScrollView style={tw`max-h-32`} nestedScrollEnabled>
-                            {[2024, 2025, 2026, 2027].map((yr) => (
-                                <TouchableOpacity
-                                    key={yr}
-                                    onPress={() => {
-                                        setTempPayslipYear(yr);
-                                        setShowYearDropdown(false);
-                                    }}
-                                    style={tw`px-3 py-2 border-b border-purple-950/20`}
-                                >
-                                    <Text style={tw`text-[11px] font-bold text-white`}>{yr}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                )}
-            </View>
-
-            {/* Modal Body / Payslip Preview Container */}
-            <ScrollView style={tw`flex-1 p-5 bg-[#0f0c24]`} contentContainerStyle={tw`pb-8`}>
-                {(() => {
-                    const details = calculateSalaryDetails(selectedPayslipMonth, selectedPayslipYear);
-                    if (!details) return null;
-
-                    if (details.payslipBlockMessage) {
-                        return (
-                            <View style={tw`flex-1 items-center justify-center py-10 px-4 bg-purple-950/20 border border-purple-500/20 rounded-2xl`}>
-                                <Info size={36} color="#c084fc" style={tw`mb-3`} />
-                                <Text style={tw`text-center text-sm font-semibold text-gray-300 leading-6`}>
-                                    {details.payslipBlockMessage}
-                                </Text>
-                            </View>
-                        );
-                    }
-
-                    const joiningDateFormatted = details.prof.joiningDate
-                        ? new Date(details.prof.joiningDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-                        : 'N/A';
-
-                    const dobFormatted = details.prof.dob
-                        ? new Date(details.prof.dob).toLocaleDateString('en-IN')
-                        : 'N/A';
-
-                    return (
-                        <View style={tw`bg-white border border-gray-200 p-4 rounded-2xl shadow-sm relative text-gray-900`}>
-
-                            {/* Company Header */}
-                            <View style={tw`flex-row justify-between items-start border-b-2 border-purple-900 pb-3 mb-4`}>
-                                <View style={tw`flex-row items-center gap-2.5`}>
-                                    <View style={tw`w-11 h-11 bg-purple-900 items-center justify-center rounded-lg shadow-sm`}>
-                                        <Text style={tw`text-white font-bold text-lg`}>EH</Text>
+                            {/* Modal Header Section with dropdown selectors */}
+                            <View style={tw`relative z-40`}>
+                                <View style={tw`px-4 py-3 bg-[#2d1266] flex-row justify-between items-center border-b border-white/10`}>
+                                    <View style={tw`flex-1 mr-2`}>
+                                        <Text style={tw`text-sm font-bold text-white`}>Payslip Preview</Text>
+                                        <Text style={tw`text-[9px] text-purple-300 font-semibold mt-0.5`}>
+                                            Payslip for {new Date(tempPayslipYear, tempPayslipMonth, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' })}
+                                        </Text>
                                     </View>
-                                    <View>
-                                        <Text style={tw`text-base font-black text-gray-900`}>EnCalm <Text style={tw`text-[#8b5cf6]`}>HRX</Text></Text>
-                                    </View>
-                                </View>
-                                <View style={tw`items-end`}>
-                                    <Text style={tw`font-bold text-[9px] text-gray-800`}>EncalmIT Consultancy Pvt. Ltd.</Text>
-                                    <Text style={tw`text-[8px] text-gray-500 mt-0.5`}>Gurgaon, Haryana, India</Text>
-                                    <Text style={tw`text-[8px] text-gray-500`}>CIN: U12345HR2023PTC123456</Text>
-                                </View>
-                            </View>
 
-                            {/* Employee & Bank Info Block */}
-                            <View style={tw`flex-row justify-between gap-4 mb-4`}>
-                                {/* Column 1 */}
-                                <View style={tw`flex-1`}>
-                                    <Text style={tw`font-bold text-[#8b5cf6] text-[8px] uppercase tracking-wider mb-1.5 border-b border-gray-100 pb-1`}>Employee Details</Text>
-                                    <View style={tw`gap-1`}>
-                                        <Text style={tw`text-[10px] text-gray-500`}>Name: <Text style={tw`font-bold text-gray-800`}>{employee.name}</Text></Text>
-                                        <Text style={tw`text-[10px] text-gray-500`}>ID: <Text style={tw`font-bold text-gray-800`}>{employee.id}</Text></Text>
-                                        <Text style={tw`text-[10px] text-gray-500`}>Role: <Text style={tw`font-bold text-gray-800`}>{details.prof.title || 'N/A'}</Text></Text>
-                                        <Text style={tw`text-[10px] text-gray-500`}>Dept: <Text style={tw`font-bold text-gray-800`}>{details.prof.department || 'N/A'}</Text></Text>
-                                        <Text style={tw`text-[10px] text-gray-500`}>DOB: <Text style={tw`font-bold text-gray-800`}>{dobFormatted}</Text></Text>
-                                        <Text style={tw`text-[10px] text-gray-500`}>DOJ: <Text style={tw`font-bold text-gray-800`}>{joiningDateFormatted}</Text></Text>
+                                    <View style={tw`flex-row items-center gap-1.5`}>
+                                        {/* Month Selector Dropdown */}
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setShowMonthDropdown(!showMonthDropdown);
+                                                setShowYearDropdown(false);
+                                            }}
+                                            style={tw`bg-[#4c1d95] border border-[#7c3aed] px-2.5 py-1.5 rounded-lg flex-row items-center gap-1`}
+                                        >
+                                            <Text style={tw`text-[10px] font-bold text-white`}>
+                                                {new Date(2000, tempPayslipMonth, 1).toLocaleString('en-US', { month: 'long' })}
+                                            </Text>
+                                            <ChevronDown size={10} color="#fff" />
+                                        </TouchableOpacity>
+
+                                        {/* Year Selector Dropdown */}
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setShowYearDropdown(!showYearDropdown);
+                                                setShowMonthDropdown(false);
+                                            }}
+                                            style={tw`bg-[#4c1d95] border border-[#7c3aed] px-2.5 py-1.5 rounded-lg flex-row items-center gap-1`}
+                                        >
+                                            <Text style={tw`text-[10px] font-bold text-white`}>{tempPayslipYear}</Text>
+                                            <ChevronDown size={10} color="#fff" />
+                                        </TouchableOpacity>
+
+                                        {/* Apply Button */}
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setSelectedPayslipMonth(tempPayslipMonth);
+                                                setSelectedPayslipYear(tempPayslipYear);
+                                                setShowMonthDropdown(false);
+                                                setShowYearDropdown(false);
+                                            }}
+                                            style={tw`bg-[#7c3aed] px-3.5 py-1.5 rounded-lg`}
+                                        >
+                                            <Text style={tw`text-[10px] font-bold text-white`}>Apply</Text>
+                                        </TouchableOpacity>
+
+                                        {/* Close Button */}
+                                        <TouchableOpacity
+                                            onPress={() => setShowPayslipModal(false)}
+                                            style={tw`p-1.5 bg-white/10 rounded-full ml-1`}
+                                        >
+                                            <X size={12} color="#fff" />
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
 
-                                {/* Column 2 */}
-                                <View style={tw`flex-1`}>
-                                    <Text style={tw`font-bold text-[#8b5cf6] text-[8px] uppercase tracking-wider mb-1.5 border-b border-gray-100 pb-1`}>Bank & Pan Details</Text>
-                                    <View style={tw`gap-1`}>
-                                        <Text style={tw`text-[10px] text-gray-500`}>Bank Name: <Text style={tw`font-bold text-gray-800`}>{details.bank.bankName || 'N/A'}</Text></Text>
-                                        <Text style={tw`text-[10px] text-gray-500`}>Account No: <Text style={tw`font-bold text-gray-800`}>XXXX{(details.bank.accountNumber || '').slice(-4)}</Text></Text>
-                                        <Text style={tw`text-[10px] text-gray-500`}>PAN: <Text style={tw`font-bold text-gray-800`}>{details.statutory.pan || 'N/A'}</Text></Text>
-                                        <Text style={tw`text-[10px] text-gray-500`}>UAN: <Text style={tw`font-bold text-gray-800`}>{details.statutory.uan || 'N/A'}</Text></Text>
+                                {/* Dropdown Options Overlays */}
+                                {showMonthDropdown && (
+                                    <View style={[tw`absolute bg-[#1e1b4b] border border-[#7c3aed] rounded-xl shadow-2xl z-50 w-28`, { top: 46, right: 130 }]}>
+                                        <ScrollView style={tw`max-h-48`} nestedScrollEnabled>
+                                            {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m, idx) => (
+                                                <TouchableOpacity
+                                                    key={m}
+                                                    onPress={() => {
+                                                        setTempPayslipMonth(idx);
+                                                        setShowMonthDropdown(false);
+                                                    }}
+                                                    style={tw`px-3 py-2 border-b border-purple-950/20`}
+                                                >
+                                                    <Text style={tw`text-[11px] font-bold text-white`}>{m}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </ScrollView>
                                     </View>
-                                </View>
+                                )}
+
+                                {showYearDropdown && (
+                                    <View style={[tw`absolute bg-[#1e1b4b] border border-[#7c3aed] rounded-xl shadow-2xl z-50 w-20`, { top: 46, right: 80 }]}>
+                                        <ScrollView style={tw`max-h-32`} nestedScrollEnabled>
+                                            {[2024, 2025, 2026, 2027].map((yr) => (
+                                                <TouchableOpacity
+                                                    key={yr}
+                                                    onPress={() => {
+                                                        setTempPayslipYear(yr);
+                                                        setShowYearDropdown(false);
+                                                    }}
+                                                    style={tw`px-3 py-2 border-b border-purple-950/20`}
+                                                >
+                                                    <Text style={tw`text-[11px] font-bold text-white`}>{yr}</Text>
+                                                </TouchableOpacity>
+                                            ))}
+                                        </ScrollView>
+                                    </View>
+                                )}
                             </View>
 
-                            {/* Payroll Summary metrics */}
-                            <View style={tw`flex-row border border-gray-200 rounded-xl overflow-hidden mb-4 text-center`}>
-                                <View style={tw`flex-1 bg-gray-50 py-2 border-r border-gray-200`}>
-                                    <Text style={tw`text-[8px] text-gray-400 font-bold uppercase`}>Working Days</Text>
-                                    <Text style={tw`font-bold text-gray-700 text-xs mt-0.5`}>{details.calendarDays}</Text>
-                                </View>
-                                <View style={tw`flex-1 bg-gray-50 py-2 border-r border-gray-200`}>
-                                    <Text style={tw`text-[8px] text-gray-400 font-bold uppercase`}>Paid Days</Text>
-                                    <Text style={tw`font-bold text-green-600 text-xs mt-0.5`}>{details.paidDays}</Text>
-                                </View>
-                                <View style={tw`flex-1 bg-gray-50 py-2`}>
-                                    <Text style={tw`text-[8px] text-gray-400 font-bold uppercase`}>Leave (LWP)</Text>
-                                    <Text style={tw`font-bold text-xs mt-0.5 ${details.lwpDays > 0 ? 'text-red-500' : 'text-gray-700'}`}>{details.lwpDays}</Text>
-                                </View>
-                            </View>
+                            {/* Modal Body / Payslip Preview Container */}
+                            <ScrollView style={tw`flex-1 p-5 bg-[#0f0c24]`} contentContainerStyle={tw`pb-8`}>
+                                {(() => {
+                                    const details = calculateSalaryDetails(selectedPayslipMonth, selectedPayslipYear);
+                                    if (!details) return null;
 
-                            {/* Earnings vs Deductions Table layout */}
-                            <View style={tw`border border-gray-200 rounded-xl overflow-hidden mb-4`}>
-                                <View style={tw`flex-row bg-gray-50 border-b border-gray-200`}>
-                                    <Text style={tw`flex-1 py-1.5 font-bold text-gray-700 text-[10px] uppercase text-center border-r border-gray-200`}>Earnings</Text>
-                                    <Text style={tw`flex-1 py-1.5 font-bold text-gray-700 text-[10px] uppercase text-center`}>Deductions</Text>
-                                </View>
-
-                                <View style={tw`flex-row min-h-[100px]`}>
-                                    {/* Left Column (Earnings) */}
-                                    <View style={tw`flex-1 border-r border-gray-200 justify-between`}>
-                                        <View>
-                                            <View style={tw`flex-row justify-between p-2 border-b border-gray-50`}>
-                                                <Text style={tw`text-[10px] text-gray-600 font-semibold`}>Basic Salary</Text>
-                                                <Text style={tw`text-[10px] font-bold text-gray-800`}>
-                                                    ₹{details.paidBasic.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    if (details.payslipBlockMessage) {
+                                        return (
+                                            <View style={tw`flex-1 items-center justify-center py-10 px-4 bg-purple-950/20 border border-purple-500/20 rounded-2xl`}>
+                                                <Info size={36} color="#c084fc" style={tw`mb-3`} />
+                                                <Text style={tw`text-center text-sm font-semibold text-gray-300 leading-6`}>
+                                                    {details.payslipBlockMessage}
                                                 </Text>
                                             </View>
-                                            {details.payslipEarningComponents.map((c: any, index: number) => (
-                                                <View key={index} style={tw`flex-row justify-between p-2 border-b border-gray-50`}>
-                                                    <Text style={tw`text-[10px] text-gray-500`}>{c.name}</Text>
-                                                    <Text style={tw`text-[10px] font-bold text-gray-800`}>
-                                                        ₹{Number(c.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                    </Text>
-                                                </View>
-                                            ))}
-                                        </View>
-                                        <View style={tw`flex-row justify-between p-2 bg-gray-50 border-t border-gray-100`}>
-                                            <Text style={tw`text-[10px] font-bold text-gray-800`}>Total Earnings</Text>
-                                            <Text style={tw`text-[10px] font-bold text-gray-800`}>
-                                                ₹{details.totalEarnings.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                            </Text>
-                                        </View>
-                                    </View>
+                                        );
+                                    }
 
-                                    {/* Right Column (Deductions) */}
-                                    <View style={tw`flex-1 justify-between`}>
-                                        <View>
-                                            {details.payslipDeductionComponents.map((c: any, index: number) => (
-                                                <View key={index} style={tw`flex-row justify-between p-2 border-b border-gray-50`}>
-                                                    <Text style={tw`text-[10px] text-gray-500`}>{c.name}</Text>
-                                                    <Text style={tw`text-[10px] font-bold text-gray-800`}>
-                                                        ₹{Number(c.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    const joiningDateFormatted = details.prof.joiningDate
+                                        ? new Date(details.prof.joiningDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                        : 'N/A';
+
+                                    const dobFormatted = details.prof.dob
+                                        ? new Date(details.prof.dob).toLocaleDateString('en-IN')
+                                        : 'N/A';
+
+                                    return (
+                                        <View style={tw`bg-white border border-gray-200 p-4 rounded-2xl shadow-sm relative text-gray-900`}>
+
+                                            {/* Company Header */}
+                                            <View style={tw`flex-row justify-between items-start border-b-2 border-purple-900 pb-3 mb-4`}>
+                                                <View style={tw`flex-row items-center gap-2.5`}>
+                                                    <View style={tw`w-11 h-11 bg-purple-900 items-center justify-center rounded-lg shadow-sm`}>
+                                                        <Text style={tw`text-white font-bold text-lg`}>EH</Text>
+                                                    </View>
+                                                    <View>
+                                                        <Text style={tw`text-base font-black text-gray-900`}>EnCalm <Text style={tw`text-[#8b5cf6]`}>HRX</Text></Text>
+                                                    </View>
+                                                </View>
+                                                <View style={tw`items-end`}>
+                                                    <Text style={tw`font-bold text-[9px] text-gray-800`}>EncalmIT Consultancy Pvt. Ltd.</Text>
+                                                    <Text style={tw`text-[8px] text-gray-500 mt-0.5`}>Gurgaon, Haryana, India</Text>
+                                                    <Text style={tw`text-[8px] text-gray-500`}>CIN: U12345HR2023PTC123456</Text>
+                                                </View>
+                                            </View>
+
+                                            {/* Employee & Bank Info Block */}
+                                            <View style={tw`flex-row justify-between gap-4 mb-4`}>
+                                                {/* Column 1 */}
+                                                <View style={tw`flex-1`}>
+                                                    <Text style={tw`font-bold text-[#8b5cf6] text-[8px] uppercase tracking-wider mb-1.5 border-b border-gray-100 pb-1`}>Employee Details</Text>
+                                                    <View style={tw`gap-1`}>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>Name: <Text style={tw`font-bold text-gray-800`}>{employee.name}</Text></Text>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>ID: <Text style={tw`font-bold text-gray-800`}>{employee.id}</Text></Text>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>Role: <Text style={tw`font-bold text-gray-800`}>{details.prof.title || 'N/A'}</Text></Text>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>Dept: <Text style={tw`font-bold text-gray-800`}>{details.prof.department || 'N/A'}</Text></Text>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>DOB: <Text style={tw`font-bold text-gray-800`}>{dobFormatted}</Text></Text>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>DOJ: <Text style={tw`font-bold text-gray-800`}>{joiningDateFormatted}</Text></Text>
+                                                    </View>
+                                                </View>
+
+                                                {/* Column 2 */}
+                                                <View style={tw`flex-1`}>
+                                                    <Text style={tw`font-bold text-[#8b5cf6] text-[8px] uppercase tracking-wider mb-1.5 border-b border-gray-100 pb-1`}>Bank & Pan Details</Text>
+                                                    <View style={tw`gap-1`}>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>Bank Name: <Text style={tw`font-bold text-gray-800`}>{details.bank.bankName || 'N/A'}</Text></Text>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>Account No: <Text style={tw`font-bold text-gray-800`}>XXXX{(details.bank.accountNumber || '').slice(-4)}</Text></Text>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>PAN: <Text style={tw`font-bold text-gray-800`}>{details.statutory.pan || 'N/A'}</Text></Text>
+                                                        <Text style={tw`text-[10px] text-gray-500`}>UAN: <Text style={tw`font-bold text-gray-800`}>{details.statutory.uan || 'N/A'}</Text></Text>
+                                                    </View>
+                                                </View>
+                                            </View>
+
+                                            {/* Payroll Summary metrics */}
+                                            <View style={tw`flex-row border border-gray-200 rounded-xl overflow-hidden mb-4 text-center`}>
+                                                <View style={tw`flex-1 bg-gray-50 py-2 border-r border-gray-200`}>
+                                                    <Text style={tw`text-[8px] text-gray-400 font-bold uppercase`}>Working Days</Text>
+                                                    <Text style={tw`font-bold text-gray-700 text-xs mt-0.5`}>{details.calendarDays}</Text>
+                                                </View>
+                                                <View style={tw`flex-1 bg-gray-50 py-2 border-r border-gray-200`}>
+                                                    <Text style={tw`text-[8px] text-gray-400 font-bold uppercase`}>Paid Days</Text>
+                                                    <Text style={tw`font-bold text-green-600 text-xs mt-0.5`}>{details.paidDays}</Text>
+                                                </View>
+                                                <View style={tw`flex-1 bg-gray-50 py-2`}>
+                                                    <Text style={tw`text-[8px] text-gray-400 font-bold uppercase`}>Leave (LWP)</Text>
+                                                    <Text style={tw`font-bold text-xs mt-0.5 ${details.lwpDays > 0 ? 'text-red-500' : 'text-gray-700'}`}>{details.lwpDays}</Text>
+                                                </View>
+                                            </View>
+
+                                            {/* Earnings vs Deductions Table layout */}
+                                            <View style={tw`border border-gray-200 rounded-xl overflow-hidden mb-4`}>
+                                                <View style={tw`flex-row bg-gray-50 border-b border-gray-200`}>
+                                                    <Text style={tw`flex-1 py-1.5 font-bold text-gray-700 text-[10px] uppercase text-center border-r border-gray-200`}>Earnings</Text>
+                                                    <Text style={tw`flex-1 py-1.5 font-bold text-gray-700 text-[10px] uppercase text-center`}>Deductions</Text>
+                                                </View>
+
+                                                <View style={tw`flex-row min-h-[100px]`}>
+                                                    {/* Left Column (Earnings) */}
+                                                    <View style={tw`flex-1 border-r border-gray-200 justify-between`}>
+                                                        <View>
+                                                            <View style={tw`flex-row justify-between p-2 border-b border-gray-50`}>
+                                                                <Text style={tw`text-[10px] text-gray-600 font-semibold`}>Basic Salary</Text>
+                                                                <Text style={tw`text-[10px] font-bold text-gray-800`}>
+                                                                    ₹{details.paidBasic.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                </Text>
+                                                            </View>
+                                                            {details.payslipEarningComponents.map((c: any, index: number) => (
+                                                                <View key={index} style={tw`flex-row justify-between p-2 border-b border-gray-50`}>
+                                                                    <Text style={tw`text-[10px] text-gray-500`}>{c.name}</Text>
+                                                                    <Text style={tw`text-[10px] font-bold text-gray-800`}>
+                                                                        ₹{Number(c.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                    </Text>
+                                                                </View>
+                                                            ))}
+                                                        </View>
+                                                        <View style={tw`flex-row justify-between p-2 bg-gray-50 border-t border-gray-100`}>
+                                                            <Text style={tw`text-[10px] font-bold text-gray-800`}>Total Earnings</Text>
+                                                            <Text style={tw`text-[10px] font-bold text-gray-800`}>
+                                                                ₹{details.totalEarnings.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+
+                                                    {/* Right Column (Deductions) */}
+                                                    <View style={tw`flex-1 justify-between`}>
+                                                        <View>
+                                                            {details.payslipDeductionComponents.map((c: any, index: number) => (
+                                                                <View key={index} style={tw`flex-row justify-between p-2 border-b border-gray-50`}>
+                                                                    <Text style={tw`text-[10px] text-gray-500`}>{c.name}</Text>
+                                                                    <Text style={tw`text-[10px] font-bold text-gray-800`}>
+                                                                        ₹{Number(c.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                    </Text>
+                                                                </View>
+                                                            ))}
+                                                            {details.paidLeaveDays > 0 && (
+                                                                <View style={tw`flex-row justify-between p-2 border-b border-gray-50 bg-green-50/25`}>
+                                                                    <Text style={tw`text-[9px] text-green-700`}>Paid Leaves ({details.paidLeaveText || `${details.paidLeaveDays} d`})</Text>
+                                                                    <Text style={tw`text-[9px] font-bold text-green-700`}>₹0.00</Text>
+                                                                </View>
+                                                            )}
+                                                            {details.lwpDeduction > 0 && (
+                                                                <View style={tw`flex-row justify-between p-2 border-b border-gray-50 bg-red-50`}>
+                                                                    <Text style={tw`text-[9px] font-bold text-red-500`}>LWP Deduct ({details.lwpDays} d)</Text>
+                                                                    <Text style={tw`text-[9px] font-bold text-red-500`}>
+                                                                        ₹{details.lwpDeduction.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                    </Text>
+                                                                </View>
+                                                            )}
+                                                            {details.totalDeductions === 0 && (
+                                                                <Text style={tw`text-center py-4 text-[9px] text-gray-400 italic`}>No deductions</Text>
+                                                            )}
+                                                        </View>
+                                                        <View style={tw`flex-row justify-between p-2 bg-gray-50 border-t border-gray-100`}>
+                                                            <Text style={tw`text-[10px] font-bold text-gray-800`}>Total Deduct</Text>
+                                                            <Text style={tw`text-[10px] font-bold text-gray-800`}>
+                                                                ₹{details.totalDeductions.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                            </Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
+
+                                                <View style={tw`flex-row justify-between p-2.5 bg-gray-50 border-t border-gray-200 font-bold`}>
+                                                    <Text style={tw`text-xs font-bold text-gray-900`}>Total Salary (Net)</Text>
+                                                    <Text style={tw`text-xs font-black text-green-600`}>
+                                                        ₹{details.totalSalary.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                     </Text>
                                                 </View>
-                                            ))}
-                                            {details.paidLeaveDays > 0 && (
-                                                <View style={tw`flex-row justify-between p-2 border-b border-gray-50 bg-green-50/25`}>
-                                                    <Text style={tw`text-[9px] text-green-700`}>Paid Leaves ({details.paidLeaveText || `${details.paidLeaveDays} d`})</Text>
-                                                    <Text style={tw`text-[9px] font-bold text-green-700`}>₹0.00</Text>
-                                                </View>
-                                            )}
-                                            {details.lwpDeduction > 0 && (
-                                                <View style={tw`flex-row justify-between p-2 border-b border-gray-50 bg-red-50`}>
-                                                    <Text style={tw`text-[9px] font-bold text-red-500`}>LWP Deduct ({details.lwpDays} d)</Text>
-                                                    <Text style={tw`text-[9px] font-bold text-red-500`}>
-                                                        ₹{details.lwpDeduction.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                    </Text>
-                                                </View>
-                                            )}
-                                            {details.totalDeductions === 0 && (
-                                                <Text style={tw`text-center py-4 text-[9px] text-gray-400 italic`}>No deductions</Text>
-                                            )}
-                                        </View>
-                                        <View style={tw`flex-row justify-between p-2 bg-gray-50 border-t border-gray-100`}>
-                                            <Text style={tw`text-[10px] font-bold text-gray-800`}>Total Deduct</Text>
-                                            <Text style={tw`text-[10px] font-bold text-gray-800`}>
-                                                ₹{details.totalDeductions.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </View>
+
+                                            {/* Footer Disclaimer */}
+                                            <Text style={tw`text-center text-[7.5px] text-gray-400 leading-4 mt-2 border-t border-gray-100 pt-2`}>
+                                                This is a computer-generated document and does not require a signature.{'\n'}Generated on {new Date().toLocaleDateString()}
                                             </Text>
+
+                                        </View>
+                                    );
+                                })()}
+                            </ScrollView>
+
+                            {/* Footer Buttons */}
+                            {(() => {
+                                const details = calculateSalaryDetails(selectedPayslipMonth, selectedPayslipYear);
+                                const hasBlock = !!details?.payslipBlockMessage;
+
+                                return (
+                                    <View style={tw`p-4 border-t border-white/10 bg-[#2d1266] flex-row justify-between gap-3`}>
+                                        <TouchableOpacity
+                                            onPress={() => setShowPayslipModal(false)}
+                                            style={tw`px-6 py-2.5 bg-slate-800 rounded-xl`}
+                                        >
+                                            <Text style={tw`text-xs font-bold text-gray-300`}>Back</Text>
+                                        </TouchableOpacity>
+                                        {!hasBlock && (
+                                            <TouchableOpacity
+                                                onPress={() => exportPayslipPDF(selectedPayslipMonth, selectedPayslipYear)}
+                                                style={tw`px-6 py-2.5 bg-[#8b5cf6] rounded-xl flex-row items-center gap-1.5`}
+                                            >
+                                                <FileText size={14} color="#fff" />
+                                                <Text style={tw`text-xs font-bold text-white`}>Download PDF</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
+                                );
+                            })()}
+
+                        </View>
+                    </View>
+                </Modal>
+
+                {/* ID Card Preview Modal */}
+                <Modal
+                    visible={showIDCardModal}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={() => setShowIDCardModal(false)}
+                >
+                    <View style={tw`flex-1 bg-black/85 justify-center items-center p-4`}>
+                        <View style={tw`relative items-center`}>
+                            {/* Close Button */}
+                            <TouchableOpacity
+                                onPress={() => setShowIDCardModal(false)}
+                                style={tw`absolute -top-10 right-0 p-2 z-50`}
+                            >
+                                <X size={24} color="#ffffff" />
+                            </TouchableOpacity>
+
+                            {/* ID Card Container */}
+                            <View style={tw`w-[320px] h-[540px] bg-white rounded-3xl overflow-hidden relative flex-col shadow-2xl`}>
+                                {/* Purple Header */}
+                                <View style={tw`absolute top-0 inset-x-0 h-44 rounded-b-[40px] bg-[#5b21b6] z-0`} />
+                                <View style={tw`mx-auto w-16 h-2.5 bg-white/20 rounded-full mt-4 relative z-10`} />
+
+                                <View style={tw`flex-row justify-between items-start mb-2 px-6 pt-2 relative z-10`}>
+                                    <Text style={tw`text-white font-bold text-lg tracking-widest`}>
+                                        EnCalm <Text style={tw`text-purple-300`}>HRX</Text>
+                                    </Text>
+                                    <View style={tw`w-10 h-7 bg-amber-400 rounded-md border border-yellow-200/50 shadow-sm`} />
+                                </View>
+
+                                {/* Profile Avatar */}
+                                <View style={tw`relative z-10 mx-auto mt-4`}>
+                                    <View style={tw`w-28 h-28 rounded-full border-4 border-white bg-[#7c3aed] shadow-lg overflow-hidden items-center justify-center`}>
+                                        {profilePictureUrl && !profileImgError ? (
+                                            <Image
+                                                source={{ uri: profilePictureUrl }}
+                                                style={tw`w-full h-full`}
+                                                resizeMode="cover"
+                                                onError={() => setProfileImgError(true)}
+                                            />
+                                        ) : (
+                                            <Text style={tw`text-white font-bold text-3xl`}>{initials}</Text>
+                                        )}
+                                    </View>
+                                </View>
+
+                                {/* Employee Info */}
+                                <View style={tw`mt-3 items-center flex-1`}>
+                                    <Text style={tw`text-xl font-bold text-gray-800 px-4 text-center`}>{employee.name}</Text>
+                                    <Text style={tw`text-purple-600 font-bold text-xs mt-1`}>{profile.title || 'Employee'}</Text>
+                                    <View style={tw`w-12 h-1 bg-purple-200 rounded-full my-3`} />
+
+                                    {/* Details Grid */}
+                                    <View style={tw`w-full px-7 gap-y-2.5`}>
+                                        <View style={tw`flex-row justify-between`}>
+                                            <View style={tw`flex-1 mr-2`}>
+                                                <Text style={tw`text-[9px] text-gray-400 uppercase font-bold`}>Employee ID</Text>
+                                                <Text style={tw`text-xs font-semibold text-gray-700`}>{employee.id}</Text>
+                                            </View>
+                                            <View style={tw`flex-1`}>
+                                                <Text style={tw`text-[9px] text-gray-400 uppercase font-bold`}>Blood Group</Text>
+                                                <Text style={tw`text-xs font-semibold text-gray-700`}>{profile.bloodGroup || 'N/A'}</Text>
+                                            </View>
+                                        </View>
+
+                                        <View style={tw`flex-row justify-between`}>
+                                            <View style={tw`flex-1 mr-2`}>
+                                                <Text style={tw`text-[9px] text-gray-400 uppercase font-bold`}>Department</Text>
+                                                <Text style={tw`text-xs font-semibold text-gray-700`} numberOfLines={1}>{profile.department || 'N/A'}</Text>
+                                            </View>
+                                            <View style={tw`flex-1`}>
+                                                <Text style={tw`text-[9px] text-gray-400 uppercase font-bold`}>Mobile Number</Text>
+                                                <Text style={tw`text-xs font-semibold text-gray-700`}>{profile.phone || 'N/A'}</Text>
+                                            </View>
                                         </View>
                                     </View>
                                 </View>
 
-                                <View style={tw`flex-row justify-between p-2.5 bg-gray-50 border-t border-gray-200 font-bold`}>
-                                    <Text style={tw`text-xs font-bold text-gray-900`}>Total Salary (Net)</Text>
-                                    <Text style={tw`text-xs font-black text-green-600`}>
-                                        ₹{details.totalSalary.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </Text>
+                                {/* Footer Section with QR Code & Admin Signature */}
+                                <View style={tw`bg-white px-6 pb-4 pt-2 flex-row justify-between items-center mt-auto border-t border-gray-100`}>
+                                    <View style={tw`w-14 h-14 bg-white p-1 rounded-lg border border-gray-200 items-center justify-center overflow-hidden`}>
+                                        <Image
+                                            source={{ uri: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`Employee ID: ${employee.id}\nName: ${employee.name}\nRole: ${profile.title || 'Employee'}\nDept: ${profile.department || 'N/A'}`)}` }}
+                                            style={tw`w-full h-full`}
+                                            resizeMode="contain"
+                                        />
+                                    </View>
+
+                                    <View style={tw`items-end justify-end`}>
+                                        {!!adminSignatureUrl && (
+                                            <Image
+                                                source={{ uri: adminSignatureUrl }}
+                                                style={tw`w-24 h-8`}
+                                                resizeMode="contain"
+                                            />
+                                        )}
+                                        <Text style={tw`text-[11px] italic text-gray-400 leading-tight mt-0.5`}>
+                                            Authorized Sig.
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
 
-                            {/* Footer Disclaimer */}
-                            <Text style={tw`text-center text-[7.5px] text-gray-400 leading-4 mt-2 border-t border-gray-100 pt-2`}>
-                                This is a computer-generated document and does not require a signature.{'\n'}Generated on {new Date().toLocaleDateString()}
-                            </Text>
-
-                        </View>
-                    );
-                })()}
-            </ScrollView>
-
-            {/* Footer Buttons */}
-            {(() => {
-                const details = calculateSalaryDetails(selectedPayslipMonth, selectedPayslipYear);
-                const hasBlock = !!details?.payslipBlockMessage;
-
-                return (
-                    <View style={tw`p-4 border-t border-white/10 bg-[#2d1266] flex-row justify-between gap-3`}>
-                        <TouchableOpacity
-                            onPress={() => setShowPayslipModal(false)}
-                            style={tw`px-6 py-2.5 bg-slate-800 rounded-xl`}
-                        >
-                            <Text style={tw`text-xs font-bold text-gray-300`}>Back</Text>
-                        </TouchableOpacity>
-                        {!hasBlock && (
+                            {/* Print / Export Button */}
                             <TouchableOpacity
-                                onPress={() => exportPayslipPDF(selectedPayslipMonth, selectedPayslipYear)}
-                                style={tw`px-6 py-2.5 bg-[#8b5cf6] rounded-xl flex-row items-center gap-1.5`}
+                                onPress={exportIDCardPDF}
+                                style={tw`mt-5 flex-row items-center gap-2 px-6 py-2.5 bg-white rounded-full shadow-lg self-center`}
                             >
-                                <FileText size={14} color="#fff" />
-                                <Text style={tw`text-xs font-bold text-white`}>Download PDF</Text>
+                                <Printer size={18} color="#1f2937" />
+                                <Text style={tw`text-xs font-bold text-gray-800`}>Print / Share ID Card</Text>
                             </TouchableOpacity>
-                        )}
+                        </View>
                     </View>
-                );
-            })()}
+                </Modal>
 
-        </View>
-    </View>
-                </Modal >
+                {/* Role Picker Modal */}
+                <Modal visible={showRolePicker} transparent animationType="fade" onRequestClose={() => setShowRolePicker(false)}>
+                    <TouchableOpacity activeOpacity={1} onPress={() => setShowRolePicker(false)} style={tw`flex-1 bg-black/60 justify-end`}>
+                        <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                            <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                                <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>Select System Role</Text>
+                                <TouchableOpacity onPress={() => setShowRolePicker(false)}>
+                                    <X size={20} color={isDark ? '#fff' : '#000'} />
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView style={tw`max-h-80`}>
+                                {roles.map((r: any) => (
+                                    <TouchableOpacity
+                                        key={r.id}
+                                        onPress={() => {
+                                            setFormRoleId(r.id);
+                                            setShowRolePicker(false);
+                                        }}
+                                        style={tw`py-3 px-4 rounded-xl mb-1.5 flex-row justify-between items-center ${String(formRoleId) === String(r.id) ? 'bg-[#8b5cf6]/10' : 'bg-gray-50 dark:bg-white/5'}`}
+                                    >
+                                        <Text style={tw`text-xs font-bold ${String(formRoleId) === String(r.id) ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'}`}>{r.name}</Text>
+                                        {String(formRoleId) === String(r.id) && <Check size={16} color="#8b5cf6" />}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
 
-            </View >
-        </KeyboardAvoidingView >
+                {/* Designation Picker Modal */}
+                <Modal visible={showDesignationPicker} transparent animationType="fade" onRequestClose={() => setShowDesignationPicker(false)}>
+                    <TouchableOpacity activeOpacity={1} onPress={() => setShowDesignationPicker(false)} style={tw`flex-1 bg-black/60 justify-end`}>
+                        <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                            <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                                <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>Select Designation</Text>
+                                <TouchableOpacity onPress={() => setShowDesignationPicker(false)}>
+                                    <X size={20} color={isDark ? '#fff' : '#000'} />
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView style={tw`max-h-80`}>
+                                {designations.map((d: any) => (
+                                    <TouchableOpacity
+                                        key={d.id}
+                                        onPress={() => {
+                                            setFormDesignationId(d.id);
+                                            setShowDesignationPicker(false);
+                                        }}
+                                        style={tw`py-3 px-4 rounded-xl mb-1.5 flex-row justify-between items-center ${String(formDesignationId) === String(d.id) ? 'bg-[#8b5cf6]/10' : 'bg-gray-50 dark:bg-white/5'}`}
+                                    >
+                                        <Text style={tw`text-xs font-bold ${String(formDesignationId) === String(d.id) ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'}`}>{d.name}</Text>
+                                        {String(formDesignationId) === String(d.id) && <Check size={16} color="#8b5cf6" />}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+
+                {/* Department Picker Modal */}
+                <Modal visible={showDepartmentPicker} transparent animationType="fade" onRequestClose={() => setShowDepartmentPicker(false)}>
+                    <TouchableOpacity activeOpacity={1} onPress={() => setShowDepartmentPicker(false)} style={tw`flex-1 bg-black/60 justify-end`}>
+                        <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                            <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                                <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>Select Department</Text>
+                                <TouchableOpacity onPress={() => setShowDepartmentPicker(false)}>
+                                    <X size={20} color={isDark ? '#fff' : '#000'} />
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView style={tw`max-h-80`}>
+                                {departments.map((dept: any) => (
+                                    <TouchableOpacity
+                                        key={dept.id}
+                                        onPress={() => {
+                                            setFormDepartmentId(dept.id);
+                                            setShowDepartmentPicker(false);
+                                        }}
+                                        style={tw`py-3 px-4 rounded-xl mb-1.5 flex-row justify-between items-center ${String(formDepartmentId) === String(dept.id) ? 'bg-[#8b5cf6]/10' : 'bg-gray-50 dark:bg-white/5'}`}
+                                    >
+                                        <Text style={tw`text-xs font-bold ${String(formDepartmentId) === String(dept.id) ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'}`}>{dept.name}</Text>
+                                        {String(formDepartmentId) === String(dept.id) && <Check size={16} color="#8b5cf6" />}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+
+                {/* Blood Group Picker Modal */}
+                <Modal visible={showBloodGroupPicker} transparent animationType="fade" onRequestClose={() => setShowBloodGroupPicker(false)}>
+                    <TouchableOpacity activeOpacity={1} onPress={() => setShowBloodGroupPicker(false)} style={tw`flex-1 bg-black/60 justify-end`}>
+                        <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                            <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                                <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>Select Blood Group</Text>
+                                <TouchableOpacity onPress={() => setShowBloodGroupPicker(false)}>
+                                    <X size={20} color={isDark ? '#fff' : '#000'} />
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView style={tw`max-h-80`}>
+                                {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bg: string) => (
+                                    <TouchableOpacity
+                                        key={bg}
+                                        onPress={() => {
+                                            setFormBloodGroup(bg);
+                                            setShowBloodGroupPicker(false);
+                                        }}
+                                        style={tw`py-3 px-4 rounded-xl mb-1.5 flex-row justify-between items-center ${formBloodGroup === bg ? 'bg-[#8b5cf6]/10' : 'bg-gray-50 dark:bg-white/5'}`}
+                                    >
+                                        <Text style={tw`text-xs font-bold ${formBloodGroup === bg ? 'text-[#8b5cf6]' : 'text-gray-800 dark:text-white'}`}>{bg}</Text>
+                                        {formBloodGroup === bg && <Check size={16} color="#8b5cf6" />}
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+
+                {/* Salary Component Add Picker Modal */}
+                <Modal visible={componentPickerType !== null} transparent animationType="fade" onRequestClose={() => setComponentPickerType(null)}>
+                    <TouchableOpacity activeOpacity={1} onPress={() => setComponentPickerType(null)} style={tw`flex-1 bg-black/60 justify-end`}>
+                        <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-t-3xl p-5 max-h-[60%]`}>
+                            <View style={tw`flex-row justify-between items-center mb-4 pb-2 border-b border-gray-100 dark:border-white/10`}>
+                                <Text style={tw`text-base font-bold text-gray-900 dark:text-white`}>
+                                    Add {componentPickerType === 'EARNING' ? 'Earnings' : 'Deductions'} Component
+                                </Text>
+                                <TouchableOpacity onPress={() => setComponentPickerType(null)}>
+                                    <X size={20} color={isDark ? '#fff' : '#000'} />
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView style={tw`max-h-80`}>
+                                {salaryComponents
+                                    .filter((c: any) => c.type === componentPickerType)
+                                    .filter((c: any) => !selectedSalaryComponents.some((item: any) => String(item.id) === String(c.id)))
+                                    .map((c: any) => (
+                                        <TouchableOpacity
+                                            key={c.id}
+                                            onPress={() => {
+                                                setSelectedSalaryComponents(prev => [...prev, c]);
+                                                setComponentPickerType(null);
+                                            }}
+                                            style={tw`py-3.5 px-4 bg-gray-50 dark:bg-white/5 rounded-xl mb-2 flex-row justify-between items-center`}
+                                        >
+                                            <View>
+                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{c.name}</Text>
+                                                <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
+                                                    {c.calculationType === 'FLAT' ? 'Fixed Amount' : `${c.value}% of Basic`}
+                                                </Text>
+                                            </View>
+                                            <View style={tw`px-2.5 py-1 rounded-full ${componentPickerType === 'EARNING' ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+                                                <Text style={tw`text-[9px] font-bold ${componentPickerType === 'EARNING' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                                                    + ADD
+                                                </Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    ))}
+
+                                {salaryComponents
+                                    .filter((c: any) => c.type === componentPickerType)
+                                    .filter((c: any) => !selectedSalaryComponents.some((item: any) => String(item.id) === String(c.id))).length === 0 && (
+                                        <Text style={tw`text-xs text-gray-400 text-center py-6 italic`}>
+                                            No available {componentPickerType?.toLowerCase()} components to add.
+                                        </Text>
+                                    )}
+                            </ScrollView>
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+
+            </View>
+        </KeyboardAvoidingView>
     );
 }
