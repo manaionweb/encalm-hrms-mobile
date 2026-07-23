@@ -405,36 +405,78 @@ export default function AddEmployeeScreen({ navigation }: any) {
 
             // Attach standard documents
             if (documents.aadhaar) {
-                formDataPayload.append('aadhaar', {
-                    uri: documents.aadhaar.uri,
-                    name: documents.aadhaar.name,
-                    type: documents.aadhaar.type
-                } as any);
+                if (Platform.OS === 'web') {
+                    if (documents.aadhaar.file) {
+                        formDataPayload.append('aadhaar', documents.aadhaar.file);
+                    } else if (documents.aadhaar.uri) {
+                        const blobRes = await fetch(documents.aadhaar.uri);
+                        const blob = await blobRes.blob();
+                        formDataPayload.append('aadhaar', blob, documents.aadhaar.name || 'aadhaar.pdf');
+                    }
+                } else {
+                    formDataPayload.append('aadhaar', {
+                        uri: documents.aadhaar.uri,
+                        name: documents.aadhaar.name,
+                        type: documents.aadhaar.type
+                    } as any);
+                }
             }
             if (documents.pan) {
-                formDataPayload.append('pan', {
-                    uri: documents.pan.uri,
-                    name: documents.pan.name,
-                    type: documents.pan.type
-                } as any);
+                if (Platform.OS === 'web') {
+                    if (documents.pan.file) {
+                        formDataPayload.append('pan', documents.pan.file);
+                    } else if (documents.pan.uri) {
+                        const blobRes = await fetch(documents.pan.uri);
+                        const blob = await blobRes.blob();
+                        formDataPayload.append('pan', blob, documents.pan.name || 'pan.pdf');
+                    }
+                } else {
+                    formDataPayload.append('pan', {
+                        uri: documents.pan.uri,
+                        name: documents.pan.name,
+                        type: documents.pan.type
+                    } as any);
+                }
             }
             if (documents.degree) {
-                formDataPayload.append('degree', {
-                    uri: documents.degree.uri,
-                    name: documents.degree.name,
-                    type: documents.degree.type
-                } as any);
+                if (Platform.OS === 'web') {
+                    if (documents.degree.file) {
+                        formDataPayload.append('degree', documents.degree.file);
+                    } else if (documents.degree.uri) {
+                        const blobRes = await fetch(documents.degree.uri);
+                        const blob = await blobRes.blob();
+                        formDataPayload.append('degree', blob, documents.degree.name || 'degree.pdf');
+                    }
+                } else {
+                    formDataPayload.append('degree', {
+                        uri: documents.degree.uri,
+                        name: documents.degree.name,
+                        type: documents.degree.type
+                    } as any);
+                }
             }
 
-            // Attach picked files
-            Object.keys(selectedFiles).forEach(key => {
+            // Attach picked custom field files
+            for (const key of Object.keys(selectedFiles)) {
                 const file = selectedFiles[key];
-                formDataPayload.append(key, {
-                    uri: file.uri,
-                    name: file.name,
-                    type: file.type
-                } as any);
-            });
+                if (file) {
+                    if (Platform.OS === 'web') {
+                        if (file.file) {
+                            formDataPayload.append(key, file.file);
+                        } else if (file.uri) {
+                            const blobRes = await fetch(file.uri);
+                            const blob = await blobRes.blob();
+                            formDataPayload.append(key, blob, file.name || 'custom_document.pdf');
+                        }
+                    } else {
+                        formDataPayload.append(key, {
+                            uri: file.uri,
+                            name: file.name,
+                            type: file.type
+                        } as any);
+                    }
+                }
+            }
 
             const response = await api.post('/employee', formDataPayload, {
                 headers: {
