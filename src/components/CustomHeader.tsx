@@ -16,7 +16,7 @@ interface CustomHeaderProps {
 
 export default function CustomHeader({ navigation, title, showBackButton }: CustomHeaderProps) {
     const { theme, toggleTheme } = useTheme();
-    const { user } = useAuth();
+    const { isAuthenticated } = useAuth();
     const isDark = theme === 'dark';
     const isHrAdmin = user?.role === 'HR_ADMIN';
 
@@ -28,14 +28,18 @@ export default function CustomHeader({ navigation, title, showBackButton }: Cust
     const insets = useSafeAreaInsets();
 
     const fetchUnreadCount = async () => {
+        if (!isAuthenticated) return;
         try {
             const res = await api.get('/notifications');
             if (Array.isArray(res.data)) {
                 const unread = res.data.filter((n: any) => n.unread).length;
                 setUnreadCount(unread);
             }
-        } catch (e) {
-            console.error('Failed to get header notifications count:', e);
+        } catch (e: any) {
+            // Silently log or handle auth errors without throwing unhandled exceptions
+            if (e?.response?.status !== 401 && e?.message !== 'No refresh token found') {
+                console.log('Failed to get header notifications count:', e?.message || e);
+            }
         }
     };
 
@@ -49,10 +53,11 @@ export default function CustomHeader({ navigation, title, showBackButton }: Cust
     };
 
     useEffect(() => {
+        if (!isAuthenticated) return;
         fetchUnreadCount();
         const interval = setInterval(fetchUnreadCount, 8000);
         return () => clearInterval(interval);
-    }, []);
+    }, [isAuthenticated]);
 
     const isDashboard = title.toLowerCase() === 'dashboard';
     const canGoBack = showBackButton !== undefined 
