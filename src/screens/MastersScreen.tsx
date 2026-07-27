@@ -775,8 +775,8 @@ export default function MastersScreen({ navigation }: any) {
                     </View>
 
                     {/* Permissions Preview */}
-                    <View style={tw`space-y-1.5 pt-2 border-t border-gray-100 dark:border-white/5`}>
-                        {Array.isArray(item.permissions) && item.permissions.slice(0, 3).map((p: any) => (
+                    <View style={tw`gap-y-1.5 pt-2 border-t border-gray-100 dark:border-white/5`}>
+                        {item.permissions && item.permissions.slice(0, 3).map((p: any) => (
                             <View key={p.id} style={tw`flex-row items-center gap-2`}>
                                 <Check size={10} color="#22c55e" />
                                 <Text style={tw`text-[11px] text-gray-600 dark:text-gray-300`}>{p.name}</Text>
@@ -1866,7 +1866,7 @@ export default function MastersScreen({ navigation }: any) {
             <CustomHeader navigation={navigation} title="Masters Configuration" subtitle="Manage organization structure, payroll rules, and system settings." />
 
             {/* Main Tabs Selection Row */}
-            <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-100 dark:border-white/5`}>
+            <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-200 dark:border-white/5`}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row px-4`}>
                     {mainTabs.map((tab) => {
                         const isSel = activeMainTab === tab.key;
@@ -1894,7 +1894,7 @@ export default function MastersScreen({ navigation }: any) {
 
             {/* Sub Tabs Selection Row */}
             {subTabs.length > 0 && (
-                <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-100 dark:border-white/5 py-2.5 px-4`}>
+                <View style={tw`bg-white dark:bg-[#0B0A1F] border-b border-gray-200 dark:border-white/5 py-2.5 px-4`}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row`}>
                         {subTabs.map((sub, idx) => {
                             const isActiveSub = activeSubTab === sub;
@@ -2062,7 +2062,7 @@ export default function MastersScreen({ navigation }: any) {
                 onRequestClose={() => setFieldToDelete(null)}
             >
                 <View style={tw`flex-1 justify-center items-center bg-black/70 px-6`}>
-                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-100 dark:border-white/10 text-center relative overflow-hidden`}>
+                    <View style={tw`bg-white dark:bg-[#0B0A1F] rounded-3xl shadow-2xl w-full max-w-sm p-6 border border-gray-200 dark:border-white/10 text-center relative overflow-hidden`}>
                         {/* Top red stripe */}
                         <View style={tw`absolute top-0 left-0 right-0 h-1.5 bg-red-500`} />
 

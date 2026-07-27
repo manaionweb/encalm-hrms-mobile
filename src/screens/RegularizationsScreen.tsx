@@ -159,52 +159,23 @@ export default function RegularizationsScreen({ navigation }: any) {
                                     </View>
                                 </View>
 
-                                {/* Times & Action Buttons Row (Matching Web App UI) */}
-                                <View style={tw`flex-row justify-between items-center bg-gray-50 dark:bg-[#230d4b] p-3 rounded-2xl mb-3 border border-gray-100 dark:border-[#6d28d9]/20`}>
-                                    <View style={tw`space-y-1`}>
-                                        {!!proposedInFormatted && (
-                                            <View style={tw`flex-row items-center gap-1.5`}>
-                                                <Clock size={13} color="#22c55e" />
-                                                <Text style={tw`text-xs font-bold text-emerald-600 dark:text-[#4ade80]`}>
-                                                    In: {proposedInFormatted}
-                                                </Text>
-                                            </View>
-                                        )}
-                                        {!!proposedOutFormatted && (
-                                            <View style={tw`flex-row items-center gap-1.5 mt-1`}>
-                                                <Clock size={13} color="#f43f5e" />
-                                                <Text style={tw`text-xs font-bold text-rose-500 dark:text-[#fb7185]`}>
-                                                    Out: {proposedOutFormatted}
-                                                </Text>
-                                            </View>
-                                        )}
-                                    </View>
-
-                                    {/* Action Buttons: Green Check and Red Cross icons matching Web App */}
-                                    <View style={tw`flex-row gap-2.5`}>
-                                        <TouchableOpacity
-                                            onPress={() => handleApprove(req.id)}
-                                            activeOpacity={0.8}
-                                            style={tw`w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md active:scale-95`}
-                                        >
-                                            <Check size={20} color="#16a34a" strokeWidth={2.5} />
-                                        </TouchableOpacity>
-
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                setRejectingId(req.id);
-                                                setRejectComment('');
-                                            }}
-                                            activeOpacity={0.8}
-                                            style={tw`w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md active:scale-95`}
-                                        >
-                                            <X size={20} color="#dc2626" strokeWidth={2.5} />
-                                        </TouchableOpacity>
-                                    </View>
+                                 {/* Proposed In/Out times */}
+                                <View style={tw`flex-row gap-4 mb-3`}>
+                                    {!!req.proposedIn && (
+                                        <View style={tw`flex-row items-center gap-1`}>
+                                            <Clock size={12} color="#10b981" />
+                                            <Text style={tw`text-xs font-bold text-green-600`}>In: {req.proposedIn}</Text>
+                                        </View>
+                                    )}
+                                    {!!req.proposedOut && (
+                                        <View style={tw`flex-row items-center gap-1`}>
+                                            <Clock size={12} color="#f43f5e" />
+                                            <Text style={tw`text-xs font-bold text-rose-500`}>Out: {req.proposedOut}</Text>
+                                        </View>
+                                    )}
                                 </View>
 
-                                {/* Reason */}
-                                <Text style={tw`text-xs text-gray-600 dark:text-purple-200/80 italic px-1`}>
+                                <Text style={tw`text-xs text-gray-600 dark:text-gray-300 italic mb-4`}>
                                     "{req.reason}"
                                 </Text>
                             </View>

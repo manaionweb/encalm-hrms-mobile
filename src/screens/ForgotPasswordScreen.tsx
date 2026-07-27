@@ -75,7 +75,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     };
 
     const renderInitialForm = () => (
-        <View style={tw`space-y-4`}>
+        <View style={tw`gap-y-4`}>
             <Text style={tw`text-2xl font-bold text-gray-800 text-center mb-4`}>Forgot Password</Text>
 
             <View style={tw`mb-4`}>
@@ -164,7 +164,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     );
 
     const renderOtpStep = () => (
-        <View style={tw`space-y-4`}>
+        <View style={tw`gap-y-4`}>
             <View style={tw`text-center mb-6`}>
                 <Text style={tw`text-2xl font-bold text-gray-800 text-center mb-1`}>Verify OTP</Text>
                 <Text style={tw`text-gray-500 text-sm text-center`}>We've sent a code to your email/mobile</Text>

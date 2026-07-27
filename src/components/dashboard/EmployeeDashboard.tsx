@@ -191,7 +191,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                         return (
                             <View>
                                 <Text style={tw`text-[10px] text-gray-400`}>Next Holiday</Text>
-                                <Text style={tw`text-sm font-bold text-gray-850 dark:text-white mt-0.5`}>
+                                <Text style={tw`text-sm font-bold text-gray-800 dark:text-white mt-0.5`}>
                                     {nextHoliday.name}
                                 </Text>
                                 <Text style={tw`text-[10px] font-bold text-purple-600 dark:text-purple-400 mt-1 uppercase`}>
@@ -212,7 +212,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                     </TouchableOpacity>
                 </View>
 
-                <View style={tw`space-y-3`}>
+                <View style={tw`gap-y-3`}>
                     {recentAttendance.length > 0 ? recentAttendance.map((log, index) => (
                         <View key={index} style={tw`flex-row items-center justify-between p-3.5 bg-[#f5f3ff] dark:bg-white/5 rounded-2xl mb-2`}>
                             <View style={tw`flex-row items-center`}>
@@ -230,7 +230,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                                         {log.status || 'Present'}
                                     </Text>
                                 </View>
-                                <Text style={tw`text-[9px] text-gray-450 mt-0.5`}>{log.clockIn} - {log.clockOut || '---'}</Text>
+                                <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>{log.clockIn} - {log.clockOut || '---'}</Text>
                             </View>
                         </View>
                     )) : (
@@ -253,7 +253,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                     </View>
                 </View>
 
-                <View style={tw`space-y-2 mb-6`}>
+                <View style={tw`gap-y-2 mb-6`}>
                     <View style={tw`flex-row items-center gap-2 mb-1`}>
                         <CheckCircle2 size={14} color="#8b5cf6" />
                         <Text style={tw`text-xs text-gray-300`}>Employee ID: EMP{user.id.toString().padStart(4, '0')}</Text>

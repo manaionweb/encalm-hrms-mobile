@@ -12,7 +12,7 @@ const getBaseURL = () => {
         return `http://${host}:3001/api`;
     }
     // Fallback to local IP for physical mobile devices on Wi-Fi
-    return 'http://192.168.1.16:3001/api';
+    return 'http://192.168.1.4:3001/api';
 };
 
 const baseURL = getBaseURL();
@@ -22,6 +22,22 @@ const api = axios.create({
 });
 
 let isRefreshing = false;
+let failedQueue: Array<{
+    resolve: (token: string) => void;
+    reject: (error: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+    failedQueue.forEach((prom) => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token!);
+        }
+    });
+    failedQueue = [];
+};
+
 let authFailureCallback: (() => void) | null = null;
 
 export const setAuthFailureCallback = (callback: () => void) => {
@@ -60,9 +76,21 @@ api.interceptors.response.use(
         if (
             error.response?.status === 401 &&
             !originalRequest.url?.includes('/auth/login') &&
-            !originalRequest._retry &&
-            !isRefreshing
+            !originalRequest.url?.includes('/auth/refresh-token')
         ) {
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                })
+                    .then((token) => {
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                        return api(originalRequest);
+                    })
+                    .catch((err) => {
+                        return Promise.reject(err);
+                    });
+            }
+
             originalRequest._retry = true;
             isRefreshing = true;
 
@@ -89,8 +117,10 @@ api.interceptors.response.use(
                     originalRequest.headers['x-tenant-id'] = tenantId;
                 }
 
+                processQueue(null, newToken);
                 return api(originalRequest);
             } catch (refreshError) {
+                processQueue(refreshError, null);
                 await AsyncStorage.removeItem('token');
                 await AsyncStorage.removeItem('refreshToken');
                 await AsyncStorage.removeItem('tenantId');
@@ -100,8 +130,6 @@ api.interceptors.response.use(
                     authFailureCallback();
                 }
 
-                // Trigger navigation redirect through event or state reset if token fails
-                // In React Native, the Auth Provider state change will automatically route to Sign In
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;

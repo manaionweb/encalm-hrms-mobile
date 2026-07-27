@@ -596,7 +596,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
                     <View style={tw`mt-1.5 w-full bg-[#1e0b40] border border-[#8b5cf6]/30 rounded-xl overflow-hidden shadow-lg z-50`}>
                         <ScrollView style={tw`max-h-48`} keyboardShouldPersistTaps="handled">
                             {salaryComponents.length === 0 ? (
-                                <Text style={tw`text-xs text-gray-450 p-4 text-center`}>No salary components found</Text>
+                                <Text style={tw`text-xs text-gray-400 p-4 text-center`}>No salary components found</Text>
                             ) : (
                                 salaryComponents.map((component) => {
                                     const isSelected = formData.selectedSalaryComponents.some(
@@ -692,7 +692,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
                     </View>
                     <View style={tw`flex-1`}>
                         <Text style={tw`font-bold text-white text-sm`}>
-                            {label} {required && <Text style={tw`text-red-500`}>*</Text>}
+                            {label} {required ? <Text style={tw`text-red-500`}>*</Text> : null}
                         </Text>
                         <Text style={tw`text-xs ${hasFile ? 'text-emerald-400 font-bold' : 'text-gray-400'} mt-1`} numberOfLines={1}>
                             {hasFile ? fileObj.name : 'Click to upload document'}
@@ -729,7 +729,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
                 placeholder={placeholder}
                 placeholderTextColor="#94a3b8"
                 keyboardType={keyboardType}
-                value={formData[field] as string}
+                value={typeof formData[field] === 'string' ? formData[field] : ''}
                 onChangeText={(text) => {
                     setErrors({ ...errors, [field]: '' });
                     setFormData({ ...formData, [field]: text });
@@ -805,7 +805,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
                     onPress={() => setOpenDropdown(isOpen ? null : field)}
                     style={tw`w-full px-4 py-3 bg-[#2d1266] border ${errors[field] ? 'border-red-500' : 'border-[#8b5cf6]/30'} rounded-xl flex-row justify-between items-center h-11`}
                 >
-                    <Text style={tw`text-xs font-bold ${valueLabel ? 'text-white' : 'text-gray-450'}`}>
+                    <Text style={tw`text-xs font-bold ${valueLabel ? 'text-white' : 'text-gray-400'}`}>
                         {valueLabel || `Select ${label.replace(' *', '')}`}
                     </Text>
                     <Text style={tw`text-gray-400 text-[10px]`}>{isOpen ? '▲' : '▼'}</Text>
