@@ -257,14 +257,16 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         setFormAddress(prof.address || '');
         setFormStatus(prof.status || 'Active');
 
-        setFormPan(stat.pan || stat.panNumber || '');
-        setFormAadhaar(stat.aadhaar || stat.aadhaarNumber || '');
-        setFormUan(stat.uan || stat.uanNumber || '');
-        setFormEsic(stat.esic || stat.esicNumber || '');
+        setFormPan(stat.panNumber || stat.pan || '');
+        setFormAadhaar(stat.aadhaarNumber || stat.aadhaar || '');
+        setFormUan(stat.uanNumber || stat.uan || '');
+        setFormEsic(stat.esicNumber || stat.esic || '');
 
         setFormBankName(bank.bankName || '');
         setFormAccountNumber(bank.accountNumber || '');
-        setFormIfscCode(bank.ifsc || bank.ifscCode || '');
+        setFormIfscCode(bank.ifscCode || bank.ifsc || '');
+
+        setFormShiftId(prof.shiftId || '');
 
         setFormBasicSalary(sal.basic ? sal.basic.toString() : '0');
 
@@ -330,7 +332,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
             // Save custom fields
             const customFieldsPayload = Object.keys(formCustomFields).reduce((acc: any, key) => {
-                const val = (formCustomFields as any)[key] ?? (formCustomFields as any)[Number(key)];
+                const val = (formCustomFields as Record<string | number, string>)[key] ?? (formCustomFields as Record<string | number, string>)[Number(key)];
                 if (val !== undefined) {
                     acc[key] = val;
                 }
@@ -1683,7 +1685,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                         <Text style={tw`text-xs font-black text-gray-400 dark:text-purple-300 uppercase tracking-widest mb-3`}>Additional Details</Text>
                                         {personalFields.map(ca => {
                                             const fType = (ca.field?.type || 'TEXT').toUpperCase();
-                                            const fieldVal = (formCustomFields as any)[ca.fieldId] ?? (formCustomFields as any)[String(ca.fieldId)] ?? ca.value ?? '';
+                                            const fieldVal = (formCustomFields as Record<string | number, string>)[ca.fieldId] ?? (formCustomFields as Record<string | number, string>)[String(ca.fieldId)] ?? ca.value ?? '';
 
                                             if (isEditing) {
                                                 // 1. Radio Buttons (e.g. SEX with options 'Mail, female')
@@ -2057,216 +2059,6 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                     ) : (
                                         <Text style={tw`text-xs text-gray-400 dark:text-purple-300 italic text-center py-3`}>No deduction components assigned.</Text>
                                     )}
-                                </View>
-                            </View>
-                        );
-                    })()}
-
-                    {activeTab === 'statutory' && (
-                        <View>
-                            <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Statutory Details</Text>
-                            {isEditing ? (
-                                <View>
-                                    {renderEditableDetailRow('UAN (Provident Fund)', profile.statutory?.uan || profile.statutory?.uanNumber, formUan, setFormUan, '12-digit UAN', 'number-pad')}
-                                    {renderEditableDetailRow('ESIC Number', profile.statutory?.esic || profile.statutory?.esicNumber, formEsic, setFormEsic, '10-digit ESIC Number', 'number-pad')}
-                                    {renderEditableDetailRow('PAN Number', profile.statutory?.pan || profile.statutory?.panNumber, formPan, setFormPan, 'e.g. ABCDE1234F')}
-                                    {renderEditableDetailRow('Aadhaar Number', profile.statutory?.aadhaar || profile.statutory?.aadhaarNumber, formAadhaar, setFormAadhaar, '12-digit Aadhaar', 'number-pad')}
-
-                                    <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mt-6 mb-4`}>Bank Account</Text>
-                                    {renderEditableDetailRow('Bank Name', profile.bank?.bankName, formBankName, setFormBankName, 'e.g. HDFC Bank')}
-                                    {renderEditableDetailRow('Account Number', profile.bank?.accountNumber, formAccountNumber, setFormAccountNumber, '9 to 18 digits', 'number-pad')}
-                                    {renderEditableDetailRow('IFSC Code', profile.bank?.ifsc || profile.bank?.ifscCode, formIfscCode, setFormIfscCode, 'e.g. SBIN0123456')}
-                                </View>
-                            ) : (
-                                <View>
-                                    {renderDetailRow('PAN Card', profile.statutory?.pan || profile.statutory?.panNumber)}
-                                    {renderDetailRow('Aadhaar Number', profile.statutory?.aadhaar || profile.statutory?.aadhaarNumber)}
-                                    {renderDetailRow('UAN (PF)', profile.statutory?.uan || profile.statutory?.uanNumber)}
-                                    {renderDetailRow('ESIC Number', profile.statutory?.esic || profile.statutory?.esicNumber)}
-                                    {renderDetailRow('Bank Name', profile.bank?.bankName)}
-                                    {renderDetailRow('IFSC Code', profile.bank?.ifsc || profile.bank?.ifscCode)}
-                                    {renderDetailRow('Account Number', profile.bank?.accountNumber)}
-                                </View>
-                            )}
-                        </View>
-                    )}
-
-                    {activeTab === 'salary' && (() => {
-                        const getComponentAmount = (comp: any) => {
-                            const basic = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
-                            if (comp.calculationType === 'FLAT') {
-                                return Number(comp.value || 0);
-                            }
-                            return (basic * Number(comp.value || 0)) / 100;
-                        };
-
-                        const rawActiveComp = isEditing
-                            ? selectedSalaryComponents
-                            : (profile?.selectedSalaryComponents || profile?.salaryComponents || []);
-                        const activeSalaryComponents = Array.isArray(rawActiveComp) ? rawActiveComp : [];
-
-                        const earningsComponents = activeSalaryComponents.filter((c: any) => c?.type === 'EARNING');
-                        const deductionComponents = activeSalaryComponents.filter((c: any) => c?.type === 'DEDUCTION');
-
-                        const currentBasicAmount = Number(isEditing ? formBasicSalary : (profile?.salary?.basic || 0));
-                        const salaryOverviewEarnings = currentBasicAmount + earningsComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
-                        const salaryOverviewDeductions = deductionComponents.reduce((acc: number, c: any) => acc + getComponentAmount(c), 0);
-                        const salaryOverviewNet = salaryOverviewEarnings - salaryOverviewDeductions;
-
-                        return (
-                            <View>
-                                <Text style={tw`text-sm font-bold text-gray-900 dark:text-white mb-4`}>Salary Overview</Text>
-
-                                {/* Salary Overview 3 Cards */}
-                                <View style={tw`flex-row flex-wrap justify-between gap-2 mb-6`}>
-                                    {/* Total Earnings */}
-                                    <View style={tw`w-[31%] p-3.5 rounded-2xl bg-green-500/10 border border-green-500/30 relative overflow-hidden`}>
-                                        <View style={tw`w-7 h-7 rounded-lg bg-green-500/20 items-center justify-center mb-2`}>
-                                            <TrendingUp size={16} color="#22c55e" />
-                                        </View>
-                                        <Text style={tw`text-[10px] font-bold text-green-600 dark:text-green-400`}>Total Earnings</Text>
-                                        <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
-                                            ₹ {salaryOverviewEarnings.toLocaleString('en-IN')}
-                                        </Text>
-                                        <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
-                                    </View>
-
-                                    {/* Total Deductions */}
-                                    <View style={tw`w-[31%] p-3.5 rounded-2xl bg-red-500/10 border border-red-500/30 relative overflow-hidden`}>
-                                        <View style={tw`w-7 h-7 rounded-lg bg-red-500/20 items-center justify-center mb-2`}>
-                                            <TrendingDown size={16} color="#ef4444" />
-                                        </View>
-                                        <Text style={tw`text-[10px] font-bold text-red-500 dark:text-red-400`}>Total Deductions</Text>
-                                        <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
-                                            ₹ {salaryOverviewDeductions.toLocaleString('en-IN')}
-                                        </Text>
-                                        <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
-                                    </View>
-
-                                    {/* Net Salary */}
-                                    <View style={tw`w-[31%] p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 relative overflow-hidden`}>
-                                        <View style={tw`w-7 h-7 rounded-lg bg-blue-500/20 items-center justify-center mb-2`}>
-                                            <Coins size={16} color="#3b82f6" />
-                                        </View>
-                                        <Text style={tw`text-[10px] font-bold text-blue-600 dark:text-blue-400`}>Net Salary</Text>
-                                        <Text style={tw`text-sm font-black text-gray-900 dark:text-white mt-1`} numberOfLines={1}>
-                                            ₹ {salaryOverviewNet.toLocaleString('en-IN')}
-                                        </Text>
-                                        <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>Per Month</Text>
-                                    </View>
-                                </View>
-
-                                {/* Earnings & Deductions Containers */}
-                                <View style={tw`gap-5`}>
-                                    {/* Earnings Container */}
-                                    <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
-                                        <Text style={tw`text-xs font-black text-green-600 dark:text-green-400 uppercase tracking-wider mb-3`}>Earnings</Text>
-
-                                        {/* Basic Salary Row */}
-                                        <View style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
-                                            <View>
-                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>Basic Salary</Text>
-                                                <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>Fixed Base Pay</Text>
-                                            </View>
-                                            {isEditing ? (
-                                                <TextInput
-                                                    style={tw`px-3 py-1.5 bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-xl text-xs text-gray-800 dark:text-white font-bold w-32 text-right`}
-                                                    value={formBasicSalary}
-                                                    onChangeText={setFormBasicSalary}
-                                                    keyboardType="number-pad"
-                                                    placeholder="Enter Basic"
-                                                    placeholderTextColor="#94a3b8"
-                                                />
-                                            ) : (
-                                                <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                    ₹ {Number(profile.salary?.basic || 0).toLocaleString('en-IN')}
-                                                </Text>
-                                            )}
-                                        </View>
-
-                                        {/* Earning Components List */}
-                                        {earningsComponents.map((comp: any) => (
-                                            <View key={comp.id} style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
-                                                <View>
-                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
-                                                    <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
-                                                        {comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`}
-                                                    </Text>
-                                                </View>
-                                                <View style={tw`flex-row items-center gap-3`}>
-                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                        ₹ {getComponentAmount(comp).toLocaleString('en-IN')}
-                                                    </Text>
-                                                    {isEditing && (
-                                                        <TouchableOpacity
-                                                            onPress={() => {
-                                                                setSelectedSalaryComponents(prev => prev.filter(c => String(c.id) !== String(comp.id)));
-                                                            }}
-                                                            style={tw`p-1.5 bg-red-500/10 rounded-lg`}
-                                                        >
-                                                            <Trash2 size={14} color="#ef4444" />
-                                                        </TouchableOpacity>
-                                                    )}
-                                                </View>
-                                            </View>
-                                        ))}
-
-                                        {/* Add Earnings Component Button */}
-                                        {isEditing && (
-                                            <TouchableOpacity
-                                                onPress={() => setComponentPickerType('EARNING')}
-                                                style={tw`mt-3 py-2.5 rounded-xl border border-dashed border-green-500/40 items-center justify-center bg-green-500/5`}
-                                            >
-                                                <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>+ Add Earnings Component</Text>
-                                            </TouchableOpacity>
-                                        )}
-                                    </View>
-
-                                    {/* Deductions Container */}
-                                    <View style={tw`bg-[#f5f3ff] dark:bg-[#111827] p-4 rounded-2xl border border-gray-100 dark:border-white/5`}>
-                                        <Text style={tw`text-xs font-black text-red-500 dark:text-red-400 uppercase tracking-wider mb-3`}>Deductions</Text>
-
-                                        {deductionComponents.length === 0 && !isEditing && (
-                                            <Text style={tw`text-xs text-gray-400 italic py-2`}>No deductions applied</Text>
-                                        )}
-
-                                        {/* Deduction Components List */}
-                                        {deductionComponents.map((comp: any) => (
-                                            <View key={comp.id} style={tw`flex-row justify-between items-center py-2.5 border-b border-gray-200 dark:border-white/10`}>
-                                                <View>
-                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{comp.name}</Text>
-                                                    <Text style={tw`text-[10px] text-gray-400 mt-0.5`}>
-                                                        {comp.calculationType === 'FLAT' ? 'Fixed' : `${comp.value}% of Basic`}
-                                                    </Text>
-                                                </View>
-                                                <View style={tw`flex-row items-center gap-3`}>
-                                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>
-                                                        ₹ {getComponentAmount(comp).toLocaleString('en-IN')}
-                                                    </Text>
-                                                    {isEditing && (
-                                                        <TouchableOpacity
-                                                            onPress={() => {
-                                                                setSelectedSalaryComponents(prev => prev.filter(c => String(c.id) !== String(comp.id)));
-                                                            }}
-                                                            style={tw`p-1.5 bg-red-500/10 rounded-lg`}
-                                                        >
-                                                            <Trash2 size={14} color="#ef4444" />
-                                                        </TouchableOpacity>
-                                                    )}
-                                                </View>
-                                            </View>
-                                        ))}
-
-                                        {/* Add Deductions Component Button */}
-                                        {isEditing && (
-                                            <TouchableOpacity
-                                                onPress={() => setComponentPickerType('DEDUCTION')}
-                                                style={tw`mt-3 py-2.5 rounded-xl border border-dashed border-red-500/40 items-center justify-center bg-red-500/5`}
-                                            >
-                                                <Text style={tw`text-xs font-bold text-red-500 dark:text-red-400`}>+ Add Deduction Component</Text>
-                                            </TouchableOpacity>
-                                        )}
-                                    </View>
                                 </View>
                             </View>
                         );

@@ -750,6 +750,13 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                                     </Text>
                                                 </View>
 
+                                                {/* Center Status Badge */}
+                                                {statusLabel !== '-' && (
+                                                    <View style={tw`w-full items-center mt-0.5`}>
+                                                        {renderStatusBadge(statusLabel)}
+                                                    </View>
+                                                )}
+
                                                 {/* Middle Details (Holiday Name or Leave Type Name) */}
                                                 <View style={tw`w-full items-center`}>
                                                     {holiday && (
@@ -797,11 +804,11 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                                         </View>
                                                     ) : null}
                                                 </TouchableOpacity>
-                                        );
-                                    })}
-                                </View>
+                                    );
+                                })}
                             </View>
-                        )}
+                        </View>
+                    )}
                     </Animated.View>
                 </PinchGestureHandler>
 
