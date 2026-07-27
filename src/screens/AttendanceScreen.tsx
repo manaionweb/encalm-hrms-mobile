@@ -750,13 +750,6 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                                     </Text>
                                                 </View>
 
-                                                {/* Center Status Badge */}
-                                                {statusLabel !== '-' && (
-                                                    <View style={tw`w-full items-center mt-0.5`}>
-                                                        {renderStatusBadge(statusLabel)}
-                                                    </View>
-                                                )}
-
                                                 {/* Middle Details (Holiday Name or Leave Type Name) */}
                                                 <View style={tw`w-full items-center`}>
                                                     {holiday && (
@@ -767,26 +760,39 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                                         </View>
                                                     )}
 
-                                                    {!holiday && leave && !isBeforeJoining && (statusLabel === 'Absent' || isFuture) && (
-                                                        <View
-                                                            style={[
-                                                                tw`px-0.5 py-0.2 rounded w-full items-center mt-0.5`,
-                                                                leave.status === 'APPROVED' ? tw`bg-blue-100 dark:bg-blue-900/30` :
-                                                                    leave.status === 'PENDING' ? tw`bg-amber-100 dark:bg-amber-900/30` :
-                                                                        tw`bg-rose-100 dark:bg-rose-900/30`
-                                                            ]}
-                                                        >
-                                                            <Text
-                                                                numberOfLines={1}
+                                                        {!holiday && leave && !isBeforeJoining && (statusLabel === 'Absent' || isFuture) && (
+                                                            <View
                                                                 style={[
-                                                                    tw`text-[5px] font-bold`,
-                                                                    leave.status === 'APPROVED' ? tw`text-blue-700 dark:text-blue-300` :
-                                                                        leave.status === 'PENDING' ? tw`text-amber-700 dark:text-amber-300` :
-                                                                            tw`text-rose-700 dark:text-rose-300`,
-                                                                    { lineHeight: 6.5 }
+                                                                    tw`px-0.5 py-0.2 rounded w-full items-center mt-0.5`,
+                                                                    leave.status === 'APPROVED' ? tw`bg-blue-100 dark:bg-blue-900/30` :
+                                                                        leave.status === 'PENDING' ? tw`bg-amber-100 dark:bg-amber-900/30` :
+                                                                            tw`bg-rose-100 dark:bg-rose-900/30`
                                                                 ]}
                                                             >
-                                                                {leave.leaveType?.name || 'Leave'}
+                                                                <Text
+                                                                    numberOfLines={1}
+                                                                    style={[
+                                                                        tw`text-[5px] font-bold`,
+                                                                        leave.status === 'APPROVED' ? tw`text-blue-700 dark:text-blue-300` :
+                                                                            leave.status === 'PENDING' ? tw`text-amber-700 dark:text-amber-300` :
+                                                                                tw`text-rose-700 dark:text-rose-300`,
+                                                                        { lineHeight: 6.5 }
+                                                                    ]}
+                                                                >
+                                                                    {leave.leaveType?.name || 'Leave'}
+                                                                </Text>
+                                                            </View>
+                                                        )}
+                                                    </View>
+
+                                                    {/* In/Out timings if log exists */}
+                                                    {log && (log.inTime || log.outTime) ? (
+                                                        <View style={tw`w-full border-t border-gray-100 dark:border-white/5 pt-0.5 mt-0.5 items-center`}>
+                                                            <Text style={[tw`text-[5.5px] font-semibold text-green-600 dark:text-green-400`, { lineHeight: 7 }]}>
+                                                                {log.inTime ? formatTime(log.inTime) : '--'}
+                                                            </Text>
+                                                            <Text style={[tw`text-[5.5px] font-semibold text-red-500 dark:text-red-400 mt-0.5`, { lineHeight: 7 }]}>
+                                                                {log.outTime ? formatTime(log.outTime) : '--'}
                                                             </Text>
                                                         </View>
                                                     )}
