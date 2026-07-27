@@ -257,14 +257,16 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         setFormAddress(prof.address || '');
         setFormStatus(prof.status || 'Active');
 
-        setFormPan(stat.pan || stat.panNumber || '');
-        setFormAadhaar(stat.aadhaar || stat.aadhaarNumber || '');
-        setFormUan(stat.uan || stat.uanNumber || '');
-        setFormEsic(stat.esic || stat.esicNumber || '');
+        setFormPan(stat.panNumber || stat.pan || '');
+        setFormAadhaar(stat.aadhaarNumber || stat.aadhaar || '');
+        setFormUan(stat.uanNumber || stat.uan || '');
+        setFormEsic(stat.esicNumber || stat.esic || '');
 
         setFormBankName(bank.bankName || '');
         setFormAccountNumber(bank.accountNumber || '');
-        setFormIfscCode(bank.ifsc || bank.ifscCode || '');
+        setFormIfscCode(bank.ifscCode || bank.ifsc || '');
+
+        setFormShiftId(prof.shiftId || '');
 
         setFormBasicSalary(sal.basic ? sal.basic.toString() : '0');
 

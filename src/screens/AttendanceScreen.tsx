@@ -801,7 +801,8 @@ export default function AttendanceScreen({ route, navigation }: any) {
                                     })}
                                 </View>
                             </View>
-                        )}
+                        </View>
+                    )}
                     </Animated.View>
                 </PinchGestureHandler>
 
