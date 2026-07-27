@@ -141,6 +141,7 @@ export default function AppNavigator() {
                     <RootStack.Screen name="Main" component={MainDrawerNavigator} />
                     <RootStack.Screen name="LeaveToday" component={ThemedLeaveToday} />
                     <RootStack.Screen name="NewJoiners" component={ThemedNewJoiners} />
+                    <RootStack.Screen name="EmployeeProfile" component={ThemedEmployeeProfile} />
                 </>
             )}
         </RootStack.Navigator>
