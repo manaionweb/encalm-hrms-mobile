@@ -14,7 +14,7 @@ type ProfileTab = 'personal' | 'documents' | 'statutory' | 'salary' | 'shifts' |
 
 export default function EmployeeProfileScreen({ route, navigation }: any) {
     const { showToast } = useToast();
-    const { id } = route.params || {};
+    const targetId = route.params?.id || route.params?.employeeId;
     const insets = useSafeAreaInsets();
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
@@ -150,13 +150,13 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
     const fetchEmployeeData = async () => {
         try {
             setLoading(true);
-            const employeeId = id || 'me';
-            const endpoint = id ? `/employee/${id}` : '/employee/me';
-            const leavesEndpoint = id ? `/leave/history?employeeId=${id}` : '/leave/history';
+            const employeeIdParam = targetId || 'me';
+            const endpoint = targetId ? `/employee/${targetId}` : '/employee/me';
+            const leavesEndpoint = targetId ? `/leave/history?employeeId=${targetId}` : '/leave/history';
 
             const [profileRes, customRes, leavesRes] = await Promise.all([
                 api.get(endpoint),
-                api.get(`/custom-fields/employee/${employeeId}`),
+                api.get(`/custom-fields/employee/${employeeIdParam}`),
                 api.get(leavesEndpoint)
             ]);
 
@@ -236,7 +236,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         fetchEmployeeData();
         fetchCompanySignature();
         fetchMasterData();
-    }, [id]);
+    }, [targetId]);
 
     const startEditing = () => {
         if (!employee) return;

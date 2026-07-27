@@ -112,8 +112,8 @@ export default function LeaveTodayScreen({ navigation }: any) {
                             On Leave
                         </Text>
                     </View>
-                    {emp.id ? (
-                        <TouchableOpacity onPress={() => navigation.navigate('EmployeeProfile', { id: emp.id })}>
+                    {(emp.id || emp._id) ? (
+                        <TouchableOpacity onPress={() => navigation.navigate('EmployeeProfile', { id: emp.id || emp._id })}>
                             <Text style={tw`text-xs font-bold text-[#8b5cf6] dark:text-[#c4b5fd]`}>
                                 View Profile
                             </Text>

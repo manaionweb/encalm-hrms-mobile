@@ -100,8 +100,8 @@ export default function NewJoinersScreen({ navigation }: any) {
                             {profile.status || 'Active'}
                         </Text>
                     </View>
-                    {item.id ? (
-                        <TouchableOpacity onPress={() => navigation.navigate('EmployeeProfile', { id: item.id })}>
+                    {(item.id || item._id) ? (
+                        <TouchableOpacity onPress={() => navigation.navigate('EmployeeProfile', { id: item.id || item._id })}>
                             <Text style={tw`text-xs font-bold text-[#8b5cf6] dark:text-[#c4b5fd]`}>
                                 View Profile
                             </Text>
