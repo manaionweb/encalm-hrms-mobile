@@ -16,7 +16,7 @@ interface CustomHeaderProps {
 
 export default function CustomHeader({ navigation, title, showBackButton }: CustomHeaderProps) {
     const { theme, toggleTheme } = useTheme();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
     const isDark = theme === 'dark';
     const isHrAdmin = user?.role === 'HR_ADMIN';
 
