@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Platform, KeyboardAvoidingView, Modal } from 'react-native';
-import { ArrowLeft, ChevronRight, User, CreditCard, Briefcase, FileText, Calendar, Trash2, Upload } from 'lucide-react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Platform, KeyboardAvoidingView, Modal, Image, Linking } from 'react-native';
+import { ArrowLeft, ChevronRight, User, CreditCard, Briefcase, FileText, Calendar, Trash2, Upload, Eye, X } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -27,9 +27,11 @@ export default function AddEmployeeScreen({ navigation }: any) {
         aadhaar: null,
         pan: null,
         degree: null,
+        profilePicture: null,
     });
     const [salaryComponents, setSalaryComponents] = useState<any[]>([]);
     const [confirmDeleteDoc, setConfirmDeleteDoc] = useState<{ key: string; isCustom: boolean } | null>(null);
+    const [previewDoc, setPreviewDoc] = useState<{ url: string; name?: string } | null>(null);
 
     // Dropdown Select State
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -347,8 +349,8 @@ export default function AddEmployeeScreen({ navigation }: any) {
             setCurrentStep(4);
         } else if (currentStep === 4) {
             // Validation for standard documents
-            if (!documents.aadhaar || !documents.pan || !documents.degree) {
-                showToast("Please upload all required standard documents (Aadhaar Card, PAN Card, and Highest Qualification Degree).", 'error');
+            if (!documents.aadhaar || !documents.pan || !documents.degree || !documents.profilePicture) {
+                showToast("Please upload all required standard documents (Aadhaar Card, PAN Card, Highest Qualification Degree, and Profile Picture).", 'error');
                 return;
             }
 
@@ -453,6 +455,27 @@ export default function AddEmployeeScreen({ navigation }: any) {
                         name: documents.degree.name,
                         type: documents.degree.type
                     } as any);
+                }
+            }
+            if (documents.profilePicture) {
+                if (Platform.OS === 'web') {
+                    if (documents.profilePicture.file) {
+                        formDataPayload.append('profilePicture', documents.profilePicture.file);
+                        formDataPayload.append('profilePhoto', documents.profilePicture.file);
+                    } else if (documents.profilePicture.uri) {
+                        const blobRes = await fetch(documents.profilePicture.uri);
+                        const blob = await blobRes.blob();
+                        formDataPayload.append('profilePicture', blob, documents.profilePicture.name || 'profile.jpg');
+                        formDataPayload.append('profilePhoto', blob, documents.profilePicture.name || 'profile.jpg');
+                    }
+                } else {
+                    const photoObj = {
+                        uri: documents.profilePicture.uri,
+                        name: documents.profilePicture.name || 'profile.jpg',
+                        type: documents.profilePicture.type || 'image/jpeg'
+                    } as any;
+                    formDataPayload.append('profilePicture', photoObj);
+                    formDataPayload.append('profilePhoto', photoObj);
                 }
             }
 
@@ -701,11 +724,83 @@ export default function AddEmployeeScreen({ navigation }: any) {
                 </View>
 
                 <View style={tw`flex-row items-center gap-2`}>
+                    {hasFile && (
+                        <TouchableOpacity
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                setPreviewDoc({ url: fileObj.uri, name: fileObj.name || label });
+                            }}
+                            style={tw`p-2 bg-[#8b5cf6]/20 rounded-lg mr-1`}
+                        >
+                            <Eye size={16} color="#c4b5fd" />
+                        </TouchableOpacity>
+                    )}
                     {hasFile ? (
                         <TouchableOpacity
                             onPress={(e) => {
                                 e.stopPropagation();
                                 setConfirmDeleteDoc({ key: docKey, isCustom: false });
+                            }}
+                            style={tw`p-2 bg-red-500/10 rounded-lg`}
+                        >
+                            <Trash2 size={16} color="#ef4444" />
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={tw`p-2 bg-white/5 rounded-lg`}>
+                            <Upload size={16} color="#c4b5fd" />
+                        </View>
+                    )}
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
+    const renderProfilePictureChecklistItem = () => {
+        const fileObj = documents.profilePicture;
+        const hasFile = !!fileObj;
+        const hasError = !!errors.profilePicture;
+
+        return (
+            <TouchableOpacity
+                key="profilePicture"
+                onPress={() => handlePickStandardFile('profilePicture')}
+                style={tw`flex-row items-center justify-between p-4 bg-black/10 border ${hasError ? 'border-red-500' : hasFile ? 'border-emerald-500 bg-emerald-500/5' : 'border-[#8b5cf6]/20'} rounded-2xl mb-4`}
+            >
+                <View style={tw`flex-row items-center flex-1 mr-2`}>
+                    <View style={tw`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center ${hasFile ? 'bg-emerald-500/15 text-emerald-400' : 'bg-black/10 text-gray-400'} mr-4`}>
+                        {hasFile && fileObj.uri ? (
+                            <Image source={{ uri: fileObj.uri }} style={tw`w-full h-full`} resizeMode="cover" />
+                        ) : (
+                            <User size={24} color={hasFile ? '#34d399' : '#94a3b8'} />
+                        )}
+                    </View>
+                    <View style={tw`flex-1`}>
+                        <Text style={tw`font-bold text-white text-sm`}>
+                            Profile Picture <Text style={tw`text-red-500`}>*</Text>
+                        </Text>
+                        <Text style={tw`text-xs ${hasFile ? 'text-emerald-400 font-bold' : 'text-gray-400'} mt-1`} numberOfLines={1}>
+                            {hasFile ? fileObj.name : 'Upload JPG, JPEG or PNG image (Max 2MB)'}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={tw`flex-row items-center gap-2`}>
+                    {hasFile && (
+                        <TouchableOpacity
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                setPreviewDoc({ url: fileObj.uri, name: fileObj.name || 'Profile Picture' });
+                            }}
+                            style={tw`p-2 bg-[#8b5cf6]/20 rounded-lg mr-1`}
+                        >
+                            <Eye size={16} color="#c4b5fd" />
+                        </TouchableOpacity>
+                    )}
+                    {hasFile ? (
+                        <TouchableOpacity
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteDoc({ key: 'profilePicture', isCustom: false });
                             }}
                             style={tw`p-2 bg-red-500/10 rounded-lg`}
                         >
@@ -968,6 +1063,7 @@ export default function AddEmployeeScreen({ navigation }: any) {
                                 {renderDocumentChecklistItem('Aadhaar Card', 'aadhaar', true)}
                                 {renderDocumentChecklistItem('PAN Card', 'pan', true)}
                                 {renderDocumentChecklistItem('Highest Qualification Degree', 'degree', true)}
+                                {renderProfilePictureChecklistItem()}
 
                                 {/* Custom Document Vault Configuration */}
                                 {documentCustomFields.length > 0 && (
@@ -1065,6 +1161,67 @@ export default function AddEmployeeScreen({ navigation }: any) {
                                 style={tw`flex-1 py-2.5 bg-red-600 rounded-xl items-center shadow-lg shadow-red-500/20`}
                             >
                                 <Text style={tw`text-xs font-bold text-white`}>Yes, Remove</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+            {/* Document Preview Modal */}
+            <Modal
+                visible={!!previewDoc}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setPreviewDoc(null)}
+            >
+                <View style={tw`flex-1 bg-black/80 items-center justify-center p-4`}>
+                    <View style={tw`bg-[#1e0b40] border border-[#8b5cf6]/30 rounded-3xl w-full max-w-sm p-5 items-center shadow-2xl`}>
+                        <View style={tw`flex-row justify-between items-center w-full mb-4 border-b border-[#8b5cf6]/30 pb-3`}>
+                            <Text style={tw`text-sm font-bold text-white flex-1 mr-2`} numberOfLines={1}>
+                                {previewDoc?.name || 'Document Preview'}
+                            </Text>
+                            <TouchableOpacity onPress={() => setPreviewDoc(null)} style={tw`p-1 rounded-full bg-white/10`}>
+                                <X size={18} color="white" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={tw`w-full h-72 bg-black/40 rounded-2xl overflow-hidden justify-center items-center mb-4`}>
+                            {previewDoc?.url ? (
+                                <Image
+                                    source={{ uri: previewDoc.url }}
+                                    style={tw`w-full h-full`}
+                                    resizeMode="contain"
+                                />
+                            ) : (
+                                <View style={tw`items-center p-4`}>
+                                    <FileText size={48} color="#a78bfa" style={tw`mb-2`} />
+                                    <Text style={tw`text-xs text-gray-300 text-center font-bold`}>
+                                        No preview available
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+
+                        <View style={tw`flex-row gap-3 w-full`}>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    if (previewDoc?.url) {
+                                        try {
+                                            await Linking.openURL(previewDoc.url);
+                                        } catch (e) {
+                                            showToast('Cannot open browser for this URL', 'error');
+                                        }
+                                    }
+                                }}
+                                style={tw`flex-1 py-2.5 bg-[#8b5cf6] rounded-xl items-center flex-row justify-center gap-1.5`}
+                            >
+                                <Eye size={14} color="white" />
+                                <Text style={tw`text-xs font-bold text-white`}>Open in Browser</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => setPreviewDoc(null)}
+                                style={tw`py-2.5 px-4 bg-white/10 rounded-xl items-center`}
+                            >
+                                <Text style={tw`text-xs font-bold text-gray-300`}>Close</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
