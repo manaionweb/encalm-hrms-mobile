@@ -49,7 +49,7 @@ export default function RegularizationsScreen({ navigation }: any) {
     const handleApprove = async (id: string) => {
         try {
             await approve(id);
-            showToast("Attendance correction approved successfully.", 'success');
+            showToast("Attendance regularization approved successfully.", 'success');
         } catch (err: any) {
             showToast(err.message || "Failed to approve regularization", 'error');
         }
@@ -66,7 +66,7 @@ export default function RegularizationsScreen({ navigation }: any) {
                 rejectingId,
                 rejectComment
             );
-            showToast("Attendance correction rejected.", 'success');
+            showToast("Attendance regularization rejected.", 'success');
             setRejectComment("");
             setRejectingId(null);
         } catch (err: any) {
@@ -88,7 +88,7 @@ export default function RegularizationsScreen({ navigation }: any) {
         <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
 
             {/* Custom Header */}
-            <CustomHeader navigation={navigation} title="Attendance Corrections" showBackButton={true} />
+            <CustomHeader navigation={navigation} title="Attendance Regularizations" showBackButton={true} />
 
             {/* Search Bar */}
             <View style={tw`px-4 pt-4`}>
@@ -111,7 +111,7 @@ export default function RegularizationsScreen({ navigation }: any) {
             ) : filteredRequests.length === 0 ? (
                 <View style={tw`flex-1 items-center justify-center p-6`}>
                     <Calendar size={48} color="#cbd5e1" style={tw`mb-4 opacity-50`} />
-                    <Text style={tw`text-base font-bold text-gray-700 dark:text-white`}>No Pending Corrections</Text>
+                    <Text style={tw`text-base font-bold text-gray-700 dark:text-white`}>No Pending Regularizations</Text>
                     <Text style={tw`text-xs text-gray-400 mt-1`}>All requests have been processed successfully.</Text>
                 </View>
             ) : (

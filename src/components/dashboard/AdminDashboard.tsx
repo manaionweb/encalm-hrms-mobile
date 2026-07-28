@@ -57,7 +57,7 @@ export default function AdminDashboard({
                         }}
                         style={tw`bg-orange-600 rounded-xl py-2 items-center`}
                     >
-                        <Text style={tw`text-white font-bold text-xs`}>Review Corrections</Text>
+                        <Text style={tw`text-white font-bold text-xs`}>Review Regularizations</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -94,7 +94,7 @@ export default function AdminDashboard({
                         style={tw`flex-1 pb-2 items-center ${activeTab === 'regularizations' ? 'border-b-2 border-[#8b5cf6]' : ''}`}
                     >
                         <Text style={tw`text-xs font-bold uppercase tracking-wider ${activeTab === 'regularizations' ? 'text-[#8b5cf6] dark:text-[#c4b5fd]' : 'text-gray-400'}`}>
-                            Corrections ({pendingRegularizations.length})
+                            REGULARIZATIONS ({pendingRegularizations.length})
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -134,7 +134,7 @@ export default function AdminDashboard({
                         )
                     ) : (
                         pendingRegularizations.length === 0 ? (
-                            <Text style={tw`text-sm text-gray-400 text-center py-6 font-semibold`}>No pending corrections.</Text>
+                            <Text style={tw`text-sm text-gray-400 text-center py-6 font-semibold`}>No pending regularizations.</Text>
                         ) : (
                             pendingRegularizations.map((request) => {
                                 const name = request.user?.name || `Employee #${request.userId}`;
