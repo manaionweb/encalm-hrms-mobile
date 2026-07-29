@@ -14,10 +14,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setThemeState] = useState<Theme>(() => {
-        const colorScheme = Appearance.getColorScheme();
-        return colorScheme === 'dark' ? 'dark' : 'light';
-    });
+    const [theme, setThemeState] = useState<Theme>('light');
 
     useEffect(() => {
         // Load theme from async storage on boot
@@ -28,10 +25,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
                     setThemeState(savedTheme);
                     (tw as any).setColorScheme(savedTheme);
                 } else {
-                    const systemScheme = Appearance.getColorScheme();
-                    const initialTheme = systemScheme === 'dark' ? 'dark' : 'light';
-                    setThemeState(initialTheme);
-                    (tw as any).setColorScheme(initialTheme);
+                    setThemeState('light');
+                    (tw as any).setColorScheme('light');
                 }
             } catch (e) {
                 console.error('Failed to load theme', e);

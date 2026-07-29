@@ -164,7 +164,7 @@ export default function CustomHeader({ navigation, title, showBackButton }: Cust
                 <Text 
                     numberOfLines={1} 
                     ellipsizeMode="tail"
-                    style={tw`text-sm font-black text-[#1e1b4b] dark:text-white tracking-tight ml-2.5 flex-1`}
+                    style={tw`text-[13px] font-black text-[#1e1b4b] dark:text-white tracking-tight ml-2 flex-1`}
                 >
                     {title}
                 </Text>

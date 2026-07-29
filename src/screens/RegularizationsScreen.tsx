@@ -143,7 +143,7 @@ export default function RegularizationsScreen({ navigation }: any) {
                             >
                                 {/* Row Header: User details & Date */}
                                 <View style={tw`flex-row justify-between items-center mb-3`}>
-                                    <View style={tw`flex-row items-center gap-3 flex-1`}>
+                                    <View style={tw`flex-row items-center gap-3 flex-1 mr-2`}>
                                         <View style={tw`w-10 h-10 rounded-2xl ${avatarBg} items-center justify-center shadow-md`}>
                                             <Text style={tw`text-white font-bold text-sm`}>{initials}</Text>
                                         </View>
@@ -159,25 +159,48 @@ export default function RegularizationsScreen({ navigation }: any) {
                                     </View>
                                 </View>
 
-                                 {/* Proposed In/Out times */}
-                                <View style={tw`flex-row gap-4 mb-3`}>
-                                    {!!req.proposedIn && (
+                                {/* Proposed In/Out times formatted */}
+                                <View style={tw`flex-row flex-wrap gap-x-4 gap-y-1 mb-3`}>
+                                    {!!proposedInFormatted && (
                                         <View style={tw`flex-row items-center gap-1`}>
                                             <Clock size={12} color="#10b981" />
-                                            <Text style={tw`text-xs font-bold text-green-600`}>In: {req.proposedIn}</Text>
+                                            <Text style={tw`text-xs font-bold text-green-600 dark:text-green-400`}>
+                                                In: {proposedInFormatted}
+                                            </Text>
                                         </View>
                                     )}
-                                    {!!req.proposedOut && (
+                                    {!!proposedOutFormatted && (
                                         <View style={tw`flex-row items-center gap-1`}>
                                             <Clock size={12} color="#f43f5e" />
-                                            <Text style={tw`text-xs font-bold text-rose-500`}>Out: {req.proposedOut}</Text>
+                                            <Text style={tw`text-xs font-bold text-rose-500 dark:text-rose-400`}>
+                                                Out: {proposedOutFormatted}
+                                            </Text>
                                         </View>
                                     )}
                                 </View>
 
-                                <Text style={tw`text-xs text-gray-600 dark:text-gray-300 italic mb-4`}>
-                                    "{req.reason}"
-                                </Text>
+                                {/* Reason & Actions */}
+                                <View style={tw`flex-row items-center justify-between pt-2 border-t border-gray-100 dark:border-white/5`}>
+                                    <Text style={tw`text-xs text-gray-600 dark:text-gray-300 italic flex-1 mr-2`} numberOfLines={2}>
+                                        "{req.reason}"
+                                    </Text>
+                                    <View style={tw`flex-row gap-2`}>
+                                        <TouchableOpacity
+                                            onPress={() => handleApprove(req.id)}
+                                            style={tw`flex-row items-center gap-1 px-3 py-1.5 bg-emerald-600 rounded-xl shadow-sm`}
+                                        >
+                                            <Check size={14} color="#ffffff" />
+                                            <Text style={tw`text-xs font-bold text-white`}>Approve</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={() => setRejectingId(req.id)}
+                                            style={tw`flex-row items-center gap-1 px-3 py-1.5 bg-rose-600 rounded-xl shadow-sm`}
+                                        >
+                                            <X size={14} color="#ffffff" />
+                                            <Text style={tw`text-xs font-bold text-white`}>Reject</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
                             </View>
                         );
                     })}
