@@ -8,11 +8,11 @@ const getBaseURL = () => {
         return process.env.EXPO_PUBLIC_API_URL;
     }
     if (Platform.OS === 'web') {
-        const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+        const host = (typeof window !== 'undefined' && window.location.hostname) ? window.location.hostname : 'localhost';
         return `http://${host}:3001/api`;
     }
-    // Fallback to local IP for physical mobile devices on Wi-Fi
-    return 'http://192.168.1.4:3001/api';
+    // Fallback to localhost for development
+    return 'http://localhost:3001/api';
 };
 
 const baseURL = getBaseURL();

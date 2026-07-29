@@ -93,12 +93,48 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
 
     const isHolidayToday = !!todayHoliday;
 
+    const formatTimeString = (timeStr?: string) => {
+        if (!timeStr || timeStr === '---' || timeStr === 'null') return '---';
+        if (timeStr.length <= 8 && (timeStr.includes('AM') || timeStr.includes('PM') || timeStr.includes(':'))) {
+            return timeStr;
+        }
+        try {
+            const d = new Date(timeStr);
+            if (!isNaN(d.getTime())) {
+                return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+            }
+        } catch (e) {
+            // Fallback
+        }
+        return timeStr;
+    };
+
+    const getStatusBadgeConfig = (statusStr?: string) => {
+        const s = (statusStr || 'Present').toUpperCase();
+        if (s.includes('LATE')) {
+            return {
+                bg: tw`bg-amber-100 dark:bg-amber-500/20`,
+                text: tw`text-amber-700 dark:text-amber-400`,
+            };
+        }
+        if (s.includes('ABSENT')) {
+            return {
+                bg: tw`bg-rose-100 dark:bg-rose-500/20`,
+                text: tw`text-rose-700 dark:text-rose-400`,
+            };
+        }
+        return {
+            bg: tw`bg-green-100 dark:bg-green-500/20`,
+            text: tw`text-green-700 dark:text-green-400`,
+        };
+    };
+
     return (
         <ScrollView style={tw`flex-1 px-4 py-4`} contentContainerStyle={tw`pb-12`}>
             
             {/* GREETING SECTION */}
             <View style={tw`bg-[#8b5cf6] rounded-[2rem] p-6 text-white shadow-lg mb-6`}>
-                <Text style={tw`text-2xl font-extrabold mb-1`}>Welcome, {user.name}!</Text>
+                <Text style={tw`text-2xl font-extrabold mb-1 text-white`}>Welcome, {user.name}!</Text>
                 <Text style={tw`text-indigo-100 text-sm opacity-90 max-w-xs mb-6`}>Your personalized workspace is ready. Have a productive day!</Text>
 
                 <View style={tw`flex-row flex-wrap gap-3`}>
@@ -134,7 +170,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
             <View style={tw`flex-row flex-wrap justify-between mb-6`}>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Attendance')}
-                    style={tw`w-[47%] bg-white dark:bg-[#1a2235] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#374151]/50 shadow-sm`}
+                    style={tw`w-[47%] bg-white dark:bg-[#181537] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/10 shadow-sm`}
                 >
                     <View style={tw`flex-row justify-between items-center mb-3`}>
                         <View style={tw`p-2 bg-blue-50 dark:bg-[#1c1a45] rounded-xl`}>
@@ -150,7 +186,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
 
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Leave')}
-                    style={tw`w-[47%] bg-white dark:bg-[#1a2235] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-[#374151]/50 shadow-sm`}
+                    style={tw`w-[47%] bg-white dark:bg-[#181537] p-4 rounded-3xl mb-4 border border-gray-100 dark:border-white/10 shadow-sm`}
                 >
                     <View style={tw`flex-row justify-between items-center mb-3`}>
                         <View style={tw`p-2 bg-[#f5f3ff] dark:bg-[#1c1a45] rounded-xl`}>
@@ -162,7 +198,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                     <Text style={tw`text-sm font-bold text-gray-800 dark:text-white mt-0.5`}>{totalLeaves} Days</Text>
                 </TouchableOpacity>
 
-                <View style={tw`w-full bg-white dark:bg-[#1a2235] p-4 rounded-3xl border border-gray-100 dark:border-[#374151]/50 shadow-sm`}>
+                <View style={tw`w-full bg-white dark:bg-[#181537] p-4 rounded-3xl border border-gray-100 dark:border-white/10 shadow-sm`}>
                     <View style={tw`flex-row justify-between items-center mb-3`}>
                         <View style={tw`p-2 bg-purple-50 dark:bg-[#1c1a45] rounded-xl`}>
                             <History size={18} color="#a855f7" />
@@ -204,7 +240,7 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
             </View>
 
             {/* RECENT ACTIVITY */}
-            <View style={tw`bg-white dark:bg-[#1a2235] rounded-3xl p-5 border border-gray-100 dark:border-[#374151]/50 shadow-sm mb-6`}>
+            <View style={tw`bg-white dark:bg-[#181537] rounded-3xl p-5 border border-gray-100 dark:border-white/10 shadow-sm mb-6`}>
                 <View style={tw`flex-row justify-between items-center mb-4`}>
                     <Text style={tw`text-lg font-bold text-gray-800 dark:text-white`}>My Recent Activity</Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Attendance')}>
@@ -213,27 +249,32 @@ export default function EmployeeDashboard({ user, navigation }: { user: any, nav
                 </View>
 
                 <View style={tw`gap-y-3`}>
-                    {recentAttendance.length > 0 ? recentAttendance.map((log, index) => (
-                        <View key={index} style={tw`flex-row items-center justify-between p-3.5 bg-[#f5f3ff] dark:bg-white/5 rounded-2xl mb-2`}>
-                            <View style={tw`flex-row items-center`}>
-                                <View style={tw`w-9 h-9 rounded-xl bg-white dark:bg-[#1c1a45] flex items-center justify-center mr-3`}>
-                                    <Clock size={16} color="#94a3b8" />
+                    {recentAttendance.length > 0 ? recentAttendance.map((log, index) => {
+                        const badge = getStatusBadgeConfig(log.status);
+                        return (
+                            <View key={index} style={tw`flex-row items-center justify-between p-3.5 bg-[#f5f3ff] dark:bg-white/5 rounded-2xl mb-2`}>
+                                <View style={tw`flex-row items-center flex-1 mr-2`}>
+                                    <View style={tw`w-9 h-9 rounded-xl bg-white dark:bg-[#1c1a45] flex items-center justify-center mr-3`}>
+                                        <Clock size={16} color="#94a3b8" />
+                                    </View>
+                                    <View style={tw`flex-1`}>
+                                        <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{new Date(log.date).toLocaleDateString()}</Text>
+                                        <Text style={tw`text-[10px] text-gray-400`}>{log.totalHours || '0'} hrs worked</Text>
+                                    </View>
                                 </View>
-                                <View>
-                                    <Text style={tw`text-xs font-bold text-gray-800 dark:text-white`}>{new Date(log.date).toLocaleDateString()}</Text>
-                                    <Text style={tw`text-[10px] text-gray-400`}>{log.totalHours || '0'} hrs worked</Text>
-                                </View>
-                            </View>
-                            <View style={tw`items-end`}>
-                                <View style={tw`px-2.5 py-0.5 bg-green-50 dark:bg-green-950/20 rounded-full`}>
-                                    <Text style={tw`text-[9px] font-bold text-green-600 dark:text-green-400`}>
-                                        {log.status || 'Present'}
+                                <View style={tw`items-end max-w-[55%]`}>
+                                    <View style={[tw`px-2.5 py-0.5 rounded-full`, badge.bg]}>
+                                        <Text style={[tw`text-[9px] font-bold`, badge.text]}>
+                                            {log.status || 'Present'}
+                                        </Text>
+                                    </View>
+                                    <Text style={tw`text-[9px] text-gray-400 dark:text-gray-400 mt-0.5`} numberOfLines={1} ellipsizeMode="tail">
+                                        {formatTimeString(log.clockIn)} - {formatTimeString(log.clockOut)}
                                     </Text>
                                 </View>
-                                <Text style={tw`text-[9px] text-gray-400 mt-0.5`}>{log.clockIn} - {log.clockOut || '---'}</Text>
                             </View>
-                        </View>
-                    )) : (
+                        );
+                    }) : (
                         <Text style={tw`text-center py-6 text-gray-400 text-sm`}>No recent activity found.</Text>
                     )}
                 </View>

@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { DrawerContentComponentProps, DrawerContentScrollView } from '@react-navigation/drawer';
 import { useAuth } from '../context/AuthContext';
 import { 
     LayoutDashboard, Users, UsersRound, LogOut, 
     Fingerprint, Settings2, FileText, CalendarRange, UserCircle,
-    ChevronDown, ChevronUp
+    ChevronDown, ChevronUp, AlertCircle
 } from 'lucide-react-native';
 import tw from 'twrnc';
 
@@ -14,6 +14,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
     const isAdmin = user?.role === 'HR_ADMIN';
 
     const [isEmployeeExpanded, setIsEmployeeExpanded] = React.useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
     const employeeSubItems = [
         { label: 'List', route: 'EmployeeStack', params: { screen: 'EmployeeList' } },
@@ -67,14 +68,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
     };
 
     const handleLogout = () => {
-        Alert.alert(
-            "Logout",
-            "Are you sure you want to logout?",
-            [
-                { text: "Cancel", style: "cancel" },
-                { text: "Logout", style: "destructive", onPress: async () => await logout() }
-            ]
-        );
+        setShowLogoutConfirm(true);
     };
 
     // Define navigation drawer menu entries
@@ -216,6 +210,65 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
                     </Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Custom Logout Confirmation Modal (Matching Web App) */}
+            <Modal
+                visible={showLogoutConfirm}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowLogoutConfirm(false)}
+            >
+                <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => setShowLogoutConfirm(false)}
+                    style={tw`flex-1 bg-black/65 items-center justify-center p-5`}
+                >
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        onPress={(e) => e.stopPropagation()}
+                        style={tw`w-full max-w-sm bg-white dark:bg-[#181537] rounded-[2rem] p-7 border border-gray-100 dark:border-white/10 shadow-2xl items-center`}
+                    >
+                        {/* Red Circle Alert Icon */}
+                        <View style={tw`w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-full items-center justify-center mb-5`}>
+                            <AlertCircle size={32} color="#ef4444" />
+                        </View>
+
+                        {/* Title */}
+                        <Text style={tw`text-xl font-bold text-gray-800 dark:text-white mb-2 text-center`}>
+                            Confirm Logout
+                        </Text>
+
+                        {/* Description */}
+                        <Text style={tw`text-sm text-gray-500 dark:text-gray-400 text-center mb-7 leading-5`}>
+                            Are you sure you want to log out of your session? You will need to sign in again to access your dashboard.
+                        </Text>
+
+                        {/* Action Buttons */}
+                        <View style={tw`w-full gap-y-3`}>
+                            <TouchableOpacity
+                                onPress={async () => {
+                                    setShowLogoutConfirm(false);
+                                    await logout();
+                                }}
+                                style={tw`w-full py-3.5 bg-red-600 rounded-2xl items-center justify-center shadow-lg shadow-red-500/30 active:opacity-90`}
+                            >
+                                <Text style={tw`text-white font-bold text-sm`}>
+                                    Yes, Logout
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => setShowLogoutConfirm(false)}
+                                style={tw`w-full py-3.5 bg-gray-100 dark:bg-white/5 rounded-2xl items-center justify-center active:opacity-90`}
+                            >
+                                <Text style={tw`text-gray-600 dark:text-gray-300 font-bold text-sm`}>
+                                    Keep me logged in
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
+                </TouchableOpacity>
+            </Modal>
 
         </View>
     );

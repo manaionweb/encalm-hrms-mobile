@@ -9,6 +9,7 @@ import api from '../utils/api';
 import tw from 'twrnc';
 
 import { useToast } from '../context/ToastContext';
+import CustomHeader from '../components/CustomHeader';
 
 type ProfileTab = 'personal' | 'documents' | 'statutory' | 'salary' | 'shifts' | 'team';
 
@@ -1016,8 +1017,8 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 <div class="payslip-container">
                     <div class="header">
                         <div class="logo-section">
-                            <div class="logo">EH</div>
-                            <div class="company-name">EnCalm <span class="brand-color">HRX</span></div>
+                            <div class="logo">OH</div>
+                            <div class="company-name">OmniHR</div>
                         </div>
                         <div class="company-address">
                             <p class="bold">EncalmIT Consultancy Pvt. Ltd.</p>
@@ -1289,7 +1290,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                 <div class="id-card">
                     <div class="card-header">
                         <div class="top-pill"></div>
-                        <div class="brand-title">EnCalm <span class="brand-sub">HRX</span></div>
+                        <div class="brand-title">OmniHR</div>
                         <div class="chip"></div>
                     </div>
                     <div class="avatar-container">
@@ -1450,19 +1451,12 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
         >
             <View style={tw`flex-1 bg-[#f5f3ff] dark:bg-[#0B0A1F]`}>
 
-                {/* Header */}
-                <View style={[
-                    tw`flex-row items-center justify-between px-4 pb-4 bg-white dark:bg-[#4c1d95] border-b border-gray-100 dark:border-white/5`,
-                    { paddingTop: insets.top + 16 }
-                ]}>
-                    <View style={tw`flex-row items-center`}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} style={tw`p-2 mr-2`}>
-                            <ArrowLeft size={20} color={arrowColor} />
-                        </TouchableOpacity>
-                        <Text style={tw`text-lg font-bold text-gray-900 dark:text-white`}>Employee Profile</Text>
-                    </View>
-                    <View style={tw`w-10`} />
-                </View>
+                {/* Custom Header with dynamic back/menu support */}
+                <CustomHeader
+                    navigation={navigation}
+                    title="Employee Profile"
+                    showBackButton={typeof navigation?.canGoBack === 'function' && navigation.canGoBack()}
+                />
 
                 <ScrollView style={tw`flex-grow`} showsVerticalScrollIndicator={false}>
 
@@ -2460,10 +2454,10 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
                                             <View style={tw`flex-row justify-between items-start border-b-2 border-purple-900 pb-3 mb-4`}>
                                                 <View style={tw`flex-row items-center gap-2.5`}>
                                                     <View style={tw`w-11 h-11 bg-purple-900 items-center justify-center rounded-lg shadow-sm`}>
-                                                        <Text style={tw`text-white font-bold text-lg`}>EH</Text>
+                                                        <Text style={tw`text-white font-bold text-lg`}>OH</Text>
                                                     </View>
                                                     <View>
-                                                        <Text style={tw`text-base font-black text-gray-900`}>EnCalm <Text style={tw`text-[#8b5cf6]`}>HRX</Text></Text>
+                                                        <Text style={tw`text-base font-black text-gray-900`}>OmniHR</Text>
                                                     </View>
                                                 </View>
                                                 <View style={tw`items-end`}>
@@ -2661,7 +2655,7 @@ export default function EmployeeProfileScreen({ route, navigation }: any) {
 
                                 <View style={tw`flex-row justify-between items-start mb-2 px-6 pt-2 relative z-10`}>
                                     <Text style={tw`text-white font-bold text-lg tracking-widest`}>
-                                        EnCalm <Text style={tw`text-purple-300`}>HRX</Text>
+                                        OmniHR
                                     </Text>
                                     <View style={tw`w-10 h-7 bg-amber-400 rounded-md border border-yellow-200/50 shadow-sm`} />
                                 </View>

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "encalm-hrms-mobile",
-    "slug": "encalm-hrms-mobile",
+    "name": "OmniHR",
+    "slug": "omnihr",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,6 +19,7 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
+      "name": "OmniHR",
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
