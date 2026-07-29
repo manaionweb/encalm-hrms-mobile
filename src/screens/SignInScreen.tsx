@@ -25,7 +25,7 @@ export default function SignInScreen({ navigation }: any) {
         setLoading(true);
         try {
             await login(email, password);
-            await setTheme('dark');
+            await setTheme('light');
             // Root navigator will switch to protected screens upon user authenticated status change.
         } catch (err: any) {
             console.error("Login failed", err);
@@ -49,7 +49,7 @@ export default function SignInScreen({ navigation }: any) {
                             source={require('../../assets/veda-logo.png')}
                             style={[tw`w-20 h-20`, { resizeMode: 'contain' }]}
                         />
-                        <Text style={tw`text-2xl font-bold text-gray-900 mt-2`}>EnCalm HRX</Text>
+                        <Text style={tw`text-2xl font-bold text-gray-900 mt-2`}>OmniHR</Text>
                         <Text style={tw`text-xs text-gray-500 mt-1 text-center font-medium`}>
                             Smart Payroll. Seamless Compliance.
                         </Text>

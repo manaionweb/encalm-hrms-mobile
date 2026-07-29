@@ -103,185 +103,71 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         const response = await api.get<DashboardStats>("/dashboard/stats");
         return response.data;
     } catch (error) {
-        throw handleApiError(error);
+        console.warn("Failed to fetch dashboard stats:", error);
+        return { headcount: 0, onLeaveToday: 0, newJoiners: 0, avgAttendance: 0 };
     }
 };
 
-/**
- * ========================================================================
- * GET LIVE ATTENDANCE
- * ========================================================================
- *
- * Backend:
- * GET /dashboard/live-attendance
- *
- * Returns:
- * [
- *   {
- *      name:"09:00",
- *      visitors:10
- *   }
- * ]
- * ========================================================================
- */
 export const getLiveAttendance = async (): Promise<AttendanceChartData[]> => {
     try {
-        const response =
-            await api.get<AttendanceChartData[]>(
-                "/dashboard/live-attendance"
-            );
-
-        return response.data;
+        const response = await api.get<AttendanceChartData[]>("/dashboard/live-attendance");
+        return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-        throw handleApiError(error);
+        console.warn("Failed to fetch live attendance:", error);
+        return [];
     }
 };
 
-/**
- * ========================================================================
- * GET PENDING LEAVE APPROVALS
- * ========================================================================
- *
- * Backend:
- * GET /dashboard/pending-approvals
- *
- * Returns:
- * [
- *   {
- *      id,
- *      userName,
- *      type,
- *      duration,
- *      avatar
- *   }
- * ]
- * ========================================================================
- */
-export const getPendingApprovals =
-    async (): Promise<PendingApproval[]> => {
-        try {
-            const response =
-                await api.get<PendingApproval[]>(
-                    "/dashboard/pending-approvals"
-                );
-
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    };
-
-/**
- * ========================================================================
- * GET EMPLOYEE OVERVIEW
- * ========================================================================
- *
- * Backend:
- * GET /dashboard/employee-overview
- *
- * Returns:
- * [
- *   {
- *      id,
- *      name,
- *      role,
- *      status
- *   }
- * ]
- * ========================================================================
- */
-export const getEmployeeOverview =
-    async (): Promise<EmployeeOverview[]> => {
-        try {
-            const response =
-                await api.get<EmployeeOverview[]>(
-                    "/dashboard/employee-overview"
-                );
-
-            return response.data;
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    };
-
-/**
- * ========================================================================
- * GET PENDING ATTENDANCE REGULARIZATION
- * ========================================================================
- *
- * Backend:
- * GET /attendance/regularize/pending
- *
- * Returns:
- * [
- *   {
- *      id,
- *      employeeName,
- *      attendanceDate,
- *      reason,
- *      status
- *   }
- * ]
- *
- * If backend returns null/undefined
- * an empty array is returned.
- * ========================================================================
- */
-export const getPendingRegularizations =
-    async (): Promise<PendingRegularization[]> => {
-        try {
-            const response =
-                await api.get<PendingRegularization[]>(
-                    "/attendance/regularize/pending"
-                );
-
-            return Array.isArray(response.data)
-                ? response.data
-                : [];
-        } catch (error) {
-            throw handleApiError(error);
-        }
-    };
-
-/**
- * ========================================================================
- * LOAD COMPLETE ADMIN DASHBOARD
- * ========================================================================
- *
- * This function loads every Dashboard API in parallel.
- *
- * Promise.all() is much faster than calling APIs one by one.
- *
- * Used by:
- *
- * useDashboard.ts
- *
- * ========================================================================
- */
-export const getAdminDashboardData = async () => {
+export const getPendingApprovals = async (): Promise<PendingApproval[]> => {
     try {
-        const [
-            stats,
-            attendanceData,
-            pendingApprovals,
-            employees,
-            pendingRegularizations,
-        ] = await Promise.all([
-            getDashboardStats(),
-            getLiveAttendance(),
-            getPendingApprovals(),
-            getEmployeeOverview(),
-            getPendingRegularizations(),
-        ]);
-
-        return {
-            stats,
-            attendanceData,
-            pendingApprovals,
-            employees,
-            pendingRegularizations,
-        };
+        const response = await api.get<PendingApproval[]>("/dashboard/pending-approvals");
+        return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-        throw handleApiError(error);
+        console.warn("Failed to fetch pending approvals:", error);
+        return [];
     }
+};
+
+export const getEmployeeOverview = async (): Promise<EmployeeOverview[]> => {
+    try {
+        const response = await api.get<EmployeeOverview[]>("/dashboard/employee-overview");
+        return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+        console.warn("Failed to fetch employee overview:", error);
+        return [];
+    }
+};
+
+export const getPendingRegularizations = async (): Promise<PendingRegularization[]> => {
+    try {
+        const response = await api.get<PendingRegularization[]>("/attendance/regularize/pending");
+        return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+        console.warn("Failed to fetch pending regularizations:", error);
+        return [];
+    }
+};
+
+export const getAdminDashboardData = async () => {
+    const [
+        stats,
+        attendanceData,
+        pendingApprovals,
+        employees,
+        pendingRegularizations,
+    ] = await Promise.all([
+        getDashboardStats(),
+        getLiveAttendance(),
+        getPendingApprovals(),
+        getEmployeeOverview(),
+        getPendingRegularizations(),
+    ]);
+
+    return {
+        stats,
+        attendanceData,
+        pendingApprovals,
+        employees,
+        pendingRegularizations,
+    };
 };
