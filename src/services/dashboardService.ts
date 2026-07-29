@@ -102,7 +102,8 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     try {
         const response = await api.get<DashboardStats>("/dashboard/stats");
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
+        if (error?.response?.status === 401) throw error;
         console.warn("Failed to fetch dashboard stats:", error);
         return { headcount: 0, onLeaveToday: 0, newJoiners: 0, avgAttendance: 0 };
     }
@@ -112,7 +113,8 @@ export const getLiveAttendance = async (): Promise<AttendanceChartData[]> => {
     try {
         const response = await api.get<AttendanceChartData[]>("/dashboard/live-attendance");
         return Array.isArray(response.data) ? response.data : [];
-    } catch (error) {
+    } catch (error: any) {
+        if (error?.response?.status === 401) throw error;
         console.warn("Failed to fetch live attendance:", error);
         return [];
     }
@@ -122,7 +124,8 @@ export const getPendingApprovals = async (): Promise<PendingApproval[]> => {
     try {
         const response = await api.get<PendingApproval[]>("/dashboard/pending-approvals");
         return Array.isArray(response.data) ? response.data : [];
-    } catch (error) {
+    } catch (error: any) {
+        if (error?.response?.status === 401) throw error;
         console.warn("Failed to fetch pending approvals:", error);
         return [];
     }
@@ -132,7 +135,8 @@ export const getEmployeeOverview = async (): Promise<EmployeeOverview[]> => {
     try {
         const response = await api.get<EmployeeOverview[]>("/dashboard/employee-overview");
         return Array.isArray(response.data) ? response.data : [];
-    } catch (error) {
+    } catch (error: any) {
+        if (error?.response?.status === 401) throw error;
         console.warn("Failed to fetch employee overview:", error);
         return [];
     }
@@ -142,7 +146,8 @@ export const getPendingRegularizations = async (): Promise<PendingRegularization
     try {
         const response = await api.get<PendingRegularization[]>("/attendance/regularize/pending");
         return Array.isArray(response.data) ? response.data : [];
-    } catch (error) {
+    } catch (error: any) {
+        if (error?.response?.status === 401) throw error;
         console.warn("Failed to fetch pending regularizations:", error);
         return [];
     }
