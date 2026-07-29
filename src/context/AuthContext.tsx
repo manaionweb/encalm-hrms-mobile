@@ -42,8 +42,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const storedUser = await AsyncStorage.getItem('encalm_user');
                 const token = await AsyncStorage.getItem('token');
                 if (storedUser && token) {
-                    const parsedUser = JSON.parse(storedUser);
-                    setUser(parsedUser);
+                    try {
+                        const meRes = await api.get('/employee/me');
+                        if (meRes.data) {
+                            const parsedUser = JSON.parse(storedUser);
+                            setUser(parsedUser);
+                        } else {
+                            await logout();
+                        }
+                    } catch (validError: any) {
+                        console.log("Stored token invalid or expired, redirecting to login:", validError?.message);
+                        await logout();
+                    }
                 } else {
                     setUser(null);
                 }
