@@ -10,6 +10,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { ToastProvider } from './src/context/ToastContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import SplashScreen from './src/components/SplashScreen';
 import { Alert, Platform } from 'react-native';
 
 if (Platform.OS === 'web') {
@@ -45,14 +46,16 @@ const queryClient = new QueryClient({
 
 function MainApp() {
   const { theme } = useTheme();
+  const [showSplash, setShowSplash] = React.useState(true);
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#000000' }}>
       <ToastProvider>
         <NavigationContainer>
           <AppNavigator />
-          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+          <StatusBar style={showSplash ? 'light' : (theme === 'dark' ? 'light' : 'dark')} />
         </NavigationContainer>
+        {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
       </ToastProvider>
     </SafeAreaProvider>
   );

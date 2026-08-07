@@ -4,23 +4,26 @@
     "slug": "omnihr",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/veda-logo.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/veda-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/veda-logo.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "name": "OmniHR",
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/veda-logo.png"
     },
     "plugins": [
       "@react-native-community/datetimepicker"
